@@ -5,6 +5,7 @@ import ch.uzh.ifi.hase.soprafs24.constant.UserStatus;
 import javax.persistence.*;
 import java.io.Serializable;
 
+
 /**
  * Internal User Representation
  * This class composes the internal representation of the user and defines how
