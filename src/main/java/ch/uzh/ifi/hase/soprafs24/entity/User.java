@@ -1,6 +1,7 @@
 package ch.uzh.ifi.hase.soprafs24.entity;
 
 import ch.uzh.ifi.hase.soprafs24.constant.UserStatus;
+import ch.uzh.ifi.hase.soprafs24.constant.ProfileKnowledgeLevel;
 import ch.uzh.ifi.hase.soprafs24.constant.UserAvailability;
 
 import javax.persistence.*; // package provides annotations (such as @Entity, @Table, @Id, @Column, etc.) used to map this class to a database table.
@@ -27,8 +28,6 @@ public class User implements Serializable {
   // This is a unique identifier for the Serializable class, ensuring that a loaded class corresponds exactly to a serialized object.
   private static final long serialVersionUID = 1L;
 
-  // @Id: Marks the field as the primary key.
-  // @GeneratedValue: Instructs JPA to automatically generate a value for this field (usually using an auto-increment strategy).
   @Id
   @GeneratedValue
   private Long id;
@@ -56,6 +55,16 @@ public class User implements Serializable {
 
   @Column(nullable = true)
   private UserAvailability availability;
+
+  @Column(nullable = true)
+  private ProfileKnowledgeLevel knowledgeLevel;
+
+  @Column(nullable = true)
+  private String studyGoals;
+
+  @Column(nullable = true)
+  private String bio;
+
 
   /*
     Getter and Setter Methods
@@ -142,7 +151,36 @@ public class User implements Serializable {
     this.availability = availability;
   }
 
-  // added here
+  // knowledge level
+  public ProfileKnowledgeLevel getKnowledgeLevel() {
+    return knowledgeLevel;
+  }
+
+  public void setKnowledgeLevel(ProfileKnowledgeLevel knowledgeLevel) {
+    this.knowledgeLevel = knowledgeLevel;
+  }
+
+  // study goals
+  public String getStudyGoals() {
+    return studyGoals;
+  }
+
+  public void setStudyGoals(String studyGoals) {
+    this.studyGoals = studyGoals;
+  }
+
+  // bio
+  public String getBio() {
+    return bio;
+  }
+
+  public void setBio(String bio) {
+    this.bio = bio;
+  }
+
+
+
+
   // A no-argument constructor is required by JPA for creating instances via reflection.
   public User() {
     this.creationDate = LocalDate.now();
