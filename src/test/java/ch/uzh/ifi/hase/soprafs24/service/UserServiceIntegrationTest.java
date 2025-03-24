@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.web.server.ResponseStatusException;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -20,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 @WebAppConfiguration
 @SpringBootTest
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class UserServiceIntegrationTest {
 
   @Qualifier("userRepository")
@@ -42,6 +44,7 @@ public class UserServiceIntegrationTest {
     User testUser = new User();
     testUser.setName("testName");
     testUser.setUsername("testUsername");
+    testUser.setPassword("testPassword");
 
     // when
     User createdUser = userService.createUser(testUser);
@@ -61,6 +64,7 @@ public class UserServiceIntegrationTest {
     User testUser = new User();
     testUser.setName("testName");
     testUser.setUsername("testUsername");
+    testUser.setPassword("testPassword");
     User createdUser = userService.createUser(testUser);
 
     // attempt to create second user with same username
@@ -69,6 +73,7 @@ public class UserServiceIntegrationTest {
     // change the name but forget about the username
     testUser2.setName("testName2");
     testUser2.setUsername("testUsername");
+    testUser2.setPassword("testPassword2");
 
     // check that an error is thrown
     assertThrows(ResponseStatusException.class, () -> userService.createUser(testUser2));

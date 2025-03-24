@@ -3,14 +3,18 @@ package ch.uzh.ifi.hase.soprafs24.repository;
 import ch.uzh.ifi.hase.soprafs24.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs24.entity.User;
 import org.junit.jupiter.api.Test;
+
+import java.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
+import org.springframework.test.annotation.DirtiesContext;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @DataJpaTest
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class UserRepositoryIntegrationTest {
 
   @Autowired
@@ -27,6 +31,8 @@ public class UserRepositoryIntegrationTest {
     user.setUsername("firstname@lastname");
     user.setStatus(UserStatus.OFFLINE);
     user.setToken("1");
+    user.setPassword("password123");
+    user.setCreationDate(LocalDateTime.now());
 
     entityManager.persist(user);
     entityManager.flush();
