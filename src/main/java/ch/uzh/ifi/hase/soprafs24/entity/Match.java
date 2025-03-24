@@ -15,10 +15,10 @@ public class Match implements Serializable{
     private Long id;
 
     @Column(nullable = false)
-    private Long idUser1;
+    private Long userId1;
 
     @Column(nullable = false)
-    private Long idUser2;
+    private Long userId2;
 
     @Column(nullable = false)
     private MatchStatus status;
@@ -34,20 +34,20 @@ public class Match implements Serializable{
 
     // user1's id
     public Long getUser1Id() {
-        return this.idUser1;
+        return this.userId1;
     }
 
-    public void setUser1Id(Long idUser1) {
-        this.idUser1 = idUser1;
+    public void setUser1Id(Long userId1) {
+        this.userId1 = userId1;
     }
 
     // user2's id
     public Long getUser2Id() {
-        return this.idUser2;
+        return this.userId2;
     }
 
-    public void setUser2Id(Long idUser2) {
-        this.idUser2 = idUser2;
+    public void setUser2Id(Long userId2) {
+        this.userId2 = userId2;
     }
 
     // status
@@ -67,8 +67,8 @@ public class Match implements Serializable{
      }
 
      public Match(User user1, User user2, MatchStatus status){
-        this.idUser1 = user1.getId();
-        this.idUser2 = user2.getId();
+        this.userId1 = user1.getId();
+        this.userId2 = user2.getId();
         this.status = status;
      }
 }
