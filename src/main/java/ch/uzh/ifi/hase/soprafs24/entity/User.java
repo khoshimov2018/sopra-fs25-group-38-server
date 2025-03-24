@@ -1,12 +1,11 @@
 package ch.uzh.ifi.hase.soprafs24.entity;
 
 import ch.uzh.ifi.hase.soprafs24.constant.UserStatus;
+import ch.uzh.ifi.hase.soprafs24.constant.UserAvailability;
 
-import javax.persistence.*;
-import java.io.Serializable;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-
+import javax.persistence.*; // package provides annotations (such as @Entity, @Table, @Id, @Column, etc.) used to map this class to a database table.
+import java.io.Serializable; // to allow the object to be converted into a byte stream (a requirement for many JPA providers).
+import java.time.LocalDate; 
 /**
  * Internal User Representation
  * This class composes the internal representation of the user and defines how
@@ -17,12 +16,19 @@ import java.time.LocalDateTime;
  * - unique = true -> this value must be unqiue across the database -> composes
  * the primary key
  */
+
+// @Entity: Indicates that this class is a JPA entity. It will be mapped to a database table.
+// Table(name = "USER"): Specifies the table name in the database.
+// implements Serializable: Ensures that instances of User can be serialized, which is often required for entities in Java.
 @Entity
 @Table(name = "USER")
 public class User implements Serializable {
 
+  // This is a unique identifier for the Serializable class, ensuring that a loaded class corresponds exactly to a serialized object.
   private static final long serialVersionUID = 1L;
 
+  // @Id: Marks the field as the primary key.
+  // @GeneratedValue: Instructs JPA to automatically generate a value for this field (usually using an auto-increment strategy).
   @Id
   @GeneratedValue
   private Long id;
@@ -36,18 +42,26 @@ public class User implements Serializable {
   @Column(nullable = false)
   private String password;
 
+  @Column(nullable = false)
+  private LocalDate creationDate;
+
   @Column(nullable = false, unique = true)
   private String token;
+
+  @Column(nullable = true, unique = true)
+  private String chatToken;
 
   @Column(nullable = false)
   private UserStatus status;
 
-  @Column(nullable = false)
-  private LocalDateTime creationDate;
-  
-  @Column
-  private LocalDate birthday;
+  @Column(nullable = true)
+  private UserAvailability availability;
 
+  /*
+    Getter and Setter Methods
+  */
+
+  // id
   public Long getId() {
     return id;
   }
@@ -56,6 +70,7 @@ public class User implements Serializable {
     this.id = id;
   }
 
+  // name
   public String getName() {
     return name;
   }
@@ -64,6 +79,7 @@ public class User implements Serializable {
     this.name = name;
   }
 
+  // username
   public String getUsername() {
     return username;
   }
@@ -72,14 +88,25 @@ public class User implements Serializable {
     this.username = username;
   }
 
+  // password
   public String getPassword() {
     return password;
   }
 
   public void setPassword(String password) {
-    this.password = password;
+      this.password = password;
   }
 
+  // creationDate
+  public LocalDate getCreationDate() {
+      return creationDate;
+  }
+
+  public void setCreationDate(LocalDate creationDate) {
+      this.creationDate = creationDate;
+  }
+
+  // token
   public String getToken() {
     return token;
   }
@@ -88,6 +115,16 @@ public class User implements Serializable {
     this.token = token;
   }
 
+  // chat token
+  public String getChatToken() {
+    return chatToken;
+  }
+
+  public void setChatToken(String token) {
+    this.chatToken = chatToken;
+  }
+
+  // status
   public UserStatus getStatus() {
     return status;
   }
@@ -96,19 +133,25 @@ public class User implements Serializable {
     this.status = status;
   }
 
-  public LocalDateTime getCreationDate() {
-    return creationDate;
+  // availability
+  public UserAvailability getAvailability() {
+    return availability;
   }
 
-  public void setCreationDate(LocalDateTime creationDate) {
-    this.creationDate = creationDate;
+  public void setAvailability(UserAvailability availability) {
+    this.availability = availability;
   }
-  
-  public LocalDate getBirthday() {
-    return birthday;
+
+  // added here
+  // A no-argument constructor is required by JPA for creating instances via reflection.
+  public User() {
+    this.creationDate = LocalDate.now();
   }
-  
-  public void setBirthday(LocalDate birthday) {
-    this.birthday = birthday;
+  // parameterized constructor
+  public User(String username, String name, String password) {
+    this.username = username;
+    this.name = name;
+    this.password = password;
+    this.creationDate = LocalDate.now();
   }
 }
