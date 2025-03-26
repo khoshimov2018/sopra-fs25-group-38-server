@@ -23,6 +23,13 @@ public class Match implements Serializable{
     @Column(nullable = false)
     private MatchStatus status;
 
+    @Column(nullable = false)
+    private boolean likedByUser1;
+
+    @Column(nullable = false)
+    private boolean likedByUser2;
+
+
     /* 
        get & set method
     */ 
@@ -59,6 +66,21 @@ public class Match implements Serializable{
         this.status = status;
     }
 
+    public boolean isLikedByUser1() {
+        return likedByUser1;
+    }
+    
+    public void setLikedByUser1(boolean likedByUser1) {
+        this.likedByUser1 = likedByUser1;
+    }
+    
+    public boolean isLikedByUser2() {
+        return likedByUser2;
+    }
+    
+    public void setLikedByUser2(boolean likedByUser2) {
+        this.likedByUser2 = likedByUser2;
+    }
     /*
      * constructor
      */
@@ -66,9 +88,11 @@ public class Match implements Serializable{
      public Match(){
      }
 
-     public Match(User user1, User user2, MatchStatus status){
+     public Match(User user1, User user2, MatchStatus status, boolean likedByUser1, boolean likedByUser2) {
         this.userId1 = user1.getId();
         this.userId2 = user2.getId();
         this.status = status;
-     }
+        this.likedByUser1 = likedByUser1;
+        this.likedByUser2 = likedByUser2;
+    }
 }
