@@ -1,8 +1,12 @@
 package ch.uzh.ifi.hase.soprafs24.rest.mapper;
 
 import ch.uzh.ifi.hase.soprafs24.entity.User;
+import ch.uzh.ifi.hase.soprafs24.entity.Match; 
 import ch.uzh.ifi.hase.soprafs24.rest.dto.UserGetDTO;
+import ch.uzh.ifi.hase.soprafs24.constant.MatchStatus;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.UserPostDTO;
+import ch.uzh.ifi.hase.soprafs24.rest.dto.MatchPostDTO;
+import ch.uzh.ifi.hase.soprafs24.rest.dto.MatchGetDTO;
 import org.mapstruct.*;
 import org.mapstruct.factory.Mappers;
 
@@ -35,4 +39,19 @@ public interface DTOMapper {
   @Mapping(source = "creationDate", target = "creationDate")
   @Mapping(source = "birthday", target = "birthday")
   UserGetDTO convertEntityToUserGetDTO(User user);
+
+
+  // Match mappings
+
+    @Mapping(source = "userId", target = "userId1")
+    @Mapping(source = "targetUserId", target = "userId2")
+    Match convertMatchPostDTOtoEntity(MatchPostDTO matchPostDTO);
+
+    // For GET requests, we expose the basic match details.
+    @Mapping(source = "id", target = "id")
+    @Mapping(source = "userId1", target = "userId1")
+    @Mapping(source = "userId2", target = "userId2")
+    @Mapping(source = "status", target = "status")
+    MatchGetDTO convertEntityToMatchGetDTO(Match match);
+
 }
