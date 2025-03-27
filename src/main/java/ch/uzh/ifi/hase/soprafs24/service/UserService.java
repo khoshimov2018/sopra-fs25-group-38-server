@@ -11,11 +11,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+
 
 /**
  * User Service
@@ -31,6 +33,7 @@ public class UserService {
   private final Logger log = LoggerFactory.getLogger(UserService.class);
 
   private final UserRepository userRepository;
+  private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
   @Autowired
   public UserService(@Qualifier("userRepository") UserRepository userRepository) {
@@ -42,15 +45,23 @@ public class UserService {
   }
 
   public User createUser(User newUser) {
-    // Validate input: username and password must not be empty
+    // Validate input: email and password must not be empty
     validateRegistrationInput(newUser);
+
     
-    // Check if username already exists
-    checkIfUsernameExists(newUser.getUsername());
+    //Check if email already exists
+    if (userRepository.existsByEmail(newUser.getEmail())) {
+      throw new ResponseStatusException(HttpStatus.CONFLICT, "Email already exists. Please choose another email.");
+    }
     
+
+    // Hash password
+    String hashedPassword = passwordEncoder.encode(newUser.getPassword());
+    newUser.setPassword(hashedPassword);
+
     // Set creation date, token and status
     newUser.setToken(UUID.randomUUID().toString());
-    newUser.setStatus(UserStatus.OFFLINE);
+    newUser.setStatus(UserStatus.ONLINE);
     newUser.setCreationDate(LocalDateTime.now());
     
     // Save user
@@ -62,40 +73,53 @@ public class UserService {
   }
   
   /**
-   * Validates that the username and password are not empty
+   * Validates that the email and password are not empty
    * 
    * @param user the user to validate
-   * @throws ResponseStatusException if username or password is empty
+   * @throws ResponseStatusException if email or password is empty
    */
   private void validateRegistrationInput(User user) {
-    // Check if username is empty
-    if (user.getUsername() == null || user.getUsername().trim().isEmpty()) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Username cannot be empty. Please provide a username.");
+    // Check if email is empty
+    if (user.getEmail() == null || user.getEmail().trim().isEmpty()) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email cannot be empty. Please provide an email.");
     }
     
     // Check if password is empty
     if (user.getPassword() == null || user.getPassword().trim().isEmpty()) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Password cannot be empty. Please provide a password.");
     }
+    // Check password length
+    if (user.getPassword().length() < 8) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Password must be at least 8 characters long.");
+    }
+
+    // Validate required fields
+    if (user.getStudyLevel() == null || user.getStudyLevel().trim().isEmpty()) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Study level is required.");
+    }
+
+    if (user.getStudyGoals() == null || user.getStudyGoals().trim().isEmpty()) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Study goals are required.");
+    }
   }
   
   /**
-   * Checks if a username already exists in the database
+   * Checks if a email already exists in the database
    * 
-   * @param username the username to check
-   * @throws ResponseStatusException if username already exists
+   * @param email the email to check
+   * @throws ResponseStatusException if email already exists
    */
-  private void checkIfUsernameExists(String username) {
-    User userByUsername = userRepository.findByUsername(username);
+  private void checkIfEmailExists(String email) {
+    User userByEmail = userRepository.findByEmail(email);
     
-    if (userByUsername != null) {
-      throw new ResponseStatusException(HttpStatus.CONFLICT, "Username already exists. Please choose another username.");
+    if (userByEmail != null) {
+      throw new ResponseStatusException(HttpStatus.CONFLICT, "Email already exists. Please choose another email.");
     }
   }
   
   /**
    * This is a helper method that will check the uniqueness criteria of the
-   * username and the name defined in the User entity. The method will do nothing 
+   * email and the name defined in the User entity. The method will do nothing 
    * if the input is unique and throw an error otherwise.
    *
    * @param userToBeCreated
@@ -103,39 +127,39 @@ public class UserService {
    * @see User
    */
   private void checkIfUserExists(User userToBeCreated) {
-    User userByUsername = userRepository.findByUsername(userToBeCreated.getUsername());
+    User userByEmail = userRepository.findByEmail(userToBeCreated.getEmail());
     User userByName = userRepository.findByName(userToBeCreated.getName());
 
     String baseErrorMessage = "The %s provided %s not unique. Therefore, the user could not be created!";
-    if (userByUsername != null && userByName != null) {
+    if (userByEmail != null && userByName != null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          String.format(baseErrorMessage, "username and the name", "are"));
-    } else if (userByUsername != null) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format(baseErrorMessage, "username", "is"));
+          String.format(baseErrorMessage, "email and the name", "are"));
+    } else if (userByEmail != null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format(baseErrorMessage, "email", "is"));
     } else if (userByName != null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format(baseErrorMessage, "name", "is"));
     }
   }
   
   /**
-   * Logs in a user with the provided username and password
+   * Logs in a user with the provided email and password
    *
-   * @param username the username of the user
+   * @param email the email of the user
    * @param password the password of the user
    * @return the logged in user
    * @throws ResponseStatusException if login fails
    */
-  public User loginUser(String username, String password) {
-    // Find user by username
-    User user = userRepository.findByUsername(username);
+  public User loginUser(String email, String password) {
+    // Find user by email
+    User user = userRepository.findByEmail(email);
     
     // Validate user exists and password matches
     if (user == null) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Username not found. Please register first.");
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Email not found. Please register first.");
     }
-    
-    if (!Objects.equals(user.getPassword(), password)) {
-      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid username or password. Please try again.");
+
+    if (!passwordEncoder.matches(password, user.getPassword())) {
+      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid email or password. Please try again.");
     }
     
     // Set user status to online and generate a new token
@@ -228,7 +252,7 @@ public class UserService {
   }
   
   /**
-   * Updates a user's profile (username and birthday)
+   * Updates a user's profile (email)
    * 
    * @param userId the ID of the user to update
    * @param userInput the updated user data
@@ -241,26 +265,24 @@ public class UserService {
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, 
             String.format("User with ID %d was not found", userId)));
     
-    // Validate the username is not empty
-    if (userInput.getUsername() == null || userInput.getUsername().trim().isEmpty()) {
+    // Validate the email is not empty
+    if (userInput.getEmail() == null || userInput.getEmail().trim().isEmpty()) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, 
-          "Username cannot be empty. Please provide a username.");
+          "Email cannot be empty. Please provide an email.");
     }
     
-    // Check if the new username is unique (only if it's different from current)
-    if (!Objects.equals(userToUpdate.getUsername(), userInput.getUsername())) {
-      User existingUser = userRepository.findByUsername(userInput.getUsername());
+    // Check if the new email is unique (only if it's different from current)
+    if (!Objects.equals(userToUpdate.getEmail(), userInput.getEmail())) {
+      User existingUser = userRepository.findByEmail(userInput.getEmail());
       if (existingUser != null && !Objects.equals(existingUser.getId(), userId)) {
         throw new ResponseStatusException(HttpStatus.CONFLICT, 
-            "Username already exists. Please choose another username.");
+            "Email already exists. Please choose another email.");
       }
       
-      // Update username if valid
-      userToUpdate.setUsername(userInput.getUsername());
+      // Update email if valid
+      userToUpdate.setEmail(userInput.getEmail());
     }
-    
-    // Update birthday (can be null)
-    userToUpdate.setBirthday(userInput.getBirthday());
+  
     
     // Save and return the updated user
     userToUpdate = userRepository.save(userToUpdate);

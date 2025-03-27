@@ -9,6 +9,7 @@ import ch.uzh.ifi.hase.soprafs24.rest.dto.MatchPostDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.MatchGetDTO;
 import org.mapstruct.*;
 import org.mapstruct.factory.Mappers;
+import java.time.LocalDateTime;
 
 /**
  * DTOMapper
@@ -27,21 +28,23 @@ public interface DTOMapper {
   DTOMapper INSTANCE = Mappers.getMapper(DTOMapper.class);
 
   @Mapping(source = "name", target = "name")
-  @Mapping(source = "username", target = "username")
+  @Mapping(source = "email", target = "email")
   @Mapping(source = "password", target = "password")
+  @Mapping(source = "studyLevel", target = "studyLevel")
+  @Mapping(source = "studyGoals", target = "studyGoals")
+  @Mapping(source = "profilePicture", target = "profilePicture")  
   User convertUserPostDTOtoEntity(UserPostDTO userPostDTO);
 
   @Mapping(source = "id", target = "id")
   @Mapping(source = "name", target = "name")
-  @Mapping(source = "username", target = "username")
+  @Mapping(source = "email", target = "email")
   @Mapping(source = "status", target = "status")
   @Mapping(source = "token", target = "token")
   @Mapping(source = "creationDate", target = "creationDate")
-  @Mapping(source = "birthday", target = "birthday")
   UserGetDTO convertEntityToUserGetDTO(User user);
 
 
-  // Match mappings
+    // Match mappings
 
     @Mapping(source = "userId", target = "userId1")
     @Mapping(source = "targetUserId", target = "userId2")
@@ -53,5 +56,6 @@ public interface DTOMapper {
     @Mapping(source = "userId2", target = "userId2")
     @Mapping(source = "status", target = "status")
     MatchGetDTO convertEntityToMatchGetDTO(Match match);
+
 
 }

@@ -85,11 +85,11 @@ public class UserController {
   @ResponseBody
   public ResponseEntity<UserGetDTO> loginUser(@RequestBody UserLoginDTO userLoginDTO) {
     // Extract credentials from request
-    String username = userLoginDTO.getUsername();
+    String email = userLoginDTO.getEmail();
     String password = userLoginDTO.getPassword();
     
     // Perform login
-    User loggedInUser = userService.loginUser(username, password);
+    User loggedInUser = userService.loginUser(email, password);
     
     // Create HTTP headers and add token
     HttpHeaders headers = new HttpHeaders();
