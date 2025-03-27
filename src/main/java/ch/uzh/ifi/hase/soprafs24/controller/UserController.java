@@ -138,4 +138,10 @@ public class UserController {
     // Update the user
     userService.updateUser(userId, userInput);
   }
+  @PostMapping("/users/logout")
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  public void logoutUser(@RequestHeader(value = "Authorization", required = false) String token) {
+    userService.logoutUserByToken(token);
+  }
+
 }

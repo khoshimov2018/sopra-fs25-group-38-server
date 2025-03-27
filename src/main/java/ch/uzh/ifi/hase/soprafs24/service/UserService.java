@@ -290,4 +290,25 @@ public class UserService {
     
     return userToUpdate;
   }
+  /**
+   * Logs out a user using the token by setting their status to OFFLINE
+   *
+   * @param token the Bearer token from Authorization header
+   * @throws ResponseStatusException if token is invalid or user not found
+   */
+  public void logoutUserByToken(String token) {
+    if (token != null && token.startsWith("Bearer ")) {
+      token = token.substring(7);
+    }
+
+    User user = userRepository.findByToken(token);
+    if (user == null) {
+      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid token.");
+    }
+
+    user.setStatus(UserStatus.OFFLINE);
+    userRepository.save(user);
+    userRepository.flush();
+  }
+
 }
