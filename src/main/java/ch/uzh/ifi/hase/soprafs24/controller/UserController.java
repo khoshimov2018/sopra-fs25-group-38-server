@@ -30,6 +30,37 @@ public class UserController {
     this.userService = userService;
   }
 
+  @GetMapping("/courses")
+  @ResponseStatus(HttpStatus.OK)
+  @ResponseBody
+  public List<CourseGetDTO> getAllCourses() {
+    List<Course> courses = courseService.getAllCourses();
+    List<CourseGetDTO> courseGetDTOs = new ArrayList<>();
+
+    for (Course course : courses) {
+      courseGetDTOs.add(DTOMapper.INSTANCE.convertEntityToCourseGetDTO(course)); // ✅ 올바른 문법
+    }
+
+    return courseGetDTOs;
+}
+
+@GetMapping("/students")
+@ResponseStatus(HttpStatus.OK)
+@ResponseBody
+public List<UserGetDTO> getStudentsByCourses(@RequestParam List<Long> courseIds) {
+  List<Long> userIds = courseService.findUserIdsEnrolledInAllCourses(courseIds);
+  List<User> allUsers = userService.getUsers();
+  List<UserGetDTO> userGetDTOs = new ArrayList<>();
+
+  for (User user : allUsers) {
+      if (userIds.contains(user.getId())) {
+        userGetDTOs.add(DTOMapper.INSTANCE.convertEntityToUserGetDTO(user)); // ✅ 올바른 문법
+      }
+  }
+
+  return userGetDTOs;
+}
+
   @GetMapping("/users")
   @ResponseStatus(HttpStatus.OK)
   @ResponseBody

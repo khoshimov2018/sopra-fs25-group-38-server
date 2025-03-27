@@ -46,6 +46,11 @@ public interface DTOMapper {
   @Mapping(source = "creationDate", target = "creationDate")
   UserGetDTO convertEntityToUserGetDTO(User user);
 
+  // Course mapping
+  @Mapping(source = "id", target = "id")
+  @Mapping(source = "userId", target = "userId")
+  @Mapping(source = "courseName", target = "courseName")
+  CourseGetDTO convertEntityToCourseGetDTO(Course course);
 
     // Match mappings
 
