@@ -252,7 +252,7 @@ public class UserService {
   }
   
   /**
-   * Updates a user's profile (email)
+   * Updates a user's profile
    * 
    * @param userId the ID of the user to update
    * @param userInput the updated user data
@@ -260,36 +260,44 @@ public class UserService {
    * @throws ResponseStatusException if the user is not found or the update is invalid
    */
   public User updateUser(Long userId, User userInput) {
-    // Find the user by ID
     User userToUpdate = userRepository.findById(userId)
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, 
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
             String.format("User with ID %d was not found", userId)));
-    
-    // Validate the email is not empty
-    if (userInput.getEmail() == null || userInput.getEmail().trim().isEmpty()) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, 
-          "Email cannot be empty. Please provide an email.");
-    }
-    
-    // Check if the new email is unique (only if it's different from current)
-    if (!Objects.equals(userToUpdate.getEmail(), userInput.getEmail())) {
-      User existingUser = userRepository.findByEmail(userInput.getEmail());
-      if (existingUser != null && !Objects.equals(existingUser.getId(), userId)) {
-        throw new ResponseStatusException(HttpStatus.CONFLICT, 
-            "Email already exists. Please choose another email.");
-      }
-      
-      // Update email if valid
-      userToUpdate.setEmail(userInput.getEmail());
+  
+    // Validate required fields
+    if (userInput.getAvailability() == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Availability is required.");
     }
   
-    
-    // Save and return the updated user
+    if (userInput.getKnowledgeLevel() == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Knowledge level is required.");
+    }
+  
+    if (userInput.getStudyGoals() == null || userInput.getStudyGoals().trim().isEmpty()) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Study goals are required.");
+    }
+  
+    // Update optional and required fields
+    userToUpdate.setBio(userInput.getBio());
+    userToUpdate.setAvailability(userInput.getAvailability());
+    userToUpdate.setKnowledgeLevel(userInput.getKnowledgeLevel());
+    userToUpdate.setStudyGoals(userInput.getStudyGoals());
+  
+    // Optional: also allow updating profile picture or study level
+    if (userInput.getStudyLevel() != null) {
+      userToUpdate.setStudyLevel(userInput.getStudyLevel());
+    }
+    if (userInput.getProfilePicture() != null) {
+      userToUpdate.setProfilePicture(userInput.getProfilePicture());
+    }
+  
+    // Save updated user
     userToUpdate = userRepository.save(userToUpdate);
     userRepository.flush();
-    
+  
     return userToUpdate;
   }
+  
   /**
    * Logs out a user using the token by setting their status to OFFLINE
    *

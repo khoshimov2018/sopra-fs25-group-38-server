@@ -33,6 +33,9 @@ public interface DTOMapper {
   @Mapping(source = "studyLevel", target = "studyLevel")
   @Mapping(source = "studyGoals", target = "studyGoals")
   @Mapping(source = "profilePicture", target = "profilePicture")  
+  @Mapping(source = "bio", target = "bio")
+  @Mapping(source = "availability", target = "availability")
+  @Mapping(source = "knowledgeLevel", target = "knowledgeLevel")
   User convertUserPostDTOtoEntity(UserPostDTO userPostDTO);
 
   @Mapping(source = "id", target = "id")

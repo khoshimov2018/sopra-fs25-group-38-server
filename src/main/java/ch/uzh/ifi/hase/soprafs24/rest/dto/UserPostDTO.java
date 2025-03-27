@@ -1,5 +1,8 @@
 package ch.uzh.ifi.hase.soprafs24.rest.dto;
 
+import ch.uzh.ifi.hase.soprafs24.constant.ProfileKnowledgeLevel;
+import ch.uzh.ifi.hase.soprafs24.constant.UserAvailability;
+
 public class UserPostDTO {
 
   private String name;
@@ -11,6 +14,10 @@ public class UserPostDTO {
   private String studyLevel;        
   private String studyGoals;       
   private String profilePicture;
+
+    private String bio;
+    private UserAvailability availability;
+    private ProfileKnowledgeLevel knowledgeLevel;
 
   public String getName() {
     return name;
@@ -58,5 +65,29 @@ public class UserPostDTO {
 
   public void setProfilePicture(String profilePicture) {
     this.profilePicture = profilePicture;
+  }
+
+  public String getBio() {
+    return bio;
+  }
+
+  public void setBio(String bio) {
+    this.bio = bio;
+  }
+
+  public UserAvailability getAvailability() {
+    return availability;
+  }
+
+  public void setAvailability(UserAvailability availability) {
+    this.availability = availability;
+  }
+
+  public ProfileKnowledgeLevel getKnowledgeLevel() {
+    return knowledgeLevel;
+  }
+
+  public void setKnowledgeLevel(ProfileKnowledgeLevel knowledgeLevel) {
+    this.knowledgeLevel = knowledgeLevel;
   }
 }
