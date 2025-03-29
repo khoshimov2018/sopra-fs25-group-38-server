@@ -44,6 +44,7 @@ public interface DTOMapper {
   @Mapping(source = "status", target = "status")
   @Mapping(source = "token", target = "token")
   @Mapping(source = "creationDate", target = "creationDate")
+  @Mapping(source = "availability", target = "availability")
   UserGetDTO convertEntityToUserGetDTO(User user);
 
   // Course mapping

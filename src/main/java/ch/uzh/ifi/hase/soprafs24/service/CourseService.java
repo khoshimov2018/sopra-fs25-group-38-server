@@ -23,6 +23,11 @@ public class CourseService {
         return courseRepository.findUserIdsByAllCourseIds(courseIds, (long) courseIds.size());
     }
 
+    // find userId who have same availability.
+    public List<Long> findUserIdsEnrolledInAllAvailability(List<String> availability) {
+        return courseRepository.findUserIdsEnrolledInAllAvailability(availability, (long) availability.size());
+    }    
+
     // show all courses.
     public List<Course> getAllCourses() {
         return courseRepository.findAll();
