@@ -7,6 +7,13 @@ import ch.uzh.ifi.hase.soprafs24.constant.UserAvailability;
 import javax.persistence.*; // package provides annotations (such as @Entity, @Table, @Id, @Column, etc.) used to map this class to a database table.
 import java.io.Serializable; // to allow the object to be converted into a byte stream (a requirement for many JPA providers).
 import java.time.LocalDate; 
+import javax.persistence.ElementCollection;
+import javax.persistence.CollectionTable;
+import javax.persistence.Column;
+import javax.persistence.JoinColumn;
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * Internal User Representation
  * This class composes the internal representation of the user and defines how
@@ -65,6 +72,12 @@ public class User implements Serializable {
   @Column(nullable = true)
   private String bio;
 
+  @ElementCollection(fetch = FetchType.LAZY)
+  @CollectionTable(name = "user_match_ids", joinColumns = @JoinColumn(name = "user_id"))
+  @Column(name = "match_id")
+  private Set<Long> matchIds = new HashSet<>();
+
+  
 
   /*
     Getter and Setter Methods
@@ -176,6 +189,14 @@ public class User implements Serializable {
 
   public void setBio(String bio) {
     this.bio = bio;
+  }
+
+  public Set<Long> getMatchIds() {
+    return matchIds;
+  }
+
+  public void setMatchIds(Set<Long> matchIds) {
+    this.matchIds = matchIds;
   }
 
 
