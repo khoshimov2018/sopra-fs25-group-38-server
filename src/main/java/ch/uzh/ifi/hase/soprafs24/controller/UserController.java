@@ -30,6 +30,53 @@ public class UserController {
     this.userService = userService;
   }
 
+  @GetMapping("/courses")
+  @ResponseStatus(HttpStatus.OK)
+  @ResponseBody
+  public List<CourseGetDTO> getAllCourses() {
+    List<Course> courses = courseService.getAllCourses();
+    List<CourseGetDTO> courseGetDTOs = new ArrayList<>();
+
+    for (Course course : courses) {
+      courseGetDTOs.add(DTOMapper.INSTANCE.convertEntityToCourseGetDTO(course)); 
+    }
+
+    return courseGetDTOs;
+}
+
+  @GetMapping("/students")
+  @ResponseStatus(HttpStatus.OK)
+  @ResponseBody
+  public List<UserGetDTO> getFilteredStudents(
+      @RequestParam(required = false) List<Long> courseIds,
+      @RequestParam(required = false) List<String> availability) {
+
+      List<User> allUsers = userService.getUsers();
+      List<UserGetDTO> userGetDTOs = new ArrayList<>();
+
+      // search userId matched with courseId
+      List<Long> courseMatchedUserIds = new ArrayList<>();
+      if (courseIds != null && !courseIds.isEmpty()) {
+          courseMatchedUserIds = courseService.findUserIdsEnrolledInAllCourses(courseIds);
+      }
+
+      // search userId matched with availability
+      List<Long> availabilityMatchedUserIds = new ArrayList<>();
+      if (availability != null && !availability.isEmpty()) {
+          availabilityMatchedUserIds = courseService.findUserIdsEnrolledInAllAvailability(availability);
+      }
+
+      // OR condition
+      for (User user : allUsers) {
+          Long userId = user.getId();
+          if (courseMatchedUserIds.contains(userId) || availabilityMatchedUserIds.contains(userId)) {
+              userGetDTOs.add(DTOMapper.INSTANCE.convertEntityToUserGetDTO(user));
+          }
+      }
+
+      return userGetDTOs;
+  }
+
   @GetMapping("/users")
   @ResponseStatus(HttpStatus.OK)
   @ResponseBody
@@ -85,11 +132,11 @@ public class UserController {
   @ResponseBody
   public ResponseEntity<UserGetDTO> loginUser(@RequestBody UserLoginDTO userLoginDTO) {
     // Extract credentials from request
-    String username = userLoginDTO.getUsername();
+    String email = userLoginDTO.getEmail();
     String password = userLoginDTO.getPassword();
     
     // Perform login
-    User loggedInUser = userService.loginUser(username, password);
+    User loggedInUser = userService.loginUser(email, password);
     
     // Create HTTP headers and add token
     HttpHeaders headers = new HttpHeaders();
@@ -138,4 +185,10 @@ public class UserController {
     // Update the user
     userService.updateUser(userId, userInput);
   }
+  @PostMapping("/users/logout")
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  public void logoutUser(@RequestHeader(value = "Authorization", required = false) String token) {
+    userService.logoutUserByToken(token);
+  }
+
 }

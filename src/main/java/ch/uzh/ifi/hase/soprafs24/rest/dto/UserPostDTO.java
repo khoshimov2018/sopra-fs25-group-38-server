@@ -1,12 +1,23 @@
 package ch.uzh.ifi.hase.soprafs24.rest.dto;
 
+import ch.uzh.ifi.hase.soprafs24.constant.ProfileKnowledgeLevel;
+import ch.uzh.ifi.hase.soprafs24.constant.UserAvailability;
+
 public class UserPostDTO {
 
   private String name;
 
-  private String username;
+  private String email;
   
   private String password;
+
+  private String studyLevel;        
+  private String studyGoals;       
+  private String profilePicture;
+
+    private String bio;
+    private UserAvailability availability;
+    private ProfileKnowledgeLevel knowledgeLevel;
 
   public String getName() {
     return name;
@@ -16,12 +27,12 @@ public class UserPostDTO {
     this.name = name;
   }
 
-  public String getUsername() {
-    return username;
+  public String getEmail() {
+    return email;
   }
 
-  public void setUsername(String username) {
-    this.username = username;
+  public void setEmail(String email) {
+    this.email = email;
   }
   
   public String getPassword() {
@@ -30,5 +41,53 @@ public class UserPostDTO {
   
   public void setPassword(String password) {
     this.password = password;
+  }
+
+  public String getStudyLevel() {
+    return studyLevel;
+  }
+
+  public void setStudyLevel(String studyLevel) {
+    this.studyLevel = studyLevel;
+  }
+
+  public String getStudyGoals() {
+    return studyGoals;
+  }
+
+  public void setStudyGoals(String studyGoals) {
+    this.studyGoals = studyGoals;
+  }
+
+  public String getProfilePicture() {
+    return profilePicture;
+  }
+
+  public void setProfilePicture(String profilePicture) {
+    this.profilePicture = profilePicture;
+  }
+
+  public String getBio() {
+    return bio;
+  }
+
+  public void setBio(String bio) {
+    this.bio = bio;
+  }
+
+  public UserAvailability getAvailability() {
+    return availability;
+  }
+
+  public void setAvailability(UserAvailability availability) {
+    this.availability = availability;
+  }
+
+  public ProfileKnowledgeLevel getKnowledgeLevel() {
+    return knowledgeLevel;
+  }
+
+  public void setKnowledgeLevel(ProfileKnowledgeLevel knowledgeLevel) {
+    this.knowledgeLevel = knowledgeLevel;
   }
 }

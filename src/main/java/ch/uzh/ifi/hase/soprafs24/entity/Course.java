@@ -10,18 +10,26 @@ public class Course implements Serializable{
     
     private static final long serialVersionUID = 5L;
 
+    @Id
+    @GeneratedValue
+    private Long id;
+
     @Column(nullable = false)
     private Long userId;
 
     @Column(nullable = false)
-    private String name;
+    private String courseName;
+
+    public Long getId() {
+        return id;
+    }
 
     public Long getUserId() {
         return userId;
     }
 
     public String getCourseName() {
-        return name;
+        return courseName;
     }
 
     /*
@@ -32,6 +40,6 @@ public class Course implements Serializable{
 
     public Course(User user, String courseName) {
         this.userId = user.getId();
-        this.name = courseName;
+        this.courseName = courseName;
     }
 }

@@ -7,13 +7,6 @@ import ch.uzh.ifi.hase.soprafs24.constant.UserAvailability;
 import javax.persistence.*; // package provides annotations (such as @Entity, @Table, @Id, @Column, etc.) used to map this class to a database table.
 import java.io.Serializable; // to allow the object to be converted into a byte stream (a requirement for many JPA providers).
 import java.time.LocalDate; 
-import javax.persistence.ElementCollection;
-import javax.persistence.CollectionTable;
-import javax.persistence.Column;
-import javax.persistence.JoinColumn;
-import java.util.HashSet;
-import java.util.Set;
-
 /**
  * Internal User Representation
  * This class composes the internal representation of the user and defines how
@@ -43,13 +36,13 @@ public class User implements Serializable {
   private String name;
 
   @Column(nullable = false, unique = true)
-  private String username;
+  private String email;
 
   @Column(nullable = false)
   private String password;
 
   @Column(nullable = false)
-  private LocalDate creationDate;
+  private LocalDateTime creationDate;
 
   @Column(nullable = false, unique = true)
   private String token;
@@ -68,6 +61,12 @@ public class User implements Serializable {
 
   @Column(nullable = true)
   private String studyGoals;
+
+  @Column(nullable = false)
+  private String studyLevel;
+
+  @Column(nullable = true)
+  private String profilePicture;
 
   @Column(nullable = true)
   private String bio;
@@ -101,13 +100,13 @@ public class User implements Serializable {
     this.name = name;
   }
 
-  // username
-  public String getUsername() {
-    return username;
+  // email
+  public String getEmail() {
+    return email;
   }
-
-  public void setUsername(String username) {
-    this.username = username;
+  
+  public void setEmail(String email) {
+    this.email = email;
   }
 
   // password
@@ -120,11 +119,11 @@ public class User implements Serializable {
   }
 
   // creationDate
-  public LocalDate getCreationDate() {
+  public LocalDateTime getCreationDate() {
       return creationDate;
   }
 
-  public void setCreationDate(LocalDate creationDate) {
+  public void setCreationDate(LocalDateTime creationDate) {
       this.creationDate = creationDate;
   }
 
@@ -182,6 +181,24 @@ public class User implements Serializable {
     this.studyGoals = studyGoals;
   }
 
+  // study level
+  public String getStudyLevel() {
+    return studyLevel;
+  }
+
+  public void setStudyLevel(String studyLevel) {
+    this.studyLevel = studyLevel;
+  }
+
+  // profile picture
+  public String getProfilePicture() {
+    return profilePicture;
+  }
+
+  public void setProfilePicture(String profilePicture) {
+    this.profilePicture = profilePicture;
+  }
+
   // bio
   public String getBio() {
     return bio;
@@ -204,13 +221,13 @@ public class User implements Serializable {
 
   // A no-argument constructor is required by JPA for creating instances via reflection.
   public User() {
-    this.creationDate = LocalDate.now();
+    this.creationDate = LocalDateTime.now();
   }
   // parameterized constructor
-  public User(String username, String name, String password) {
-    this.username = username;
+  public User(String email, String name, String password) {
+    this.email = email;
     this.name = name;
     this.password = password;
-    this.creationDate = LocalDate.now();
+    this.creationDate = LocalDateTime.now();
   }
 }
