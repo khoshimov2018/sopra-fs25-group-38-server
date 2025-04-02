@@ -196,4 +196,10 @@ public class UserController {
     userService.logoutUserByToken(token);
   }
 
+  //exposing endpoint for fetching all accepted matches
+  @GetMapping("users/{userId}/accepted-matches")
+    public ResponseEntity<Set<Long>> getAcceptedMatches(@PathVariable Long userId) {
+        Set<Long> partnerIds = userService.getAcceptedMatchPartnerIds(userId);
+        return ResponseEntity.ok(partnerIds);
+    }
 }

@@ -12,7 +12,8 @@ import java.util.List;
 
 @Repository
 public interface MatchRepository extends JpaRepository<Match, Long> {
-    @Query("SELECT m FROM Match m WHERE m.userId1 = :userId OR m.userId2 = :userId")
-    List<Match> findMatchesByUserId(@Param("userId") Long userId);
+    @Query("SELECT m FROM Match m WHERE (m.userId1 = :userId OR m.userId2 = :userId) AND m.status = 'ACCEPTED'")
+    List<Match> findAcceptedMatchesByUserId(@Param("userId") Long userId);
+
 }
 

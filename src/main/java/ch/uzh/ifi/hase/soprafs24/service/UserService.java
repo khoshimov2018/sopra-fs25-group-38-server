@@ -3,6 +3,7 @@ package ch.uzh.ifi.hase.soprafs24.service;
 import ch.uzh.ifi.hase.soprafs24.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs24.entity.User;
 import ch.uzh.ifi.hase.soprafs24.repository.UserRepository;
+import ch.uzh.ifi.hase.soprafs24.repository.MatchRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,11 +37,13 @@ public class UserService {
   private final Logger log = LoggerFactory.getLogger(UserService.class);
 
   private final UserRepository userRepository;
+  private final MatchRepository matchRepository;
   private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
   @Autowired
-  public UserService(@Qualifier("userRepository") UserRepository userRepository) {
+  public UserService(@Qualifier("userRepository") UserRepository userRepository,MatchRepository matchRepository) {
     this.userRepository = userRepository;
+    this.matchRepository = matchRepository;
   }
 
   public List<User> getUsers() {
@@ -211,6 +214,20 @@ public class UserService {
     return user.getMatchIds();
   }
   
+  public Set<Long> getAcceptedMatchPartnerIds(Long userId) {
+    List<Match> acceptedMatches = matchRepository.findAcceptedMatchesByUserId(userId);
+    Set<Long> partnerIds = new HashSet<>();
+    for (Match match : acceptedMatches) {
+        // Determine the partner: if the given user is userId1, then partner is userId2, and vice versa.
+        if (Objects.equals(match.getUser1Id(), userId)) {
+            partnerIds.add(match.getUser2Id());
+        } else {
+            partnerIds.add(match.getUser1Id());
+        }
+    }
+    return partnerIds;
+}
+
   /**
    * Authenticates a request based on token
    *
