@@ -10,6 +10,10 @@ import java.time.LocalDate;
 public class StudyPlan implements Serializable{
     
     private static final long serialVersionUID = 6L;
+    
+    @Id
+    @GeneratedValue
+    private Long id;
 
     @Column(nullable = false)
     private Long userId;

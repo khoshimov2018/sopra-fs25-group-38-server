@@ -1,17 +1,18 @@
 package ch.uzh.ifi.hase.soprafs24.controller;
 
 import ch.uzh.ifi.hase.soprafs24.entity.User;
+import ch.uzh.ifi.hase.soprafs24.entity.Course;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.UserGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.UserLoginDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.UserPostDTO;
+import ch.uzh.ifi.hase.soprafs24.rest.dto.CourseGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.mapper.DTOMapper;
 import ch.uzh.ifi.hase.soprafs24.service.UserService;
+import ch.uzh.ifi.hase.soprafs24.service.CourseService;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ch.uzh.ifi.hase.soprafs24.rest.dto.CourseGetDTO;
-
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,10 +31,12 @@ import java.time.LocalDateTime;
 public class UserController {
 
   private final UserService userService;
+  private final CourseService courseService;
 
-  UserController(UserService userService) {
+  public UserController(UserService userService, CourseService courseService) {
     this.userService = userService;
-  }
+    this.courseService = courseService;
+}
 
   @GetMapping("/courses")
   @ResponseStatus(HttpStatus.OK)

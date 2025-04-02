@@ -3,6 +3,7 @@ package ch.uzh.ifi.hase.soprafs24.entity;
 import javax.persistence.*; // package provides annotations (such as @Entity, @Table, @Id, @Column, etc.) used to map this class to a database table.
 import java.io.Serializable; 
 import ch.uzh.ifi.hase.soprafs24.constant.MatchStatus;
+import ch.uzh.ifi.hase.soprafs24.entity.Match;
 
 @Entity
 @Table(name = "MATCH")
