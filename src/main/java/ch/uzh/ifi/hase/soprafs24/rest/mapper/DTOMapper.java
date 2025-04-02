@@ -47,24 +47,25 @@ public interface DTOMapper {
   @Mapping(source = "availability", target = "availability")
   UserGetDTO convertEntityToUserGetDTO(User user);
 
-  // Course mapping
+  // // Course mapping
+  // @Mapping(source = "id", target = "id")
+  // @Mapping(source = "userId", target = "userId")
+  // @Mapping(source = "courseName", target = "courseName")
+  // CourseGetDTO convertEntityToCourseGetDTO(Course course);
+
+  // Match mappings
+
+  @Mapping(source = "userId", target = "userId1")
+  @Mapping(source = "targetUserId", target = "userId2")
+  Match convertMatchPostDTOtoEntity(MatchPostDTO matchPostDTO);
+  
   @Mapping(source = "id", target = "id")
-  @Mapping(source = "userId", target = "userId")
-  @Mapping(source = "courseName", target = "courseName")
-  CourseGetDTO convertEntityToCourseGetDTO(Course course);
-
-    // Match mappings
-
-    @Mapping(source = "userId", target = "userId1")
-    @Mapping(source = "targetUserId", target = "userId2")
-    Match convertMatchPostDTOtoEntity(MatchPostDTO matchPostDTO);
-
-    // For GET requests, we expose the basic match details.
-    @Mapping(source = "id", target = "id")
-    @Mapping(source = "userId1", target = "userId1")
-    @Mapping(source = "userId2", target = "userId2")
-    @Mapping(source = "status", target = "status")
-    MatchGetDTO convertEntityToMatchGetDTO(Match match);
+  @Mapping(source = "userId1", target = "userId1")
+  @Mapping(source = "userId2", target = "userId2")
+  @Mapping(source = "status", target = "status")
+  @Mapping(source = "likedByUser1", target = "likedByUser1")
+  @Mapping(source = "likedByUser2", target = "likedByUser2")
+  MatchGetDTO convertEntityToMatchGetDTO(Match match);
 
 
 }
