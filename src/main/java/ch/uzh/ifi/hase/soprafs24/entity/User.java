@@ -13,6 +13,7 @@ import javax.persistence.Column;
 import javax.persistence.JoinColumn;
 import java.util.HashSet;
 import java.util.Set;
+import java.time.LocalDateTime;
 /**
  * Internal User Representation
  * This class composes the internal representation of the user and defines how

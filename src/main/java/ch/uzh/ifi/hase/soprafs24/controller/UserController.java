@@ -10,9 +10,14 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ch.uzh.ifi.hase.soprafs24.rest.dto.CourseGetDTO;
+
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.time.LocalDateTime;
+
 
 /**
  * User Controller

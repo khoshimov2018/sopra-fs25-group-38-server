@@ -1,3 +1,6 @@
+package ch.uzh.ifi.hase.soprafs24.rest.dto;
+
+
 public class MatchPostDTO {
     private Long userId;       // ID of the user performing the action
     private Long targetUserId; // ID of the user being liked/disliked

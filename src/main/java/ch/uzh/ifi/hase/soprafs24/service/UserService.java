@@ -12,11 +12,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import ch.uzh.ifi.hase.soprafs24.repository.CourseRepository;
+import ch.uzh.ifi.hase.soprafs24.entity.Course;
+
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.Set;
 
 
 /**
@@ -199,6 +203,13 @@ public class UserService {
     return userRepository.findById(userId)
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, 
             String.format("User with ID %d was not found", userId)));
+  }
+  
+  //find userIds for matches
+  public Set<Long> getMatchIdsForUser(Long userId) {
+    User user = userRepository.findById(userId)
+            .orElseThrow(() -> new RuntimeException("User not found"));
+    return user.getMatchIds();
   }
   
   /**
