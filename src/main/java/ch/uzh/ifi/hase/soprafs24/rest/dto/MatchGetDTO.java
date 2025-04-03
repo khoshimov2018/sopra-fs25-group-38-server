@@ -1,4 +1,4 @@
-import ch.uzh.ifi.hase.soprafs24.constant.MatchStatus;
+/* import ch.uzh.ifi.hase.soprafs24.constant.MatchStatus;
 
 public class MatchGetDTO {
     private Long id;           // Unique identifier for the match
@@ -46,3 +46,4 @@ public class MatchGetDTO {
         this.status = status;
     }
 }
+ */

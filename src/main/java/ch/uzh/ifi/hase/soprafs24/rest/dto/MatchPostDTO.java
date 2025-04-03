@@ -1,4 +1,4 @@
-public class MatchPostDTO {
+/* public class MatchPostDTO {
     private Long userId;       // ID of the user performing the action
     private Long targetUserId; // ID of the user being liked/disliked
 
@@ -24,3 +24,4 @@ public class MatchPostDTO {
         this.targetUserId = targetUserId;
     }
 }
+ */

@@ -1,4 +1,4 @@
-package ch.uzh.ifi.hase.soprafs25.controller;
+/* package ch.uzh.ifi.hase.soprafs25.controller;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,4 +26,4 @@ public class CorsConfig {
             }
         };
     }
-}
+} */

@@ -30,7 +30,7 @@ public class UserController {
     this.userService = userService;
   }
 
-  @GetMapping("/courses")
+/*   @GetMapping("/courses")
   @ResponseStatus(HttpStatus.OK)
   @ResponseBody
   public List<CourseGetDTO> getAllCourses() {
@@ -59,7 +59,7 @@ public List<UserGetDTO> getStudentsByCourses(@RequestParam List<Long> courseIds)
   }
 
   return userGetDTOs;
-}
+} */
 
   @GetMapping("/users")
   @ResponseStatus(HttpStatus.OK)

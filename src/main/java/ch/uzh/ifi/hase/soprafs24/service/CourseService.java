@@ -1,4 +1,4 @@
-package ch.uzh.ifi.hase.soprafs24.service;
+/* package ch.uzh.ifi.hase.soprafs24.service;
 
 import ch.uzh.ifi.hase.soprafs24.repository.CourseRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,3 +28,4 @@ public class CourseService {
         return courseRepository.findAll();
     }
 }
+ */
