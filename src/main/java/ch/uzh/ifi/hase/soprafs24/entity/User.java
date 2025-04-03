@@ -6,14 +6,12 @@ import ch.uzh.ifi.hase.soprafs24.constant.UserAvailability;
 
 import javax.persistence.*; // package provides annotations (such as @Entity, @Table, @Id, @Column, etc.) used to map this class to a database table.
 import java.io.Serializable; // to allow the object to be converted into a byte stream (a requirement for many JPA providers).
-import java.time.LocalDate; 
-import javax.persistence.ElementCollection;
-import javax.persistence.CollectionTable;
-import javax.persistence.Column;
-import javax.persistence.JoinColumn;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 import java.time.LocalDateTime;
+import java.util.List;
+import ch.uzh.ifi.hase.soprafs24.entity.Course;
 /**
  * Internal User Representation
  * This class composes the internal representation of the user and defines how
@@ -77,6 +75,14 @@ public class User implements Serializable {
 
   @Column(nullable = true)
   private String bio;
+  @ManyToMany
+  @JoinTable(
+      name = "user_courses",
+      joinColumns = @JoinColumn(name = "user_id"),
+      inverseJoinColumns = @JoinColumn(name = "course_id")
+  )
+  private List<Course> courses = new ArrayList<>();
+
 
   @ElementCollection(fetch = FetchType.LAZY)
   @CollectionTable(name = "user_match_ids", joinColumns = @JoinColumn(name = "user_id"))
@@ -223,6 +229,13 @@ public class User implements Serializable {
     this.matchIds = matchIds;
   }
 
+  public List<Course> getCourses() {
+    return courses;
+  }
+
+  public void setCourses(List<Course> courses) {
+      this.courses = courses;
+  }
 
 
 

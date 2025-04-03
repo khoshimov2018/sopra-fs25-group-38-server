@@ -1,45 +1,51 @@
 package ch.uzh.ifi.hase.soprafs24.entity;
 
-import javax.persistence.*; // package provides annotations (such as @Entity, @Table, @Id, @Column, etc.) used to map this class to a database table.
+import javax.persistence.*;
 import java.io.Serializable;
-import java.time.LocalDate; 
+import java.util.List;
 
 @Entity
 @Table(name = "COURSE")
-public class Course implements Serializable{
-    
+public class Course implements Serializable {
+
     private static final long serialVersionUID = 5L;
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private Long userId;
-
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String courseName;
 
-    public Long getId() {
-        return id;
+    @ManyToMany(mappedBy = "courses") // 'mappedBy' means the User class owns the relationship
+    private List<User> users;
+
+    
+    public Course() {}
+
+    
+    public Course(String courseName) {
+        this.courseName = courseName;
     }
 
-    public Long getUserId() {
-        return userId;
+    
+    public Long getId() {
+        return id;
     }
 
     public String getCourseName() {
         return courseName;
     }
 
-    /*
-     * constructor
-     */
-    public Course() {
+    public void setCourseName(String courseName) {
+        this.courseName = courseName;
     }
 
-    public Course(User user, String courseName) {
-        this.userId = user.getId();
-        this.courseName = courseName;
+    public List<User> getUsers() {
+        return users;
+    }
+
+    public void setUsers(List<User> users) {
+        this.users = users;
     }
 }

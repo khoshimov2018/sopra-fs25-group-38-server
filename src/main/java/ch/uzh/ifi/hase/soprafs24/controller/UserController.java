@@ -13,6 +13,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ch.uzh.ifi.hase.soprafs24.repository.CourseRepository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,24 +34,28 @@ public class UserController {
   private final UserService userService;
   /* private final CourseService courseService; */
 
-  public UserController(UserService userService/* , CourseService courseService */) {
-    this.userService = userService;
-    /* this.courseService = courseService; */
-}
+  private final CourseRepository courseRepository;
 
- /*  @GetMapping("/courses")
+  public UserController(UserService userService, CourseRepository courseRepository) {
+      this.userService = userService;
+      this.courseRepository = courseRepository;
+  }
+  
+
+  @GetMapping("/courses")
   @ResponseStatus(HttpStatus.OK)
   @ResponseBody
   public List<CourseGetDTO> getAllCourses() {
-    List<Course> courses = courseService.getAllCourses();
+    List<Course> courses = courseRepository.findAll();
     List<CourseGetDTO> courseGetDTOs = new ArrayList<>();
-
+  
     for (Course course : courses) {
-      courseGetDTOs.add(DTOMapper.INSTANCE.convertEntityToCourseGetDTO(course)); 
+      courseGetDTOs.add(DTOMapper.INSTANCE.convertEntityToCourseGetDTO(course));
     }
-
-    return courseGetDTOs; 
-}*/
+  
+    return courseGetDTOs;
+  }
+  
 
 /*   @GetMapping("/students")
   @ResponseStatus(HttpStatus.OK)
@@ -106,8 +111,15 @@ public class UserController {
     // convert API user to internal representation
     User userInput = DTOMapper.INSTANCE.convertUserPostDTOtoEntity(userPostDTO);
 
+    //assign selected courses to the user before creation
+    if (userPostDTO.getCourseIds() != null && !userPostDTO.getCourseIds().isEmpty()) {
+        List<Course> selectedCourses = courseRepository.findAllById(userPostDTO.getCourseIds());
+        userInput.setCourses(selectedCourses);
+    }
+    
     // create user
     User createdUser = userService.createUser(userInput);
+    
     
     // Create HTTP headers and add token for automatic login
     HttpHeaders headers = new HttpHeaders();

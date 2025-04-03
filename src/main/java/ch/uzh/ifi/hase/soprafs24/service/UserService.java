@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import ch.uzh.ifi.hase.soprafs24.repository.CourseRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -22,6 +23,7 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.Set;
 import java.util.HashSet;
+
 
 /**
  * User Service
@@ -39,12 +41,18 @@ public class UserService {
   private final UserRepository userRepository;
   private final MatchRepository matchRepository;
   private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+  private final CourseRepository courseRepository;
+
 
   @Autowired
-  public UserService(@Qualifier("userRepository") UserRepository userRepository,MatchRepository matchRepository) {
-    this.userRepository = userRepository;
-    this.matchRepository = matchRepository;
+  public UserService(@Qualifier("userRepository") UserRepository userRepository,
+                     MatchRepository matchRepository,
+                     CourseRepository courseRepository) {
+      this.userRepository = userRepository;
+      this.matchRepository = matchRepository;
+      this.courseRepository = courseRepository;
   }
+  
 
   public List<User> getUsers() {
     return this.userRepository.findAll();
@@ -70,6 +78,15 @@ public class UserService {
     newUser.setStatus(UserStatus.ONLINE);
     newUser.setCreationDate(LocalDateTime.now());
     
+    // If the user has selected courses via IDs (from the DTO)
+    if (newUser.getCourses() != null && !newUser.getCourses().isEmpty()) {
+      List<Long> courseIds = newUser.getCourses().stream()
+                                    .map(Course::getId)
+                                    .toList();
+      List<Course> courses = courseRepository.findAllById(courseIds);
+      newUser.setCourses(courses);
+    }
+
     // Save user
     newUser = userRepository.save(newUser);
     userRepository.flush();
@@ -322,7 +339,15 @@ public class UserService {
     if (userInput.getProfilePicture() != null) {
       userToUpdate.setProfilePicture(userInput.getProfilePicture());
     }
-  
+    // If course list is included in userInput, update the user's courses
+    if (userInput.getCourses() != null) {
+      List<Long> courseIds = userInput.getCourses().stream()
+                                      .map(Course::getId)
+                                      .toList();
+      List<Course> updatedCourses = courseRepository.findAllById(courseIds);
+      userToUpdate.setCourses(updatedCourses);
+    }
+
     // Save updated user
     userToUpdate = userRepository.save(userToUpdate);
     userRepository.flush();

@@ -2,6 +2,8 @@ package ch.uzh.ifi.hase.soprafs24.rest.dto;
 
 import ch.uzh.ifi.hase.soprafs24.constant.ProfileKnowledgeLevel;
 import ch.uzh.ifi.hase.soprafs24.constant.UserAvailability;
+import java.util.List;
+
 
 public class UserPostDTO {
 
@@ -10,6 +12,8 @@ public class UserPostDTO {
   private String email;
   
   private String password;
+
+  private List<Long> courseIds;
 
   private String studyLevel;        
   private String studyGoals;       
@@ -90,4 +94,13 @@ public class UserPostDTO {
   public void setKnowledgeLevel(ProfileKnowledgeLevel knowledgeLevel) {
     this.knowledgeLevel = knowledgeLevel;
   }
+
+  public List<Long> getCourseIds() {
+    return courseIds;
+  }
+  
+  public void setCourseIds(List<Long> courseIds) {
+    this.courseIds = courseIds;
+  }
+  
 }

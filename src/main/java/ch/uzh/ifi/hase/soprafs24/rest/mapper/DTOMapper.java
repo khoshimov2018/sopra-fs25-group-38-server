@@ -54,9 +54,9 @@ public interface DTOMapper {
 
   // Course mapping
   @Mapping(source = "id", target = "id")
-  @Mapping(source = "userId", target = "userId")
   @Mapping(source = "courseName", target = "courseName")
-  CourseGetDTO convertEntityToCourseGetDTO(Course course);
+  CourseGetDTO convertEntityToCourseGetDTO(ch.uzh.ifi.hase.soprafs24.entity.Course course);
+
 
   // Match mappings
 
