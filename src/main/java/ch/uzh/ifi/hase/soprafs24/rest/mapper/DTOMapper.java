@@ -8,8 +8,8 @@ import ch.uzh.ifi.hase.soprafs24.rest.dto.UserGetDTO;
 import ch.uzh.ifi.hase.soprafs24.constant.UserAvailability;
 import ch.uzh.ifi.hase.soprafs24.constant.MatchStatus;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.UserPostDTO;
-/* import ch.uzh.ifi.hase.soprafs24.rest.dto.MatchPostDTO;
-import ch.uzh.ifi.hase.soprafs24.rest.dto.MatchGetDTO; */
+import ch.uzh.ifi.hase.soprafs24.rest.dto.MatchPostDTO;
+import ch.uzh.ifi.hase.soprafs24.rest.dto.MatchGetDTO; 
 import org.mapstruct.*;
 import org.mapstruct.factory.Mappers;
 import java.time.LocalDateTime;
@@ -52,7 +52,7 @@ public interface DTOMapper {
   @Mapping(source = "availability", target = "availability")
   UserGetDTO convertEntityToUserGetDTO(User user);
 
-/*   // Course mapping
+  // Course mapping
   @Mapping(source = "id", target = "id")
   @Mapping(source = "userId", target = "userId")
   @Mapping(source = "courseName", target = "courseName")

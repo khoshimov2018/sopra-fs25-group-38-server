@@ -8,7 +8,7 @@ import ch.uzh.ifi.hase.soprafs24.rest.dto.UserPostDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.CourseGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.mapper.DTOMapper;
 import ch.uzh.ifi.hase.soprafs24.service.UserService;
-import ch.uzh.ifi.hase.soprafs24.service.CourseService;
+/* import ch.uzh.ifi.hase.soprafs24.service.CourseService; */
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,18 +27,18 @@ import java.time.LocalDateTime;
  * The controller will receive the request and delegate the execution to the
  * UserService and finally return the result.
  */
-@RestController
+ @RestController
 public class UserController {
 
   private final UserService userService;
-  private final CourseService courseService;
+  /* private final CourseService courseService; */
 
-  public UserController(UserService userService, CourseService courseService) {
+  public UserController(UserService userService/* , CourseService courseService */) {
     this.userService = userService;
-    this.courseService = courseService;
+    /* this.courseService = courseService; */
 }
 
-/*   @GetMapping("/courses")
+ /*  @GetMapping("/courses")
   @ResponseStatus(HttpStatus.OK)
   @ResponseBody
   public List<CourseGetDTO> getAllCourses() {
@@ -49,10 +49,10 @@ public class UserController {
       courseGetDTOs.add(DTOMapper.INSTANCE.convertEntityToCourseGetDTO(course)); 
     }
 
-    return courseGetDTOs;
-}
+    return courseGetDTOs; 
+}*/
 
-  @GetMapping("/students")
+/*   @GetMapping("/students")
   @ResponseStatus(HttpStatus.OK)
   @ResponseBody
   public List<UserGetDTO> getFilteredStudents(
@@ -83,8 +83,8 @@ public class UserController {
       }
 
       return userGetDTOs;
-  }
-
+  } */
+ 
   @GetMapping("/users")
   @ResponseStatus(HttpStatus.OK)
   @ResponseBody
