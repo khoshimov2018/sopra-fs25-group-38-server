@@ -11,6 +11,10 @@ public class Block implements Serializable{
 
     private static final long serialVersionUID = 4L;
 
+    @Id
+    @GeneratedValue
+    private Long id;
+
     @Column(nullable = false)
     private Long blockerId;
 

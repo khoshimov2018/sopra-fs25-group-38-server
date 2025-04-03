@@ -2,7 +2,10 @@ package ch.uzh.ifi.hase.soprafs24.service;
 
 import ch.uzh.ifi.hase.soprafs24.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs24.entity.User;
+import ch.uzh.ifi.hase.soprafs24.entity.Course;
+import ch.uzh.ifi.hase.soprafs24.entity.Match;
 import ch.uzh.ifi.hase.soprafs24.repository.UserRepository;
+import ch.uzh.ifi.hase.soprafs24.repository.MatchRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +20,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
-
+import java.util.Set;
+import java.util.HashSet;
 
 /**
  * User Service
@@ -33,11 +37,13 @@ public class UserService {
   private final Logger log = LoggerFactory.getLogger(UserService.class);
 
   private final UserRepository userRepository;
+  private final MatchRepository matchRepository;
   private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
   @Autowired
-  public UserService(@Qualifier("userRepository") UserRepository userRepository) {
+  public UserService(@Qualifier("userRepository") UserRepository userRepository,MatchRepository matchRepository) {
     this.userRepository = userRepository;
+    this.matchRepository = matchRepository;
   }
 
   public List<User> getUsers() {
@@ -201,6 +207,32 @@ public class UserService {
             String.format("User with ID %d was not found", userId)));
   }
   
+  //find userIds for matches
+  public Set<Long> getMatchIdsForUser(Long userId) {
+    User user = userRepository.findById(userId)
+            .orElseThrow(() -> new RuntimeException("User not found"));
+    return user.getMatchIds();
+  }
+  
+  public Set<Long> getAcceptedMatchPartnerIds(Long userId) {
+    List<Match> acceptedMatches = matchRepository.findAcceptedMatchesByUserId(userId);
+    Set<Long> partnerIds = new HashSet<>();
+    for (Match match : acceptedMatches) {
+        // Determine the partner: if the given user is userId1, then partner is userId2, and vice versa.
+        // if (Objects.equals(match.getUser1Id(), userId)) {
+        //     partnerIds.add(match.getUser2Id());
+        // } else {
+        //     partnerIds.add(match.getUser1Id());
+        // }
+        if (Objects.equals(match.getUserId1(), userId)) {
+          partnerIds.add(match.getUserId2());
+      } else {
+          partnerIds.add(match.getUserId1());
+      }
+    }
+    return partnerIds;
+}
+
   /**
    * Authenticates a request based on token
    *

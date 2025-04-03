@@ -10,6 +10,10 @@ public class Profile implements Serializable{
     
     private static final long serialVersionUID = 7L;
 
+    @Id
+    @GeneratedValue
+    private Long id;
+
     @Column(nullable = false)
     private Long userId;
 

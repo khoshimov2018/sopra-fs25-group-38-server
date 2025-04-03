@@ -1,8 +1,11 @@
 package ch.uzh.ifi.hase.soprafs24.rest.mapper;
 
 import ch.uzh.ifi.hase.soprafs24.entity.User;
-import ch.uzh.ifi.hase.soprafs24.entity.Match; 
+import ch.uzh.ifi.hase.soprafs24.entity.Match;
+import ch.uzh.ifi.hase.soprafs24.entity.Course;
+import ch.uzh.ifi.hase.soprafs24.rest.dto.CourseGetDTO; 
 import ch.uzh.ifi.hase.soprafs24.rest.dto.UserGetDTO;
+import ch.uzh.ifi.hase.soprafs24.constant.UserAvailability;
 import ch.uzh.ifi.hase.soprafs24.constant.MatchStatus;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.UserPostDTO;
 /* import ch.uzh.ifi.hase.soprafs24.rest.dto.MatchPostDTO;
@@ -10,6 +13,8 @@ import ch.uzh.ifi.hase.soprafs24.rest.dto.MatchGetDTO; */
 import org.mapstruct.*;
 import org.mapstruct.factory.Mappers;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.ArrayList;
 
 /**
  * DTOMapper
@@ -44,6 +49,7 @@ public interface DTOMapper {
   @Mapping(source = "status", target = "status")
   @Mapping(source = "token", target = "token")
   @Mapping(source = "creationDate", target = "creationDate")
+  @Mapping(source = "availability", target = "availability")
   UserGetDTO convertEntityToUserGetDTO(User user);
 
 /*   // Course mapping
@@ -52,18 +58,23 @@ public interface DTOMapper {
   @Mapping(source = "courseName", target = "courseName")
   CourseGetDTO convertEntityToCourseGetDTO(Course course);
 
-    // Match mappings
+  // Match mappings
 
-    @Mapping(source = "userId", target = "userId1")
-    @Mapping(source = "targetUserId", target = "userId2")
-    Match convertMatchPostDTOtoEntity(MatchPostDTO matchPostDTO);
+  @Mapping(source = "userId", target = "userId1")
+  @Mapping(source = "targetUserId", target = "userId2")
+  Match convertMatchPostDTOtoEntity(MatchPostDTO matchPostDTO);
+  
+  @Mapping(source = "id", target = "id")
+  @Mapping(source = "userId1", target = "userId1")
+  @Mapping(source = "userId2", target = "userId2")
+  @Mapping(source = "status", target = "status")
+  @Mapping(source = "likedByUser1", target = "likedByUser1")
+  @Mapping(source = "likedByUser2", target = "likedByUser2")
+  MatchGetDTO convertEntityToMatchGetDTO(Match match);
 
-    // For GET requests, we expose the basic match details.
-    @Mapping(source = "id", target = "id")
-    @Mapping(source = "userId1", target = "userId1")
-    @Mapping(source = "userId2", target = "userId2")
-    @Mapping(source = "status", target = "status")
-    MatchGetDTO convertEntityToMatchGetDTO(Match match);
- */
+  default List<String> map(UserAvailability availability) {
+    if (availability == null) return new ArrayList<>();
+    return List.of(availability.name());
+  }
 
 }

@@ -1,11 +1,14 @@
 package ch.uzh.ifi.hase.soprafs24.controller;
 
 import ch.uzh.ifi.hase.soprafs24.entity.User;
+import ch.uzh.ifi.hase.soprafs24.entity.Course;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.UserGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.UserLoginDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.UserPostDTO;
+import ch.uzh.ifi.hase.soprafs24.rest.dto.CourseGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.mapper.DTOMapper;
 import ch.uzh.ifi.hase.soprafs24.service.UserService;
+import ch.uzh.ifi.hase.soprafs24.service.CourseService;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +16,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.time.LocalDateTime;
+
 
 /**
  * User Controller
@@ -25,10 +31,12 @@ import java.util.List;
 public class UserController {
 
   private final UserService userService;
+  private final CourseService courseService;
 
-  UserController(UserService userService) {
+  public UserController(UserService userService, CourseService courseService) {
     this.userService = userService;
-  }
+    this.courseService = courseService;
+}
 
 /*   @GetMapping("/courses")
   @ResponseStatus(HttpStatus.OK)
@@ -38,28 +46,44 @@ public class UserController {
     List<CourseGetDTO> courseGetDTOs = new ArrayList<>();
 
     for (Course course : courses) {
-      courseGetDTOs.add(DTOMapper.INSTANCE.convertEntityToCourseGetDTO(course)); // ✅ 올바른 문법
+      courseGetDTOs.add(DTOMapper.INSTANCE.convertEntityToCourseGetDTO(course)); 
     }
 
     return courseGetDTOs;
 }
 
-@GetMapping("/students")
-@ResponseStatus(HttpStatus.OK)
-@ResponseBody
-public List<UserGetDTO> getStudentsByCourses(@RequestParam List<Long> courseIds) {
-  List<Long> userIds = courseService.findUserIdsEnrolledInAllCourses(courseIds);
-  List<User> allUsers = userService.getUsers();
-  List<UserGetDTO> userGetDTOs = new ArrayList<>();
+  @GetMapping("/students")
+  @ResponseStatus(HttpStatus.OK)
+  @ResponseBody
+  public List<UserGetDTO> getFilteredStudents(
+      @RequestParam(required = false) List<Long> courseIds,
+      @RequestParam(required = false) List<String> availability) {
 
-  for (User user : allUsers) {
-      if (userIds.contains(user.getId())) {
-        userGetDTOs.add(DTOMapper.INSTANCE.convertEntityToUserGetDTO(user)); // ✅ 올바른 문법
+      List<User> allUsers = userService.getUsers();
+      List<UserGetDTO> userGetDTOs = new ArrayList<>();
+
+      // search userId matched with courseId
+      List<Long> courseMatchedUserIds = new ArrayList<>();
+      if (courseIds != null && !courseIds.isEmpty()) {
+          courseMatchedUserIds = courseService.findUserIdsEnrolledInAllCourses(courseIds);
       }
-  }
 
-  return userGetDTOs;
-} */
+      // search userId matched with availability
+      List<Long> availabilityMatchedUserIds = new ArrayList<>();
+      if (availability != null && !availability.isEmpty()) {
+          availabilityMatchedUserIds = courseService.findUserIdsEnrolledInAllAvailability(availability);
+      }
+
+      // OR condition
+      for (User user : allUsers) {
+          Long userId = user.getId();
+          if (courseMatchedUserIds.contains(userId) || availabilityMatchedUserIds.contains(userId)) {
+              userGetDTOs.add(DTOMapper.INSTANCE.convertEntityToUserGetDTO(user));
+          }
+      }
+
+      return userGetDTOs;
+  }
 
   @GetMapping("/users")
   @ResponseStatus(HttpStatus.OK)
@@ -175,4 +199,10 @@ public List<UserGetDTO> getStudentsByCourses(@RequestParam List<Long> courseIds)
     userService.logoutUserByToken(token);
   }
 
+  //exposing endpoint for fetching all accepted matches
+  @GetMapping("users/{userId}/accepted-matches")
+    public ResponseEntity<Set<Long>> getAcceptedMatches(@PathVariable Long userId) {
+        Set<Long> partnerIds = userService.getAcceptedMatchPartnerIds(userId);
+        return ResponseEntity.ok(partnerIds);
+    }
 }

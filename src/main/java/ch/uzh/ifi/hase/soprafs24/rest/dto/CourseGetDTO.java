@@ -1,5 +1,6 @@
 package ch.uzh.ifi.hase.soprafs24.rest.dto;
 
+
 public class CourseGetDTO {
     private Long id;
     private Long userId;

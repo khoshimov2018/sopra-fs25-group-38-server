@@ -3,6 +3,8 @@ package ch.uzh.ifi.hase.soprafs24.rest.dto;
 import ch.uzh.ifi.hase.soprafs24.constant.UserStatus;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
+
 
 public class UserGetDTO {
 
@@ -12,6 +14,7 @@ public class UserGetDTO {
   private UserStatus status;
   private String token;
   private LocalDateTime creationDate;
+  private List<String> availability;
  
 
   public Long getId() {
@@ -62,4 +65,11 @@ public class UserGetDTO {
     this.creationDate = creationDate;
   }
   
+  public List<String> getAvailability() {
+    return availability;
+  }
+
+  public void setAvailability(List<String> availability) {
+    this.availability = availability;
+  }
 }
