@@ -20,6 +20,8 @@ public class ChatChannel {
     // Indicates the type ("individual" or "group")
     private String type;
 
+    private String channelProfileImage;
+
     // One channel can have many participants.
     // mappedBy = "channel" means the "channel" field in ChatParticipant owns the relationship. the ChatParticipant entity has a field called channel that holds the foreign key.
     // cascade = CascadeType.ALL ensures that any changes to ChatChannel cascade to its child entity - ChatParticipant.
@@ -38,10 +40,11 @@ public class ChatChannel {
     }
 
     // Parameterized constructor to set name and type.
-    public ChatChannel(String name, String type) {
+    public ChatChannel(String name, String type, String channelProfileImage) {
         this();
         this.name = name;
         this.type = type;
+        this.channelProfileImage = channelProfileImage;
     }
 
     // Getters and setters for each field.
@@ -62,6 +65,12 @@ public class ChatChannel {
     }
     public void setType(String type) {
         this.type = type;
+    }
+    public String getChannelProfileImage() {
+        return channelProfileImage;
+    }
+    public void setChannelProfileImage(String channelProfileImage) {
+        this.channelProfileImage = channelProfileImage;
     }
     public List<ChatParticipant> getParticipants() {
         return participants;
@@ -93,4 +102,5 @@ public class ChatChannel {
         participants.remove(participant);
         participant.setChannel(null);
     }
+
 }

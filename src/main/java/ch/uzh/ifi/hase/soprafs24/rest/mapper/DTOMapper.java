@@ -67,54 +67,54 @@ public interface DTOMapper {
   
   // Chat mappings
 
-  // Convert POST DTO to ChatChannel entity
-  @Mapping(target = "id", ignore = true)
-  @Mapping(target = "name", source = "channelName")
-  @Mapping(target = "type", source = "channelType")
-  @Mapping(target = "channelProfileImage", source = "channelProfileImage")
-  @Mapping(target = "createdAt", expression = "java(java.time.LocalDateTime.now())")
-  @Mapping(target = "updatedAt", expression = "java(java.time.LocalDateTime.now())")
-  @Mapping(target = "participants", ignore = true) // will be set in ChatService
-  ChatChannel convertChatChannelPostDTOtoEntity(ChatChannelPostDTO chatChannelPostDTO);
+  // // Convert POST DTO to ChatChannel entity
+  // @Mapping(target = "id", ignore = true)
+  // @Mapping(target = "name", source = "channelName")
+  // @Mapping(target = "type", source = "channelType")
+  // @Mapping(target = "channelProfileImage", source = "channelProfileImage")
+  // @Mapping(target = "createdAt", expression = "java(java.time.LocalDateTime.now())")
+  // @Mapping(target = "updatedAt", expression = "java(java.time.LocalDateTime.now())")
+  // @Mapping(target = "participants", ignore = true) // will be set in ChatService
+  // ChatChannel convertChatChannelPostDTOtoEntity(ChatChannelPostDTO chatChannelPostDTO);
 
-  // Convert ChatChannel entity to GET DTO.
-  @Mapping(source = "id", target = "channelId")
-  @Mapping(source = "name", target = "channelName")
-  @Mapping(source = "type", target = "channelType")
-  @Mapping(source = "channelProfileImage", target = "channelProfileImage")
-  @Mapping(target = "createdAt", expression = "java(chatChannel.getCreatedAt().toString())")
-  @Mapping(target = "updatedAt", expression = "java(chatChannel.getUpdatedAt().toString())")
-  ChatChannelGetDTO convertEntityToChatChannelGetDTO(ChatChannel chatChannel);
+  // // Convert ChatChannel entity to GET DTO.
+  // @Mapping(source = "id", target = "channelId")
+  // @Mapping(source = "name", target = "channelName")
+  // @Mapping(source = "type", target = "channelType")
+  // @Mapping(source = "channelProfileImage", target = "channelProfileImage")
+  // @Mapping(target = "createdAt", expression = "java(chatChannel.getCreatedAt().toString())")
+  // @Mapping(target = "updatedAt", expression = "java(chatChannel.getUpdatedAt().toString())")
+  // ChatChannelGetDTO convertEntityToChatChannelGetDTO(ChatChannel chatChannel);
 
-  // Convert MessagePostDTO to Message entity.
-  @Mapping(target = "id", ignore = true)
-  @Mapping(target = "timestamp", expression = "java(java.time.LocalDateTime.now())")
-  @Mapping(target = "channel", ignore = true)
-  @Mapping(target = "sender", ignore = true)
-  @Mapping(target = "content", source = "context")
-  Message convertMessagePostDTOtoEntity(MessagePostDTO messagePostDTO);
+  // // Convert MessagePostDTO to Message entity.
+  // @Mapping(target = "id", ignore = true)
+  // @Mapping(target = "timestamp", expression = "java(java.time.LocalDateTime.now())")
+  // @Mapping(target = "channel", ignore = true)
+  // @Mapping(target = "sender", ignore = true)
+  // @Mapping(target = "content", source = "context")
+  // Message convertMessagePostDTOtoEntity(MessagePostDTO messagePostDTO);
 
-  // Convert Message entity to MessageGetDTO.
-  @Mapping(source = "id", target = "messageId")
-  @Mapping(source = "channel.id", target = "channelId")
-  @Mapping(source = "sender.id", target = "senderId")
-  @Mapping(source = "content", target = "context")
-  @Mapping(target = "timestamp", expression = "java(message.getTimestamp().toString())")
-  @Mapping(source = "sender.profilePicture", target = "senderProfileImage")
-  MessageGetDTO convertEntityToMessageGetDTO(Message message);
+  // // Convert Message entity to MessageGetDTO.
+  // @Mapping(source = "id", target = "messageId")
+  // @Mapping(source = "channel.id", target = "channelId")
+  // @Mapping(source = "sender.id", target = "senderId")
+  // @Mapping(source = "content", target = "context")
+  // @Mapping(target = "timestamp", expression = "java(message.getTimestamp().toString())")
+  // @Mapping(source = "sender.profilePicture", target = "senderProfileImage")
+  // MessageGetDTO convertEntityToMessageGetDTO(Message message);
 
-  // Convert list of Message entities to list of MessageGetDTO
-  List<ChatParticipantGetDTO> convertEntityToMessageGetDTOList(List<Message> messages)
+  // // Convert list of Message entities to list of MessageGetDTO
+  // List<ChatParticipantGetDTO> convertEntityToMessageGetDTOList(List<Message> messages);
 
-  // Convert ChatParticipant entity to ChatParticipantGetDTO.
-  @Mapping(source = "user.id", target = "userId")
-  @Mapping(source = "user.name", target = "userName")
-  @Mapping(source = "user.profilePicture", target = "userProfileImage")
-  @Mapping(source = "role", target = "role")
-  ChatParticipantGetDTO convertEntityToChatParticipantGetDTO(ch.uzh.ifi.hase.soprafs24.entity.ChatParticipant chatParticipant);
+  // // Convert ChatParticipant entity to ChatParticipantGetDTO.
+  // @Mapping(source = "user.id", target = "userId")
+  // @Mapping(source = "user.name", target = "userName")
+  // @Mapping(source = "user.profilePicture", target = "userProfileImage")
+  // @Mapping(source = "role", target = "role")
+  // ChatParticipantGetDTO convertEntityToChatParticipantGetDTO(ch.uzh.ifi.hase.soprafs24.entity.ChatParticipant chatParticipant);
 
-  // Convert list of ChatParticipant entities to list of ChatParticipantGetDTOs.
-  List<ChatParticipantGetDTO> convertEntityToChatParticipantGetDTOList(List<ch.uzh.ifi.hase.soprafs24.entity.ChatParticipant> chatParticipants);
+  // // Convert list of ChatParticipant entities to list of ChatParticipantGetDTOs.
+  // List<ChatParticipantGetDTO> convertEntityToChatParticipantGetDTOList(List<ch.uzh.ifi.hase.soprafs24.entity.ChatParticipant> chatParticipants);
 
 
   // Match mappings
