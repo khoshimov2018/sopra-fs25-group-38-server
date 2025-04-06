@@ -1,6 +1,9 @@
 package ch.uzh.ifi.hase.soprafs24.entity;
 
 import javax.persistence.*;
+
+import org.apache.tomcat.jni.Local;
+
 import java.time.LocalDateTime;
 
 @Entity
@@ -35,6 +38,38 @@ public class Message {
         this.channel = channel;
         this.sender = sender;
         this.content = content;
+    }
+
+    // getter and setter
+    public Long getId(){
+        return id;
+    }
+    public void setId(Long id){
+        this.id = id;
+    }
+    public ChatChannel getChannel(){
+        return channel;
+    }
+    public void setChannel(ChatChannel channel){
+        this.channel = channel;
+    }
+    public User getSender(){
+        return sender;
+    }
+    public void setSender(User sender){
+        this.sender = sender;
+    }
+    public String getContent(){
+        return content;
+    }
+    public void setContent(String content){
+        this.content = content;
+    }
+    public LocalDateTime getTimestamp(){
+        return timestamp;
+    }
+    public void setTimestamp(LocalDateTime timestamp){
+        this.timestamp = timestamp;
     }
 
 }

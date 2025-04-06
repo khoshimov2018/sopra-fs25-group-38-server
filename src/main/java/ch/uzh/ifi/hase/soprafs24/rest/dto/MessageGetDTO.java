@@ -5,12 +5,13 @@ package ch.uzh.ifi.hase.soprafs24.rest.dto;
 public class MessageGetDTO {
     private Long messageId;
     private Long senderId;
+    private Long channelId; // new added
     private String senderProfileImage;
     private String context;
     private String timestamp;
 
     // getter and setter 
-    
+
     public Long getMessageId() {
         return messageId;
     }
@@ -22,6 +23,12 @@ public class MessageGetDTO {
     }
     public void setSenderId(Long senderId) {
         this.senderId = senderId;
+    }
+    public Long getChannelId() {
+        return channelId;
+    }
+    public void setChannelId(Long channelId) {
+        this.channelId = channelId;
     }
     public String getSenderProfileImage() {
         return senderProfileImage;
