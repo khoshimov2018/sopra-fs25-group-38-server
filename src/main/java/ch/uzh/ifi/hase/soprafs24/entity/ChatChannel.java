@@ -1,13 +1,17 @@
 package ch.uzh.ifi.hase.soprafs24.entity;
 
 import javax.persistence.*;
+
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
 @Table(name = "channel")
-public class ChatChannel {
+public class ChatChannel implements Serializable{
+
+    private static final long serialVersionUID = 10L;
 
     // @GeneratedValue with strategy=GenerationType.IDENTITY tells JPA that the database generates the unique ID.
     @Id

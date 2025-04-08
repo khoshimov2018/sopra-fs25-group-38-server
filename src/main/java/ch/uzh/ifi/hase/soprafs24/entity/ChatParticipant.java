@@ -1,10 +1,14 @@
 package ch.uzh.ifi.hase.soprafs24.entity;
 
+import java.io.Serializable;
+
 import javax.persistence.*;
 
 @Entity
 @Table(name = "chat_participants")
-public class ChatParticipant {
+public class ChatParticipant implements Serializable {
+
+    private static final long serialVersionUID = 9L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

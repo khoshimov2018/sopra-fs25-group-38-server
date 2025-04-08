@@ -4,11 +4,14 @@ import javax.persistence.*;
 
 import org.apache.tomcat.jni.Local;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "messages")
-public class Message {
+public class Message implements Serializable{
+
+    private static final long serialVersionUID = 8L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

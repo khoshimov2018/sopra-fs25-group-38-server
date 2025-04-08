@@ -82,6 +82,7 @@ public interface DTOMapper {
   @Mapping(source = "name", target = "channelName")
   @Mapping(source = "type", target = "channelType")
   @Mapping(source = "channelProfileImage", target = "channelProfileImage")
+  @Mapping(source = "participants", target = "participants")
   @Mapping(target = "createdAt", expression = "java(chatChannel.getCreatedAt().toString())")
   @Mapping(target = "updatedAt", expression = "java(chatChannel.getUpdatedAt().toString())")
   ChatChannelGetDTO convertEntityToChatChannelGetDTO(ChatChannel chatChannel);
