@@ -217,4 +217,10 @@ public class UserController {
         Set<Long> partnerIds = userService.getAcceptedMatchPartnerIds(userId);
         return ResponseEntity.ok(partnerIds);
     }
+    @PostMapping("/users/register")
+    @ResponseBody
+    public ResponseEntity<UserGetDTO> registerUser(@RequestBody UserPostDTO userPostDTO) {
+        return createUser(userPostDTO);
+    }
+
 }

@@ -16,7 +16,7 @@ public class UserPostDTO {
   private List<Long> courseIds;
 
   private String studyLevel;        
-  private String studyGoals;       
+  private List<String> studyGoals;       
   private String profilePicture;
 
     private String bio;
@@ -55,11 +55,11 @@ public class UserPostDTO {
     this.studyLevel = studyLevel;
   }
 
-  public String getStudyGoals() {
+  public List<String> getStudyGoals() {
     return studyGoals;
   }
 
-  public void setStudyGoals(String studyGoals) {
+  public void setStudyGoals(List<String> studyGoals) {
     this.studyGoals = studyGoals;
   }
 

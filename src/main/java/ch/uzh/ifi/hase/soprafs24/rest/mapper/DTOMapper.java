@@ -22,7 +22,7 @@ import ch.uzh.ifi.hase.soprafs24.rest.dto.ChatChannelGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.ChatChannelPostDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.ChatParticipantGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.MessageGetDTO;
-import ch.uzh.ifi.hase.soprafs24.rest.dto.MessagePostDTO;
+import ch.uzh.ifi.hase.soprafs24.rest.dto.MessagePostDTO; 
 
 /**
  * DTOMapper
@@ -113,7 +113,7 @@ public interface DTOMapper {
 
   // Convert list of ChatParticipant entities to list of ChatParticipantGetDTOs.
   List<ChatParticipantGetDTO> convertEntityToChatParticipantGetDTOList(List<ch.uzh.ifi.hase.soprafs24.entity.ChatParticipant> chatParticipants);
-
+ 
 
   // Match mappings
 
@@ -133,5 +133,10 @@ public interface DTOMapper {
     if (availability == null) return new ArrayList<>();
     return List.of(availability.name());
   }
+
+  default String map(List<String> goals) {
+    return goals == null ? null : String.join(",", goals);
+}
+
 
 }

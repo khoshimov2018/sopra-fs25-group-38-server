@@ -12,6 +12,7 @@ import java.util.Set;
 import java.time.LocalDateTime;
 import java.util.List;
 import ch.uzh.ifi.hase.soprafs24.entity.Course;
+import java.util.List;
 /**
  * Internal User Representation
  * This class composes the internal representation of the user and defines how
@@ -236,8 +237,6 @@ public class User implements Serializable {
   public void setCourses(List<Course> courses) {
       this.courses = courses;
   }
-
-
 
   // A no-argument constructor is required by JPA for creating instances via reflection.
   public User() {
