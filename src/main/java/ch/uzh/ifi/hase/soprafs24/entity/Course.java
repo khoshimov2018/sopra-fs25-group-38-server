@@ -2,6 +2,7 @@ package ch.uzh.ifi.hase.soprafs24.entity;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -17,8 +18,9 @@ public class Course implements Serializable {
     @Column(nullable = false, unique = true)
     private String courseName;
 
-    @ManyToMany(mappedBy = "courses") // 'mappedBy' means the User class owns the relationship
-    private List<User> users;
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserCourse> userCourses = new ArrayList<>();
+
 
     
     public Course() {}
@@ -41,11 +43,12 @@ public class Course implements Serializable {
         this.courseName = courseName;
     }
 
-    public List<User> getUsers() {
-        return users;
+    public List<UserCourse> getUserCourses() {
+        return userCourses;
     }
-
-    public void setUsers(List<User> users) {
-        this.users = users;
+    
+    public void setUserCourses(List<UserCourse> userCourses) {
+        this.userCourses = userCourses;
     }
+    
 }

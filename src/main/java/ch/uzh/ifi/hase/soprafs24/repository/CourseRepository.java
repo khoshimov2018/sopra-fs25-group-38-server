@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface CourseRepository extends JpaRepository<Course, Long> {
@@ -14,4 +15,6 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
 
     @Query(value = "SELECT u.id FROM users u WHERE u.availability IN :availability GROUP BY u.id HAVING COUNT(u.id) = :count", nativeQuery = true)
     List<Long> findUserIdsEnrolledInAllAvailability(List<String> availability, Long count);
+
+    Optional<Course> findByCourseName(String courseName);
 }

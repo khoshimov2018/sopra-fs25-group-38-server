@@ -4,24 +4,21 @@ import ch.uzh.ifi.hase.soprafs24.constant.ProfileKnowledgeLevel;
 import ch.uzh.ifi.hase.soprafs24.constant.UserAvailability;
 import java.util.List;
 
-
 public class UserPostDTO {
 
   private String name;
-
   private String email;
-  
   private String password;
-
-  private List<Long> courseIds;
-
-  private String studyLevel;        
-  private List<String> studyGoals;       
+  private String studyLevel;
+  private List<String> studyGoals;
   private String profilePicture;
+  private String bio;
+  private UserAvailability availability;
+  private ProfileKnowledgeLevel knowledgeLevel;
 
-    private String bio;
-    private UserAvailability availability;
-    private ProfileKnowledgeLevel knowledgeLevel;
+  private List<CourseSelectionDTO> courseSelections;
+
+
 
   public String getName() {
     return name;
@@ -38,11 +35,11 @@ public class UserPostDTO {
   public void setEmail(String email) {
     this.email = email;
   }
-  
+
   public String getPassword() {
     return password;
   }
-  
+
   public void setPassword(String password) {
     this.password = password;
   }
@@ -95,12 +92,11 @@ public class UserPostDTO {
     this.knowledgeLevel = knowledgeLevel;
   }
 
-  public List<Long> getCourseIds() {
-    return courseIds;
+  public List<CourseSelectionDTO> getCourseSelections() {
+    return courseSelections;
   }
-  
-  public void setCourseIds(List<Long> courseIds) {
-    this.courseIds = courseIds;
+
+  public void setCourseSelections(List<CourseSelectionDTO> courseSelections) {
+    this.courseSelections = courseSelections;
   }
-  
 }

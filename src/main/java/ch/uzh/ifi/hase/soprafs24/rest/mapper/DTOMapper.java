@@ -8,6 +8,7 @@ import ch.uzh.ifi.hase.soprafs24.rest.dto.UserGetDTO;
 import ch.uzh.ifi.hase.soprafs24.constant.UserAvailability;
 import ch.uzh.ifi.hase.soprafs24.constant.MatchStatus;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.UserPostDTO;
+import ch.uzh.ifi.hase.soprafs24.rest.dto.UserPutDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.MatchPostDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.MatchGetDTO; 
 import org.mapstruct.*;
@@ -136,6 +137,29 @@ public interface DTOMapper {
 
   default String map(List<String> goals) {
     return goals == null ? null : String.join(",", goals);
+}
+
+default void updateUserFromDTO(UserPutDTO userPutDTO, User user) {
+    if (userPutDTO.getName() != null) {
+        user.setName(userPutDTO.getName());
+    }
+    if (userPutDTO.getBio() != null) {
+        user.setBio(userPutDTO.getBio());
+    }
+    if (userPutDTO.getProfilePicture() != null) {
+        user.setProfilePicture(userPutDTO.getProfilePicture());
+    }
+    if (userPutDTO.getAvailability() != null) {
+        user.setAvailability(userPutDTO.getAvailability());
+    }
+    if (userPutDTO.getStudyLevel() != null) {
+        user.setStudyLevel(userPutDTO.getStudyLevel());
+    }
+    if (userPutDTO.getStudyGoals() != null) {
+        user.setStudyGoals(String.join(",", userPutDTO.getStudyGoals()));
+    }
+
+    // Do not set userCourses here — you'll do it inside the UserService
 }
 
 

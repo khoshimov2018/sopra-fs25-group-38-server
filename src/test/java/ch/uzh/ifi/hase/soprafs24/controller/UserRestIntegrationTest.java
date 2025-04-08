@@ -1,8 +1,11 @@
 package ch.uzh.ifi.hase.soprafs24.controller;
 
 import ch.uzh.ifi.hase.soprafs24.config.TestSecurityConfig;
+import ch.uzh.ifi.hase.soprafs24.constant.ProfileKnowledgeLevel;
 import ch.uzh.ifi.hase.soprafs24.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs24.entity.User;
+import ch.uzh.ifi.hase.soprafs24.entity.UserCourse;
+import ch.uzh.ifi.hase.soprafs24.rest.dto.CourseSelectionDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.UserLoginDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.UserPostDTO;
 import ch.uzh.ifi.hase.soprafs24.service.UserService;
@@ -62,32 +65,33 @@ public class UserRestIntegrationTest {
     
 
 
-/**
- * Integration Test 1: Complete User Registration Flow
- *
- * This test verifies that a new user can successfully register via the REST API:
- * 
- * Steps:
- * 1. Send a POST request to /users/register with valid registration data.
- * 2. Expect a 201 Created response with user information and an authentication token.
- * 3. Validate the response body contains all required fields (id, name, email, status, token).
- * 4. Confirm the user is persisted in the database.
- */
+        /**
+         * Integration Test 1: Complete User Registration Flow
+         *
+         * This test verifies that a new user can successfully register via the REST API:
+         * 
+         * Steps:
+         * 1. Send a POST request to /users/register with valid registration data.
+         * 2. Expect a 201 Created response with user information and an authentication token.
+         * 3. Validate the response body contains all required fields (id, name, email, status, token).
+         * 4. Confirm the user is persisted in the database.
+         */
 
-    @Test
-    public void testUserRegistrationFlow() throws Exception {
+        @Test
+        public void testUserRegistrationFlow() throws Exception {
         UserPostDTO userPostDTO = new UserPostDTO();
         userPostDTO.setName("Integration Tester");
         userPostDTO.setEmail("integration-test@gmail.com");
         userPostDTO.setPassword("password123");
         userPostDTO.setStudyLevel("Bachelor");
         userPostDTO.setStudyGoals(List.of("exam prep"));
-    
+        
+        
         MvcResult result = mockMvc.perform(post("/users/register")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(asJsonString(userPostDTO))
                 .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isCreated())  // <-- fix here
+                .andExpect(status().isCreated())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.name", is(userPostDTO.getName())))
                 .andExpect(jsonPath("$.email", is(userPostDTO.getEmail())))
@@ -95,16 +99,18 @@ public class UserRestIntegrationTest {
                 .andExpect(jsonPath("$.id").exists())
                 .andExpect(jsonPath("$.token").exists())
                 .andReturn();
-    
+        
         String responseContent = result.getResponse().getContentAsString();
         Map<String, Object> responseMap = objectMapper.readValue(responseContent, Map.class);
         Integer userId = (Integer) responseMap.get("id");
         String token = (String) responseMap.get("token");
-    
+        
         assertNotNull(userId);
         assertNotNull(token);
         assertNotNull(userService.getUserById(userId.longValue()));
-    }
+        }
+ 
+
     
     /**
          * Integration Test 2: User Registration with Duplicate Username

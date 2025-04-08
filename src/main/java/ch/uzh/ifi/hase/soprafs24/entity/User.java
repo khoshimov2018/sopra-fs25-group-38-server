@@ -76,13 +76,9 @@ public class User implements Serializable {
 
   @Column(nullable = true)
   private String bio;
-  @ManyToMany
-  @JoinTable(
-      name = "user_courses",
-      joinColumns = @JoinColumn(name = "user_id"),
-      inverseJoinColumns = @JoinColumn(name = "course_id")
-  )
-  private List<Course> courses = new ArrayList<>();
+  @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<UserCourse> userCourses = new ArrayList<>();
+  
 
 
   @ElementCollection(fetch = FetchType.LAZY)
@@ -230,12 +226,12 @@ public class User implements Serializable {
     this.matchIds = matchIds;
   }
 
-  public List<Course> getCourses() {
-    return courses;
+  public List<UserCourse> getUserCourses() {
+    return userCourses;
   }
 
-  public void setCourses(List<Course> courses) {
-      this.courses = courses;
+  public void setUserCourses(List<UserCourse> userCourses) {
+      this.userCourses = userCourses;
   }
 
   // A no-argument constructor is required by JPA for creating instances via reflection.
