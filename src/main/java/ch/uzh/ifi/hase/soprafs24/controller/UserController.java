@@ -30,17 +30,6 @@ public class UserController {
     this.courseRepository = courseRepository;
   }
 
-  @GetMapping("/courses")
-  @ResponseStatus(HttpStatus.OK)
-  public List<CourseGetDTO> getAllCourses() {
-    List<Course> courses = courseRepository.findAll();
-    List<CourseGetDTO> courseGetDTOs = new ArrayList<>();
-    for (Course course : courses) {
-      courseGetDTOs.add(DTOMapper.INSTANCE.convertEntityToCourseGetDTO(course));
-    }
-    return courseGetDTOs;
-  }
-
   @GetMapping("/users")
   @ResponseStatus(HttpStatus.OK)
   public List<UserGetDTO> getAllUsers() {

@@ -11,11 +11,13 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            .csrf().ignoringAntMatchers("/users/register", "/users/login")
+            .csrf()
+                .ignoringAntMatchers("/users/register", "/login", "/courses") // CSRF exempt
             .and()
             .authorizeRequests()
-                .antMatchers("/users/register", "/users/login").permitAll()
+                .antMatchers("/users/register", "/login", "/courses").permitAll() // public access
                 .anyRequest().authenticated();
         return http.build();
     }
 }
+
