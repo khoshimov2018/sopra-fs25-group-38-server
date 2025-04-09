@@ -12,11 +12,13 @@ import java.util.Optional;
 
 @Repository
 public interface CourseRepository extends JpaRepository<Course, Long> {
-    @Query(value = "SELECT u.user_id FROM user_courses u WHERE u.course_id IN :courseIds GROUP BY u.user_id HAVING COUNT(u.course_id) = :count", nativeQuery = true)
+    @Query(value = "SELECT u.user_id FROM user_course u WHERE u.course_id IN :courseIds GROUP BY u.user_id HAVING COUNT(u.course_id) = :count", nativeQuery = true)
     List<Long> findUserIdsByAllCourseIds(List<Long> courseIds, Long count);
 
-    @Query(value = "SELECT u.id FROM users u WHERE u.availability IN :availability GROUP BY u.id HAVING COUNT(u.id) = :count", nativeQuery = true)
-    List<Long> findUserIdsEnrolledInAllAvailability(@Param("availability") List<String> availability, @Param("count") Long count);
-    
+    // Using JPQL instead of native query to ensure proper binding of enums in IN clauses
+    @Query("SELECT u.id FROM User u WHERE u.availability IN :availability GROUP BY u.id HAVING COUNT(u.id) = :count")
+    List<Long> findUserIdsEnrolledInAllAvailability(@Param("availability") List<UserAvailability> availability,
+                                                @Param("count") Long count);
+
     Optional<Course> findByCourseName(String courseName);
 }
