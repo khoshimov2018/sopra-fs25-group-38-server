@@ -12,10 +12,10 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
             .csrf()
-                .ignoringAntMatchers("/users/register", "/login", "/courses") // CSRF exempt
+                .ignoringAntMatchers("/users/register", "/login", "/courses", "/chat/**") // CSRF exempt
             .and()
             .authorizeRequests()
-                .antMatchers("/users/register", "/login", "/courses").permitAll() // public access
+                .antMatchers("/users/register", "/login", "/courses","/chat/**").permitAll() // public access
                 .anyRequest().authenticated();
         return http.build();
     }
