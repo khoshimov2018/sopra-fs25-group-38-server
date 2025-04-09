@@ -318,50 +318,61 @@ public class UserService {
     }
   }
   
-/**
- * Updates a user's profile in the database.
- *
- * @param userId the ID of the user to update
- * @param updatedUser the user entity with updated fields already set (from DTOMapper)
- * @return the updated user
- * @throws ResponseStatusException if the user is not found or validation fails
- */
-public User updateUser(Long userId, User updatedUser) {
-  User existingUser = userRepository.findById(userId)
-      .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-          String.format("User with ID %d was not found", userId)));
-
-  // Basic required field validation
-  if (updatedUser.getAvailability() == null) {
-    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Availability is required.");
+  /**
+   * Updates a user's profile
+   * 
+   * @param userId the ID of the user to update
+   * @param userInput the updated user data
+   * @return the updated user
+   * @throws ResponseStatusException if the user is not found or the update is invalid
+   */
+  public User updateUser(Long userId, User userInput) {
+    User userToUpdate = userRepository.findById(userId)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+            String.format("User with ID %d was not found", userId)));
+  
+    // Validate required fields
+    if (userInput.getAvailability() == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Availability is required.");
+    }
+  
+    if (userInput.getKnowledgeLevel() == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Knowledge level is required.");
+    }
+  
+    if (userInput.getStudyGoals() == null || userInput.getStudyGoals().trim().isEmpty()) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Study goals are required.");
+    }
+  
+    // Update optional and required fields
+    userToUpdate.setBio(userInput.getBio());
+    userToUpdate.setAvailability(userInput.getAvailability());
+    userToUpdate.setKnowledgeLevel(userInput.getKnowledgeLevel());
+    userToUpdate.setStudyGoals(userInput.getStudyGoals());
+  
+    // Optional: also allow updating profile picture or study level
+    if (userInput.getStudyLevel() != null) {
+      userToUpdate.setStudyLevel(userInput.getStudyLevel());
+    }
+    if (userInput.getProfilePicture() != null) {
+      userToUpdate.setProfilePicture(userInput.getProfilePicture());
+    }
+    // If course list is included in userInput, update the user's courses
+    if (userInput.getUserCourses() != null) {
+      userToUpdate.getUserCourses().clear();
+      for (UserCourse uc : userInput.getUserCourses()) {
+          uc.setUser(userToUpdate);
+          userToUpdate.getUserCourses().add(uc);
+      }
   }
+  
 
-  if (updatedUser.getStudyGoals() == null || updatedUser.getStudyGoals().trim().isEmpty()) {
-    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Study goals are required.");
+    // Save updated user
+    userToUpdate = userRepository.save(userToUpdate);
+    userRepository.flush();
+  
+    return userToUpdate;
   }
-
-  if (updatedUser.getUserCourses() == null || updatedUser.getUserCourses().isEmpty()) {
-    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "At least one course selection is required.");
-  }
-
-  // Copy updated fields
-  existingUser.setBio(updatedUser.getBio());
-  existingUser.setAvailability(updatedUser.getAvailability());
-  existingUser.setStudyLevel(updatedUser.getStudyLevel());
-  existingUser.setStudyGoals(updatedUser.getStudyGoals());
-  existingUser.setProfilePicture(updatedUser.getProfilePicture());
-
-  // Update enrolled courses (with knowledge levels)
-  existingUser.getUserCourses().clear();
-  for (UserCourse userCourse : updatedUser.getUserCourses()) {
-    userCourse.setUser(existingUser); // re-link user
-    existingUser.getUserCourses().add(userCourse);
-  }
-
-  // Save changes
-  return userRepository.saveAndFlush(existingUser);
-}
-
   
   /**
    * Logs out a user using the token by setting their status to OFFLINE
