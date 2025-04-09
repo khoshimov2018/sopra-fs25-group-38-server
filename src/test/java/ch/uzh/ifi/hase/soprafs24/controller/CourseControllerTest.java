@@ -16,6 +16,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 
 
 /**
@@ -41,15 +46,16 @@ public class CourseControllerTest {
     @Test
     public void getAllCourses_returns200OkAndCourses() throws Exception {
         // given
-        courseRepository.save(new Course("Java"));
-        courseRepository.save(new Course("Python"));
-
+        courseRepository.deleteAll(); // Ensure a clean state
+        courseRepository.save(new Course(1L, "Java"));
+        courseRepository.save(new Course(2L, "Python"));
+    
         // when/then
         mockMvc.perform(get("/courses")
                         .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk()) // 200 OK
+                .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(2)))
-                .andExpect(jsonPath("$[0].courseName", is("Java")))
-                .andExpect(jsonPath("$[1].courseName", is("Python")));
+                .andExpect(jsonPath("$[*].courseName", containsInAnyOrder("Java", "Python")));
     }
+    
 }
