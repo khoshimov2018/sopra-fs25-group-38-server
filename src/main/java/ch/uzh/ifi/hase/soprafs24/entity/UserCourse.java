@@ -13,7 +13,7 @@ public class UserCourse implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long id;    
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "user_id")

@@ -24,6 +24,8 @@ import ch.uzh.ifi.hase.soprafs24.rest.dto.ChatChannelPostDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.ChatParticipantGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.MessageGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.MessagePostDTO; 
+import ch.uzh.ifi.hase.soprafs24.entity.UserCourse;
+import ch.uzh.ifi.hase.soprafs24.repository.CourseRepository;
 
 /**
  * DTOMapper
@@ -139,7 +141,9 @@ public interface DTOMapper {
     return goals == null ? null : String.join(",", goals);
 }
 
-default void updateUserFromDTO(UserPutDTO userPutDTO, User user) {
+
+
+default void updateUserFromDTO(UserPutDTO userPutDTO, User user, CourseRepository courseRepository) {
     if (userPutDTO.getName() != null) {
         user.setName(userPutDTO.getName());
     }
@@ -158,6 +162,25 @@ default void updateUserFromDTO(UserPutDTO userPutDTO, User user) {
     if (userPutDTO.getStudyGoals() != null) {
         user.setStudyGoals(String.join(",", userPutDTO.getStudyGoals()));
     }
+
+    // Update courses and their knowledge level
+    if (userPutDTO.getCourses() != null) {
+        user.getUserCourses().clear(); // Remove old links
+
+        for (UserPutDTO.CourseSelectionDTO selection : userPutDTO.getCourses()) {
+            Course course = courseRepository.findById(selection.getCourseId())
+                .orElseThrow(() -> new IllegalArgumentException("Course not found: " + selection.getCourseId()));
+
+            UserCourse userCourse = new UserCourse();
+            userCourse.setUser(user);
+            userCourse.setCourse(course);
+            userCourse.setKnowledgeLevel(selection.getKnowledgeLevel());
+
+            user.getUserCourses().add(userCourse);
+        }
+    }
+
+
 
     // Do not set userCourses here — you'll do it inside the UserService
 }

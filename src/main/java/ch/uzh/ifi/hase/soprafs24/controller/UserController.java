@@ -5,6 +5,7 @@ import ch.uzh.ifi.hase.soprafs24.entity.Course;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.UserGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.UserLoginDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.UserPostDTO;
+import ch.uzh.ifi.hase.soprafs24.rest.dto.UserPutDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.CourseGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.mapper.DTOMapper;
 import ch.uzh.ifi.hase.soprafs24.service.UserService;
@@ -76,17 +77,22 @@ public class UserController {
   @ResponseStatus(HttpStatus.NO_CONTENT)
   public void updateUser(
       @PathVariable Long userId,
-      @RequestBody UserPostDTO userUpdateDTO,
+      @RequestBody UserPutDTO userUpdateDTO,
       @RequestHeader(value = "Authorization", required = false) String token) {
-
+  
     userService.authenticateByToken(token);
     userService.checkAuthorizationById(token, userId);
-
-    User userInput = DTOMapper.INSTANCE.convertUserPostDTOtoEntity(userUpdateDTO);
-    userInput.setId(userId);
-
-    userService.updateUser(userId, userInput);
+  
+    // Get the user from the DB
+    User existingUser = userService.getUserById(userId);
+  
+    // Apply updates from DTO to entity
+    DTOMapper.INSTANCE.updateUserFromDTO(userUpdateDTO, existingUser, courseRepository);
+  
+    // Save updated user
+    userService.updateUser(userId, existingUser);
   }
+  
 
   @GetMapping("users/{userId}/accepted-matches")
   public ResponseEntity<Set<Long>> getAcceptedMatches(@PathVariable Long userId) {
