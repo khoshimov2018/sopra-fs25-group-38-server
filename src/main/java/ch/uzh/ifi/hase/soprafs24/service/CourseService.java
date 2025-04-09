@@ -1,9 +1,11 @@
-/* package ch.uzh.ifi.hase.soprafs24.service;
+package ch.uzh.ifi.hase.soprafs24.service;
 
+import ch.uzh.ifi.hase.soprafs24.constant.UserAvailability;
 import ch.uzh.ifi.hase.soprafs24.entity.Course;
 import ch.uzh.ifi.hase.soprafs24.entity.Match;
 import ch.uzh.ifi.hase.soprafs24.repository.CourseRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -28,13 +30,15 @@ public class CourseService {
     }
 
     // find userId who have same availability.
-    public List<Long> findUserIdsEnrolledInAllAvailability(List<String> availability) {
-        return courseRepository.findUserIdsEnrolledInAllAvailability(availability, (long) availability.size());
-    }    
-
+    public List<Long> findUserIdsEnrolledInAllAvailability(List<UserAvailability> availability) {
+        List<String> availabilityStr = availability.stream()
+                .map(Enum::name)
+                .toList();
+        return courseRepository.findUserIdsEnrolledInAllAvailability(availabilityStr, (long) availability.size());
+    }
+    
     // show all courses.
     public List<Course> getAllCourses() {
         return courseRepository.findAll();
     }
 }
- */
