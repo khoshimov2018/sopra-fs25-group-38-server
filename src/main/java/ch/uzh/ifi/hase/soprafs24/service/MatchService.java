@@ -9,6 +9,7 @@ import ch.uzh.ifi.hase.soprafs24.repository.UserRepository;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.MatchGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.MatchPostDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.mapper.DTOMapper;
+import ch.uzh.ifi.hase.soprafs24.service.ChatService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -27,13 +28,16 @@ public class MatchService {
 
     private final MatchRepository matchRepository;
     private final UserRepository userRepository;
+    private final ChatService chatService;
     private final DTOMapper dtoMapper = DTOMapper.INSTANCE;
 
     @Autowired
     public MatchService(MatchRepository matchRepository,
-                        UserRepository userRepository) {
+                        UserRepository userRepository,
+                        ChatService chatService) {
         this.matchRepository = matchRepository;
         this.userRepository = userRepository;
+        this.chatService = chatService;
     }
     /**
      * Processes a "like" action.
@@ -68,6 +72,24 @@ public class MatchService {
             match.setLikedByUser2(false);
             // Set an initial status (e.g., PENDING).
             match.setStatus(MatchStatus.PENDING);
+        }
+
+        // Check if both users have liked each other and update status to ACCEPTED.
+        if (match.isLikedByUser1() && match.isLikedByUser2() &&
+            match.getStatus() != MatchStatus.REJECTED) {
+            match.setStatus(MatchStatus.ACCEPTED);
+
+            // Create an individual chat channel for this accepted match.
+            // Retrieve both user entities (ensure they exist).
+            User user1 = userRepository.findById(match.getUserId1())
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "User with id " + match.getUserId1() + " not found."));
+            User user2 = userRepository.findById(match.getUserId2())
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "User with id " + match.getUserId2() + " not found."));
+
+            // Call ChatService's method to create a channel.
+            chatService.createIndividualChatChannelAfterMatch(user1, user2);
         }
 
 

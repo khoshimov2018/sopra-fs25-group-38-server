@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -30,11 +31,9 @@ public class CourseService {
     }
 
     // find userId who have same availability.
+    // uses JPQL, allowing direct enum binding, not native query, required converting enums to Strings
     public List<Long> findUserIdsEnrolledInAllAvailability(List<UserAvailability> availability) {
-        List<String> availabilityStr = availability.stream()
-                .map(Enum::name)
-                .toList();
-        return courseRepository.findUserIdsEnrolledInAllAvailability(availabilityStr, (long) availability.size());
+        return courseRepository.findUserIdsEnrolledInAllAvailability(availability, (long) availability.size());
     }
     
     // show all courses.
