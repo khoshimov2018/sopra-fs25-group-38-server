@@ -97,7 +97,7 @@ public class UserController {
   @PostMapping("/users/register")
   public ResponseEntity<UserGetDTO> registerUser(@RequestBody UserPostDTO userPostDTO) {
     User userInput = DTOMapper.INSTANCE.convertUserPostDTOtoEntity(userPostDTO);
-    User createdUser = userService.createUser(userInput);
+    User createdUser = userService.createUser(userInput, userPostDTO.getCourseSelections());
 
     if (userPostDTO.getCourseSelections() != null && !userPostDTO.getCourseSelections().isEmpty()) {
       userService.assignCoursesWithKnowledgeLevels(createdUser, userPostDTO.getCourseSelections());

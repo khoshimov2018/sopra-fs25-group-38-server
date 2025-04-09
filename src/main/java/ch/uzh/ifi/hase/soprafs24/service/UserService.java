@@ -73,7 +73,7 @@ public class UserService {
     return this.userRepository.findAll();
   }
 
-  public User createUser(User newUser) {
+  public User createUser(User newUser, List<CourseSelectionDTO> courseSelections) {
     // Validate input: email and password must not be empty
     validateRegistrationInput(newUser);
 
@@ -97,13 +97,17 @@ public class UserService {
     if (newUser.getUserCourses() != null) {
     for (UserCourse uc : newUser.getUserCourses()) {
         uc.setUser(newUser); // link back to user
-    }
-}
-
+      }
+  }
 
     // Save user
     newUser = userRepository.save(newUser);
     userRepository.flush();
+//////---------------------------------------------
+    // Mapping with User and courseSelections
+    if (courseSelections != null && !courseSelections.isEmpty()) {
+      assignCoursesWithKnowledgeLevels(newUser, courseSelections);
+  }
 
     log.debug("Created Information for User: {}", newUser);
     return newUser;
@@ -405,6 +409,8 @@ public class UserService {
         return userCourse;
     }).toList();
 
+    // add for mapping usercourse list
+    user.getUserCourses().addAll(userCourses);
     userCourseRepository.saveAll(userCourses);
   }
 
