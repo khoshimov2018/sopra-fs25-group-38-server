@@ -1,6 +1,5 @@
 // package ch.uzh.ifi.hase.soprafs24.controller;
 
-<<<<<<< HEAD
 // import ch.uzh.ifi.hase.soprafs24.constant.UserStatus;
 // import ch.uzh.ifi.hase.soprafs24.entity.User;
 // import ch.uzh.ifi.hase.soprafs24.entity.Course;
@@ -24,7 +23,6 @@
 // import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 // import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 // import org.springframework.web.server.ResponseStatusException;
-=======
 import ch.uzh.ifi.hase.soprafs24.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs24.entity.User;
 import ch.uzh.ifi.hase.soprafs24.entity.Course;
@@ -48,8 +46,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.web.server.ResponseStatusException;
->>>>>>> 5a0084c5fb9d62840f034aaa5a09f43690df5d8a
-
 // import java.time.LocalDate;
 // import java.time.LocalDateTime;
 // import java.util.Collections;
@@ -82,15 +78,12 @@ import org.springframework.web.server.ResponseStatusException;
 
 //   @MockBean
 //   private UserService userService;
-
-<<<<<<< HEAD
 //   @MockBean
 //   private CourseService courseService;
 
 //    /**
 //    * GET /courses 
 //    * Tests retrieving all courses (200 OK).
-=======
   /* @MockBean
   private CourseService courseService; */
 
@@ -200,7 +193,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 //   /**
 //    * S1 - GET /users - Test retrieving all users
->>>>>>> 5a0084c5fb9d62840f034aaa5a09f43690df5d8a
 //    */
 //   @Test
 //   public void givenUsers_whenGetUsers_thenReturnJsonArray() throws Exception {
