@@ -1,5 +1,6 @@
 // package ch.uzh.ifi.hase.soprafs24.controller;
 
+<<<<<<< HEAD
 // import ch.uzh.ifi.hase.soprafs24.constant.UserStatus;
 // import ch.uzh.ifi.hase.soprafs24.entity.User;
 // import ch.uzh.ifi.hase.soprafs24.entity.Course;
@@ -23,6 +24,31 @@
 // import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 // import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 // import org.springframework.web.server.ResponseStatusException;
+=======
+import ch.uzh.ifi.hase.soprafs24.constant.UserStatus;
+import ch.uzh.ifi.hase.soprafs24.entity.User;
+import ch.uzh.ifi.hase.soprafs24.entity.Course;
+import ch.uzh.ifi.hase.soprafs24.constant.UserAvailability;
+import ch.uzh.ifi.hase.soprafs24.rest.dto.CourseGetDTO;
+import ch.uzh.ifi.hase.soprafs24.rest.dto.UserLoginDTO;
+import ch.uzh.ifi.hase.soprafs24.rest.dto.UserPostDTO;
+import ch.uzh.ifi.hase.soprafs24.service.UserService;
+/* import ch.uzh.ifi.hase.soprafs24.service.CourseService; */
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import org.springframework.web.server.ResponseStatusException;
+>>>>>>> 5a0084c5fb9d62840f034aaa5a09f43690df5d8a
 
 // import java.time.LocalDate;
 // import java.time.LocalDateTime;
@@ -57,12 +83,124 @@
 //   @MockBean
 //   private UserService userService;
 
+<<<<<<< HEAD
 //   @MockBean
 //   private CourseService courseService;
 
 //    /**
 //    * GET /courses 
 //    * Tests retrieving all courses (200 OK).
+=======
+  /* @MockBean
+  private CourseService courseService; */
+
+   /**
+   * GET /courses 
+   * Tests retrieving all courses (200 OK).
+   */
+/*   @Test
+  public void givenUsers_whenGetUsers_thenReturnJsonArray() throws Exception {
+      // given
+      User user = new User();
+      user.setId(1L);
+      user.setName("Firstname Lastname");
+      user.setEmail("firstname@lastname");  
+      user.setStatus(UserStatus.OFFLINE);
+      user.setPassword("password123");
+      user.setCreationDate(LocalDateTime.now());
+
+      Course course = new Course(user, "Test Course");
+
+      List<User> allUsers = Collections.singletonList(user);
+    
+      // Mock the CourseService behavior
+      /* given(courseService.getAllCourses()).willReturn(List.of(course)); */
+
+      // when/then
+/*       MockHttpServletRequestBuilder getRequest = get("/courses")
+          .contentType(MediaType.APPLICATION_JSON)
+          .header("Authorization", "Bearer valid-token") 
+          .accept(MediaType.APPLICATION_JSON);
+  
+      // then
+      MvcResult result = mockMvc.perform(getRequest)
+      .andExpect(status().isOk())
+      .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+      .andExpect(jsonPath("$", hasSize(greaterThanOrEqualTo(0))))
+      .andExpect(jsonPath("$[0].courseName", is(course.getCourseName())))
+      .andExpect(jsonPath("$[0].userId", is(course.getUserId().intValue())))
+      .andReturn(); 
+  
+    System.out.println("Status: " + result.getResponse().getStatus());
+    System.out.println("Response Body: " + result.getResponse().getContentAsString());
+}   */ 
+
+   /**
+    * GET /students?availability=EVENING 
+    * Tests retrieving all students filtered by availability (200 OK).
+    */
+   /* @Test
+   public void getStudents_withAvailabilityFilter_returnsMatchingUser() throws Exception {
+       // given - User1 (match)
+       User user1 = new User();
+       user1.setId(1L);
+       user1.setName("User1");
+       user1.setEmail("user1@example.com");
+       user1.setStatus(UserStatus.ONLINE);
+       user1.setPassword("password123");
+       user1.setCreationDate(LocalDateTime.now());
+       user1.setAvailability(UserAvailability.EVENING);
+   
+       // given - User2 (no match)
+       User user2 = new User();
+       user2.setId(2L);
+       user2.setName("User2");
+       user2.setEmail("user2@example.com");
+       user2.setStatus(UserStatus.ONLINE);
+       user2.setPassword("password123");
+       user2.setCreationDate(LocalDateTime.now());
+       user2.setAvailability(UserAvailability.MORNING);
+   
+       // given - User3 (match)
+       User user3 = new User();
+       user3.setId(3L);
+       user3.setName("User3");
+       user3.setEmail("user3@example.com");
+       user3.setStatus(UserStatus.ONLINE);
+       user3.setPassword("password123");
+       user3.setCreationDate(LocalDateTime.now());
+       user3.setAvailability(UserAvailability.EVENING);
+   
+       given(userService.getUsers()).willReturn(List.of(user1, user2, user3));
+   
+       /* given(courseService.findUserIdsEnrolledInAllAvailability(List.of("EVENING")))
+           .willReturn(List.of(user1.getId(), user3.getId())); */
+   
+       // when
+       /* MockHttpServletRequestBuilder getRequest = get("/students?availability=EVENING")
+           .contentType(MediaType.APPLICATION_JSON)
+           .header("Authorization", "Bearer valid-token")
+           .accept(MediaType.APPLICATION_JSON);
+   
+       // then
+       MvcResult result = mockMvc.perform(getRequest)
+           .andExpect(status().isOk())
+           .andExpect(jsonPath("$", hasSize(greaterThanOrEqualTo(0))))
+           .andExpect(jsonPath("$[0].id", is(user1.getId().intValue())))
+           .andExpect(jsonPath("$[0].name", is(user1.getName())))
+           .andExpect(jsonPath("$[1].id", is(user3.getId().intValue())))
+           .andExpect(jsonPath("$[1].name", is(user3.getName())))
+           .andReturn();
+   
+       System.out.println("Status: " + result.getResponse().getStatus());
+       System.out.println("Response Body: " + result.getResponse().getContentAsString());
+    } */ 
+   
+
+
+//   /**
+//    * S1 - GET /users - Test retrieving all users
+>>>>>>> 5a0084c5fb9d62840f034aaa5a09f43690df5d8a
 //    */
 //   @Test
 //   public void givenUsers_whenGetUsers_thenReturnJsonArray() throws Exception {

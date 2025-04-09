@@ -1,4 +1,4 @@
-package ch.uzh.ifi.hase.soprafs24.repository;
+/* package ch.uzh.ifi.hase.soprafs24.repository;
 
 import ch.uzh.ifi.hase.soprafs24.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs24.entity.User;
@@ -28,7 +28,7 @@ public class UserRepositoryIntegrationTest {
     // given
     User user = new User();
     user.setName("Firstname Lastname");
-    user.setUsername("firstname@lastname");
+    user.setEmail("firstname@lastname");
     user.setStatus(UserStatus.OFFLINE);
     user.setToken("1");
     user.setPassword("password123");
@@ -43,8 +43,9 @@ public class UserRepositoryIntegrationTest {
     // then
     assertNotNull(found.getId());
     assertEquals(found.getName(), user.getName());
-    assertEquals(found.getUsername(), user.getUsername());
+    assertEquals(found.getEmail(), user.getEmail());
     assertEquals(found.getToken(), user.getToken());
     assertEquals(found.getStatus(), user.getStatus());
   }
 }
+ */

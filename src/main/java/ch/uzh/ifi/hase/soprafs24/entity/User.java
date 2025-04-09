@@ -6,14 +6,13 @@ import ch.uzh.ifi.hase.soprafs24.constant.UserAvailability;
 
 import javax.persistence.*; // package provides annotations (such as @Entity, @Table, @Id, @Column, etc.) used to map this class to a database table.
 import java.io.Serializable; // to allow the object to be converted into a byte stream (a requirement for many JPA providers).
-import java.time.LocalDate; 
-import javax.persistence.ElementCollection;
-import javax.persistence.CollectionTable;
-import javax.persistence.Column;
-import javax.persistence.JoinColumn;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 import java.time.LocalDateTime;
+import java.util.List;
+import ch.uzh.ifi.hase.soprafs24.entity.Course;
+import java.util.List;
 /**
  * Internal User Representation
  * This class composes the internal representation of the user and defines how
@@ -77,6 +76,10 @@ public class User implements Serializable {
 
   @Column(nullable = true)
   private String bio;
+  @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<UserCourse> userCourses = new ArrayList<>();
+  
+
 
   @ElementCollection(fetch = FetchType.LAZY)
   @CollectionTable(name = "user_match_ids", joinColumns = @JoinColumn(name = "user_id"))
@@ -223,8 +226,13 @@ public class User implements Serializable {
     this.matchIds = matchIds;
   }
 
+  public List<UserCourse> getUserCourses() {
+    return userCourses;
+  }
 
-
+  public void setUserCourses(List<UserCourse> userCourses) {
+      this.userCourses = userCourses;
+  }
 
   // A no-argument constructor is required by JPA for creating instances via reflection.
   public User() {

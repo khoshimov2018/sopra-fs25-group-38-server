@@ -1,11 +1,17 @@
 package ch.uzh.ifi.hase.soprafs24.service;
 
+import ch.uzh.ifi.hase.soprafs24.constant.ProfileKnowledgeLevel;
 import ch.uzh.ifi.hase.soprafs24.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs24.entity.User;
+import ch.uzh.ifi.hase.soprafs24.entity.UserCourse;
 import ch.uzh.ifi.hase.soprafs24.entity.Course;
 import ch.uzh.ifi.hase.soprafs24.entity.Match;
 import ch.uzh.ifi.hase.soprafs24.repository.UserRepository;
+import ch.uzh.ifi.hase.soprafs24.rest.dto.CourseSelectionDTO;
+import ch.uzh.ifi.hase.soprafs24.rest.dto.UserPostDTO;
 import ch.uzh.ifi.hase.soprafs24.repository.MatchRepository;
+import ch.uzh.ifi.hase.soprafs24.repository.UserCourseRepository;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,13 +21,19 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import ch.uzh.ifi.hase.soprafs24.repository.CourseRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.Set;
+import java.util.ArrayList;
 import java.util.HashSet;
+
+
+
+
 
 /**
  * User Service
@@ -32,6 +44,7 @@ import java.util.HashSet;
  */
 @Service
 @Transactional
+
 public class UserService {
 
   private final Logger log = LoggerFactory.getLogger(UserService.class);
@@ -39,12 +52,22 @@ public class UserService {
   private final UserRepository userRepository;
   private final MatchRepository matchRepository;
   private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+  private final CourseRepository courseRepository;
 
   @Autowired
-  public UserService(@Qualifier("userRepository") UserRepository userRepository,MatchRepository matchRepository) {
-    this.userRepository = userRepository;
-    this.matchRepository = matchRepository;
+  private UserCourseRepository userCourseRepository;
+
+
+
+  @Autowired
+  public UserService(@Qualifier("userRepository") UserRepository userRepository,
+                     MatchRepository matchRepository,
+                     CourseRepository courseRepository) {
+      this.userRepository = userRepository;
+      this.matchRepository = matchRepository;
+      this.courseRepository = courseRepository;
   }
+  
 
   public List<User> getUsers() {
     return this.userRepository.findAll();
@@ -70,6 +93,14 @@ public class UserService {
     newUser.setStatus(UserStatus.ONLINE);
     newUser.setCreationDate(LocalDateTime.now());
     
+  
+    if (newUser.getUserCourses() != null) {
+    for (UserCourse uc : newUser.getUserCourses()) {
+        uc.setUser(newUser); // link back to user
+    }
+}
+
+
     // Save user
     newUser = userRepository.save(newUser);
     userRepository.flush();
@@ -322,7 +353,16 @@ public class UserService {
     if (userInput.getProfilePicture() != null) {
       userToUpdate.setProfilePicture(userInput.getProfilePicture());
     }
+    // If course list is included in userInput, update the user's courses
+    if (userInput.getUserCourses() != null) {
+      userToUpdate.getUserCourses().clear();
+      for (UserCourse uc : userInput.getUserCourses()) {
+          uc.setUser(userToUpdate);
+          userToUpdate.getUserCourses().add(uc);
+      }
+  }
   
+
     // Save updated user
     userToUpdate = userRepository.save(userToUpdate);
     userRepository.flush();
@@ -349,6 +389,23 @@ public class UserService {
     user.setStatus(UserStatus.OFFLINE);
     userRepository.save(user);
     userRepository.flush();
+  }
+
+
+  public void assignCoursesWithKnowledgeLevels(User user, List<CourseSelectionDTO> courseSelections) {
+    List<UserCourse> userCourses = courseSelections.stream().map(selection -> {
+        Course course = courseRepository.findById(selection.getCourseId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Course not found: " + selection.getCourseId()));
+
+        UserCourse userCourse = new UserCourse();
+        userCourse.setUser(user);
+        userCourse.setCourse(course);
+        userCourse.setKnowledgeLevel(ProfileKnowledgeLevel.fromString(selection.getKnowledgeLevel()));
+
+        return userCourse;
+    }).toList();
+
+    userCourseRepository.saveAll(userCourses);
   }
 
 }

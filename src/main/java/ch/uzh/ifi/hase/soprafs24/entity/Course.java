@@ -1,45 +1,54 @@
 package ch.uzh.ifi.hase.soprafs24.entity;
 
-import javax.persistence.*; // package provides annotations (such as @Entity, @Table, @Id, @Column, etc.) used to map this class to a database table.
+import javax.persistence.*;
 import java.io.Serializable;
-import java.time.LocalDate; 
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "COURSE")
-public class Course implements Serializable{
-    
+public class Course implements Serializable {
+
     private static final long serialVersionUID = 5L;
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private Long userId;
-
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String courseName;
 
-    public Long getId() {
-        return id;
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserCourse> userCourses = new ArrayList<>();
+
+
+    
+    public Course() {}
+
+    
+    public Course(String courseName) {
+        this.courseName = courseName;
     }
 
-    public Long getUserId() {
-        return userId;
+    
+    public Long getId() {
+        return id;
     }
 
     public String getCourseName() {
         return courseName;
     }
 
-    /*
-     * constructor
-     */
-    public Course() {
-    }
-
-    public Course(User user, String courseName) {
-        this.userId = user.getId();
+    public void setCourseName(String courseName) {
         this.courseName = courseName;
     }
+
+    public List<UserCourse> getUserCourses() {
+        return userCourses;
+    }
+    
+    public void setUserCourses(List<UserCourse> userCourses) {
+        this.userCourses = userCourses;
+    }
+    
 }

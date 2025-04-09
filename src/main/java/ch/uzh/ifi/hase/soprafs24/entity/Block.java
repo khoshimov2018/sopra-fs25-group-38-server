@@ -7,7 +7,7 @@ import java.time.LocalDate;
 
 @Entity
 @Table(name = "BLOCK")
-public class Block implements Serializable{
+public class Block implements Serializable {
 
     private static final long serialVersionUID = 4L;
 
@@ -24,34 +24,31 @@ public class Block implements Serializable{
     @Column(nullable = false)
     private LocalDate blockDate;
 
-    /*
-     * Getter & setter
-     */
+    // Constructors
+    public Block() {
+        this.blockDate = LocalDate.now();
+    }
+
+    public Block(User blocker, User blockedUser) {
+        this.blockerId = blocker.getId();
+        this.blockedUserId = blockedUser.getId();
+        this.blockDate = LocalDate.now();
+    }
+
+    // Getters
+    public Long getId() {
+        return id;
+    }
 
     public Long getBlockerId() {
         return blockerId;
     }
-    
-    public Long blockedUserId() {
+
+    public Long getBlockedUserId() {
         return blockedUserId;
     }
 
     public LocalDate getBlockDate() {
         return blockDate;
     }
-
-    /*
-     * constructor
-     */
-
-     public Block() {
-        blockDate = LocalDate.now();
-     }
-
-     public Block(User blocker, User blockedUser){
-        this.blockerId = blocker.getId();
-        this.blockedUserId = blockedUser.getId();
-        blockDate = LocalDate.now();
-     }
-
 }
