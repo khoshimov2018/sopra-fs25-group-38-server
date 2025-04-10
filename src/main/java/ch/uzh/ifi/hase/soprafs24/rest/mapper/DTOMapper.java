@@ -61,6 +61,12 @@ public interface DTOMapper {
   @Mapping(source = "token", target = "token")
   @Mapping(source = "creationDate", target = "creationDate")
   @Mapping(source = "availability", target = "availability")
+  @Mapping(target = "studyLevel", source = "studyLevel")
+  @Mapping(target = "studyGoals", source = "studyGoals")
+  @Mapping(target = "bio", source = "bio")
+  @Mapping(target = "profilePicture", source = "profilePicture")
+  @Mapping(target = "knowledgeLevel", source = "knowledgeLevel")
+  @Mapping(target = "userCourses", expression = "java(convertUserCourses(user.getUserCourses()))")
   UserGetDTO convertEntityToUserGetDTO(User user);
 
   // Course mapping
@@ -179,7 +185,28 @@ default void updateUserFromDTO(UserPutDTO userPutDTO, User user, CourseRepositor
     }
 
 
+    
     // Do not set userCourses here — you'll do it inside the UserService
+}
+
+default UserGetDTO.UserCourseDTO mapUserCourseToDTO(UserCourse userCourse) {
+    if (userCourse == null) return null;
+
+    UserGetDTO.UserCourseDTO dto = new UserGetDTO.UserCourseDTO();
+    dto.setCourseId(userCourse.getCourse().getId());
+    dto.setCourseName(userCourse.getCourse().getCourseName());
+    dto.setKnowledgeLevel(userCourse.getKnowledgeLevel());
+    return dto;
+}
+
+default List<UserGetDTO.UserCourseDTO> convertUserCourses(List<UserCourse> userCourses) {
+    if (userCourses == null) return new ArrayList<>();
+
+    List<UserGetDTO.UserCourseDTO> dtos = new ArrayList<>();
+    for (UserCourse uc : userCourses) {
+        dtos.add(mapUserCourseToDTO(uc));
+    }
+    return dtos;
 }
 
 
