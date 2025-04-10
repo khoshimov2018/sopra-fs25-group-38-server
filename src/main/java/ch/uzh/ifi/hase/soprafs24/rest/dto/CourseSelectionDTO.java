@@ -5,7 +5,7 @@ import ch.uzh.ifi.hase.soprafs24.constant.ProfileKnowledgeLevel;
 public class CourseSelectionDTO {
 
     private Long courseId;
-    private String knowledgeLevel; 
+    private ProfileKnowledgeLevel knowledgeLevel; 
 
     public Long getCourseId() {
         return courseId;
@@ -15,11 +15,11 @@ public class CourseSelectionDTO {
         this.courseId = courseId;
     }
 
-    public String getKnowledgeLevel() {
+    public ProfileKnowledgeLevel getKnowledgeLevel() {
         return knowledgeLevel;
     }
 
-    public void setKnowledgeLevel(String knowledgeLevel) {
+    public void setKnowledgeLevel(ProfileKnowledgeLevel knowledgeLevel) {
         this.knowledgeLevel = knowledgeLevel;
-    }
+    }    
 }

@@ -385,6 +385,8 @@ public class UserService {
     userRepository.flush();
   }
 
+  private ProfileKnowledgeLevel knowledgeLevel;
+
 
   public void assignCoursesWithKnowledgeLevels(User user, List<CourseSelectionDTO> courseSelections) {
     List<UserCourse> userCourses = courseSelections.stream().map(selection -> {
@@ -394,7 +396,7 @@ public class UserService {
         UserCourse userCourse = new UserCourse();
         userCourse.setUser(user);
         userCourse.setCourse(course);
-        userCourse.setKnowledgeLevel(ProfileKnowledgeLevel.fromString(selection.getKnowledgeLevel()));
+        userCourse.setKnowledgeLevel(selection.getKnowledgeLevel()); // Directly set enum
 
         return userCourse;
     }).toList();
@@ -402,6 +404,7 @@ public class UserService {
     // add for mapping usercourse list
     user.getUserCourses().addAll(userCourses);
     userCourseRepository.saveAll(userCourses);
-  }
+}
+
 
 }
