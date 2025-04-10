@@ -31,43 +31,48 @@ public class StudentFilterController {
     public List<UserGetDTO> getFilteredStudents(
             @RequestParam(required = false) List<Long> courseIds,
             // firstly, receive the availability as string.
-            @RequestParam(required = false) List<String> availability) { 
+            @RequestParam(required = false) List<String> availability) {
 
         List<User> allUsers = userService.getUsers();
         List<UserGetDTO> userGetDTOs = new ArrayList<>();
-    
+
         List<Long> courseMatchedUserIds = new ArrayList<>();
         if (courseIds != null && !courseIds.isEmpty()) {
             courseMatchedUserIds = courseService.findUserIdsEnrolledInAllCourses(courseIds);
         }
-    
+
         List<UserAvailability> availabilityEnums = new ArrayList<>();
-        if (availability != null) {
+        List<Long> availabilityMatchedUserIds = new ArrayList<>();
+        if (availability != null && !availability.isEmpty()) {
             for (String str : availability) {
 
                 // Second, convert the availability values from String to Enum to allow proper binding in the JPQL query.
-                availabilityEnums.add(UserAvailability.valueOf(str)); 
+                availabilityEnums.add(UserAvailability.valueOf(str));
+            }
+            availabilityMatchedUserIds = courseService.findUserIdsEnrolledInAllAvailability(availabilityEnums);
         }
 
-        List<Long> availabilityMatchedUserIds = courseService.findUserIdsEnrolledInAllAvailability(availabilityEnums);
+        boolean hasCourseFilter = courseIds != null && !courseIds.isEmpty();
+        boolean hasAvailabilityFilter = availability != null && !availability.isEmpty();
 
         for (User user : allUsers) {
             Long userId = user.getId();
+            if (userId == null) continue;
 
             boolean matchesCourse = courseMatchedUserIds.isEmpty() || courseMatchedUserIds.contains(userId);
             boolean matchesAvailability = availabilityMatchedUserIds.isEmpty() || availabilityMatchedUserIds.contains(userId);
 
-            //AND condition(courseId, availability)
-            if (matchesCourse && matchesAvailability) { 
+            boolean shouldIncludeUser =
+                    (hasCourseFilter && hasAvailabilityFilter && matchesCourse && matchesAvailability)
+                || (hasCourseFilter && !hasAvailabilityFilter && matchesCourse)
+                || (!hasCourseFilter && hasAvailabilityFilter && matchesAvailability)
+                || (!hasCourseFilter && !hasAvailabilityFilter);
+
+            if (shouldIncludeUser) {
                 userGetDTOs.add(DTOMapper.INSTANCE.convertEntityToUserGetDTO(user));
             }
-
-            // //OR condition(courseId, availability)
-            // if (courseMatchedUserIds.contains(userId) || availabilityMatchedUserIds.contains(userId)) {
-            //     userGetDTOs.add(DTOMapper.INSTANCE.convertEntityToUserGetDTO(user));
-            // }
-            }
         }
+
         return userGetDTOs;
     }
 }
