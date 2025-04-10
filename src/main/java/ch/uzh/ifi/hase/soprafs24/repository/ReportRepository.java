@@ -14,4 +14,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
     List<Report> findAllByReportedUserId(Long reportedUserId);
 
     List<Report> findAllByReporterId(Long reporterId);
+
+    // Delete all records involving the given user(both of reporterId, reportedUserId)
+    void deleteAllByReporterIdOrReportedUserId(Long reporterId, Long reportedUserId);
 }

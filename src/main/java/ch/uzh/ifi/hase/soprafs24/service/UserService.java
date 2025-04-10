@@ -4,12 +4,18 @@ import ch.uzh.ifi.hase.soprafs24.constant.ProfileKnowledgeLevel;
 import ch.uzh.ifi.hase.soprafs24.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs24.entity.User;
 import ch.uzh.ifi.hase.soprafs24.entity.UserCourse;
+import ch.uzh.ifi.hase.soprafs24.entity.ChatChannel;
+import ch.uzh.ifi.hase.soprafs24.entity.ChatParticipant;
 import ch.uzh.ifi.hase.soprafs24.entity.Course;
 import ch.uzh.ifi.hase.soprafs24.entity.Match;
 import ch.uzh.ifi.hase.soprafs24.repository.UserRepository;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.CourseSelectionDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.UserPostDTO;
 import ch.uzh.ifi.hase.soprafs24.repository.MatchRepository;
+import ch.uzh.ifi.hase.soprafs24.repository.MessageRepository;
+import ch.uzh.ifi.hase.soprafs24.repository.ProfileRepository;
+import ch.uzh.ifi.hase.soprafs24.repository.ReportRepository;
+import ch.uzh.ifi.hase.soprafs24.repository.StudyPlanRepository;
 import ch.uzh.ifi.hase.soprafs24.repository.UserCourseRepository;
 
 import org.slf4j.Logger;
@@ -21,6 +27,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+
+import ch.uzh.ifi.hase.soprafs24.repository.BlockRepository;
+import ch.uzh.ifi.hase.soprafs24.repository.ChatChannelRepository;
 import ch.uzh.ifi.hase.soprafs24.repository.CourseRepository;
 
 import java.time.LocalDateTime;
@@ -56,7 +65,18 @@ public class UserService {
 
   @Autowired
   private UserCourseRepository userCourseRepository;
-
+  @Autowired
+  private MessageRepository messageRepository;
+  @Autowired
+  private BlockRepository blockRepository;
+  @Autowired
+  private ReportRepository reportRepository;
+  @Autowired
+  private ChatChannelRepository chatChannelRepository;
+  @Autowired
+  private StudyPlanRepository studyPlanRepository;
+  @Autowired
+  private ProfileRepository profileRepository;
 
 
   @Autowired
@@ -406,5 +426,48 @@ public class UserService {
     userCourseRepository.saveAll(userCourses);
 }
 
+/**
+ * Deletes a user and all associated data using their authentication token.
+ * 
+ * This includes messages, matches, chat participation, blocks, reports, 
+ * study plans, profile, enrolled courses, and the user account itself.
+ *
+ * @param token the Bearer authentication token of the user
+ * @throws ResponseStatusException if the token is invalid or user not found
+ */
+  public void deleteUserByToken(String token) {
+    if (token != null && token.startsWith("Bearer ")) {
+        token = token.substring(7);
+    }
 
+    User user = userRepository.findByToken(token);
+    if (user == null) {
+        throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid token.");
+    }
+
+    Long userId = user.getId();
+
+    messageRepository.deleteAllBySenderId(userId);
+    matchRepository.deleteAllByUserId1OrUserId2(userId, userId);
+
+    // Delete chat channels where the user is the only participant
+    List<ChatChannel> channels = chatChannelRepository.findByParticipantsUserId(userId);
+    for (ChatChannel channel : channels) {
+        List<ChatParticipant> participants = channel.getParticipants();
+
+        if (participants.size() == 1 && participants.get(0).getUser().getId().equals(userId)) {
+            chatChannelRepository.delete(channel);  // ChatParticipants are also deleted via cascade
+        }
+    }
+
+    blockRepository.deleteAllByBlockerIdOrBlockedUserId(userId, userId);
+    reportRepository.deleteAllByReporterIdOrReportedUserId(userId, userId);
+
+    studyPlanRepository.deleteAllByUserId(userId);
+    profileRepository.deleteByUserId(userId);
+    userCourseRepository.deleteAllByUserId(userId);
+
+    userRepository.delete(user);
+    userRepository.flush();
+  }
 }
