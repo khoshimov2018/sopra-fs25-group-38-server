@@ -24,6 +24,7 @@ import ch.uzh.ifi.hase.soprafs24.rest.dto.ChatChannelPostDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.ChatParticipantGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.MessageGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.MessagePostDTO; 
+import org.mapstruct.Mapper;
 
 /**
  * DTOMapper
@@ -36,7 +37,7 @@ import ch.uzh.ifi.hase.soprafs24.rest.dto.MessagePostDTO;
  * Always created one mapper for getting information (GET) and one mapper for
  * creating information (POST).
  */
-@Mapper
+@Mapper(componentModel = "spring")
 public interface DTOMapper {
 
   DTOMapper INSTANCE = Mappers.getMapper(DTOMapper.class);
