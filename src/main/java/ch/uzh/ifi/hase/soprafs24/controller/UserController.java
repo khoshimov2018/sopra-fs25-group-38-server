@@ -19,7 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = {"http://localhost:3000", "https://sopra-fs25-khoshimov-r-client.oa.r.appspot.com"})
 @RestController
 public class UserController {
 
@@ -114,5 +114,38 @@ public class UserController {
     UserGetDTO userGetDTO = DTOMapper.INSTANCE.convertEntityToUserGetDTO(createdUser);
 
     return ResponseEntity.status(HttpStatus.CREATED).headers(headers).body(userGetDTO);
+  }
+  
+  /**
+   * Endpoint that uses the Authorization token to identify and return the current user
+   * This is a common pattern in RESTful APIs for retrieving the authenticated user
+   */
+  @GetMapping("/users/me")
+  public ResponseEntity<UserGetDTO> getCurrentUser(
+      @RequestHeader(value = "Authorization", required = true) String token) {
+    try {
+      // Verify the token format
+      if (token == null || token.isBlank()) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+      }
+      
+      // Extract token without Bearer prefix if present
+      String authToken = token;
+      if (token.startsWith("Bearer ")) {
+        authToken = token.substring(7);
+      }
+      
+      // Get the user associated with this token
+      User currentUser = userService.getUserByToken(authToken);
+      
+      if (currentUser == null) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+      }
+      
+      UserGetDTO userGetDTO = DTOMapper.INSTANCE.convertEntityToUserGetDTO(currentUser);
+      return ResponseEntity.ok(userGetDTO);
+    } catch (Exception e) {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+    }
   }
 }

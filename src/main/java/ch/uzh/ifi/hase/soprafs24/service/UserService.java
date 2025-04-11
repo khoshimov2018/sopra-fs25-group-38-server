@@ -313,6 +313,27 @@ public class UserService {
   }
   
   /**
+   * Gets a user by their authentication token
+   *
+   * @param token the auth token without "Bearer " prefix
+   * @return the User associated with this token, or null if not found
+   */
+  public User getUserByToken(String token) {
+    // Check if token exists
+    if (token == null || token.isEmpty()) {
+      return null;
+    }
+    
+    // Clean the token (remove "Bearer " prefix if exists)
+    if (token.startsWith("Bearer ")) {
+      token = token.substring(7);
+    }
+    
+    // Find user by token
+    return userRepository.findByToken(token);
+  }
+  
+  /**
    * Checks if the authenticated user is authorized to modify a specific user
    * 
    * @param token the auth token
