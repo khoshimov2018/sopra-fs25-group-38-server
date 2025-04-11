@@ -19,7 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-@CrossOrigin(origins = {"http://localhost:3000", "https://sopra-fs25-group-38-client.vercel.app"})
+@CrossOrigin(origins = {"http://localhost:3000", "https://sopra-fs25-khoshimov-r-client.oa.r.appspot.com"})
 @RestController
 public class UserController {
 
@@ -147,5 +147,20 @@ public class UserController {
     } catch (Exception e) {
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
     }
+  }
+
+  /**
+ * DELETE /users/me
+ * Deletes the currently authenticated user's account and all associated data.
+ *
+ * Note: This does NOT delete all users. For admin-level deletion of other users, 
+ * a separate endpoint with proper authorization should be implemented.
+ *
+ * @param token Bearer token from the Authorization header
+ * @return 204 No Content on successful deletion 
+*/@DeleteMapping("/users/me")
+  public ResponseEntity<Void> deleteMyAccount(@RequestHeader("Authorization") String token) {
+      userService.deleteUserByToken(token);
+      return ResponseEntity.noContent().build();
   }
 }
