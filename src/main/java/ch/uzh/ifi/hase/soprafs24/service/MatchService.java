@@ -44,9 +44,16 @@ public class MatchService {
      * If a match record already exists between the two users, update the match to be ACCEPTED.
      * If no match exists, create a new Match record.
      */
+
+    public Optional<Match> findMatchByUsers(Long userId, Long targetUserId) {
+        return matchRepository.findMatchByUsers(userId, targetUserId);
+    }
+    
+
     public MatchGetDTO processLike(MatchPostDTO matchPostDTO) {
         // Try to find an existing match record regardless of order.
-        Optional<Match> existingMatch = matchRepository.findMatchByUsers(
+        //optional to handle no result from query  
+        Optional<Match> existingMatch = findMatchByUsers(
                 matchPostDTO.getUserId(), matchPostDTO.getTargetUserId());
 
         Match match;
@@ -54,10 +61,8 @@ public class MatchService {
             match = existingMatch.get();
              // Check if the match has been rejected. This is used for blocking.
             if (match.getStatus() == MatchStatus.REJECTED) {
-                // You can either throw an exception or simply return the rejected match.
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This match has been rejected due to a block.");
             }
-            // Determine which flag to update based on the acting user.
             if (Objects.equals(match.getUserId1(), matchPostDTO.getUserId())) {
                 match.setLikedByUser1(true);
             } else {
@@ -75,12 +80,10 @@ public class MatchService {
         }
 
         // Check if both users have liked each other and update status to ACCEPTED.
-        if (match.isLikedByUser1() && match.isLikedByUser2() &&
-            match.getStatus() != MatchStatus.REJECTED) {
+        if (match.isLikedByUser1() && match.isLikedByUser2()) {
             match.setStatus(MatchStatus.ACCEPTED);
 
             // Create an individual chat channel for this accepted match.
-            // Retrieve both user entities (ensure they exist).
             User user1 = userRepository.findById(match.getUserId1())
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "User with id " + match.getUserId1() + " not found."));
@@ -97,14 +100,33 @@ public class MatchService {
         return dtoMapper.convertEntityToMatchGetDTO(savedMatch);
     }
 
-    /**
-     * Processes a "dislike" action.
-     * For this example, we'll simply remove any existing match record.
-     * You could also update a flag to mark a dislike, depending on requirements.
-     */
+    //process dislike action 
     public void processDislike(MatchPostDTO matchPostDTO) {
-        Optional<Match> existingMatch = matchRepository.findMatchByUsers(
+        // Try to find an existing match between the two users.
+        Optional<Match> existingMatchOptional = findMatchByUsers(
                 matchPostDTO.getUserId(), matchPostDTO.getTargetUserId());
-        existingMatch.ifPresent(matchRepository::delete);
+    
+        if (existingMatchOptional.isPresent()) {
+            Match match = existingMatchOptional.get();
+    
+            if (Objects.equals(match.getUserId1(), matchPostDTO.getUserId())) {
+                match.setLikedByUser1(false);
+            } else if (Objects.equals(match.getUserId2(), matchPostDTO.getUserId())) {
+                match.setLikedByUser2(false);
+            }
+            //set status to REJECTED
+            match.setStatus(MatchStatus.REJECTED);
+            matchRepository.save(match);
+        } else {
+            // If no match exists, create one with rejected status
+            Match newMatch = new Match();
+            newMatch.setUserId1(matchPostDTO.getUserId());
+            newMatch.setUserId2(matchPostDTO.getTargetUserId());
+            newMatch.setStatus(MatchStatus.REJECTED);
+            newMatch.setLikedByUser1(false);
+            newMatch.setLikedByUser2(false);
+            matchRepository.save(newMatch);
+        }
     }
+    
 }
