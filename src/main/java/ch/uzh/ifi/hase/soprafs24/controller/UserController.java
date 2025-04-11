@@ -19,7 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-@CrossOrigin(origins = {"http://localhost:3000", "https://sopra-fs25-khoshimov-r-client.oa.r.appspot.com"})
+@CrossOrigin(origins = {"http://localhost:3000", "https://sopra-fs25-group-38-client.vercel.app"})
 @RestController
 public class UserController {
 

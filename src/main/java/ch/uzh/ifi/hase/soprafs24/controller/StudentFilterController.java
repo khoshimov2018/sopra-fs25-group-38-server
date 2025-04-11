@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.List;
 
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = {"http://localhost:3000", "https://sopra-fs25-group-38-client.vercel.app"})
 @RestController
 @RequestMapping("/students")
 public class StudentFilterController {
