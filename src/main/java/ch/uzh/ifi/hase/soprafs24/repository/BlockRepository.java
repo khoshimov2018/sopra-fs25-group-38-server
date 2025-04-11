@@ -20,4 +20,7 @@ public interface BlockRepository extends JpaRepository<Block, Long> {
 
     // Optionally: find all blocks against a user
     List<Block> findByBlockedUserId(Long blockedUserId);
+
+    // Delete all records involving the given user(both of blockId, blockedUserId)
+    void deleteAllByBlockerIdOrBlockedUserId(Long blockerId, Long blockedUserId);
 }

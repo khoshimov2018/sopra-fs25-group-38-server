@@ -12,8 +12,14 @@ public class Course implements Serializable {
     private static final long serialVersionUID = 5L;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(nullable = false)
     private Long id;
+
+       
+    public Course(Long id, String courseName) {
+        this.id = id;
+        this.courseName = courseName;
+    }
 
     @Column(nullable = false, unique = true)
     private String courseName;

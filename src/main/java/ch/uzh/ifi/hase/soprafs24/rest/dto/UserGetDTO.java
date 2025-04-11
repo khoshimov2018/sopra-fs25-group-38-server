@@ -1,10 +1,11 @@
 package ch.uzh.ifi.hase.soprafs24.rest.dto;
 
+import ch.uzh.ifi.hase.soprafs24.constant.ProfileKnowledgeLevel;
+import ch.uzh.ifi.hase.soprafs24.constant.UserAvailability;
 import ch.uzh.ifi.hase.soprafs24.constant.UserStatus;
-import java.time.LocalDate;
+
 import java.time.LocalDateTime;
 import java.util.List;
-
 
 public class UserGetDTO {
 
@@ -14,8 +15,48 @@ public class UserGetDTO {
   private UserStatus status;
   private String token;
   private LocalDateTime creationDate;
-  private List<String> availability;
- 
+
+  private UserAvailability availability;
+  private String studyLevel;
+  private String studyGoals;
+  private String bio;
+  private String profilePicture;
+  private ProfileKnowledgeLevel knowledgeLevel;
+
+  private List<UserCourseDTO> userCourses;
+
+  // DTO for courses + level
+  public static class UserCourseDTO {
+    private Long courseId;
+    private String courseName;
+    private ProfileKnowledgeLevel knowledgeLevel;
+
+    public Long getCourseId() {
+      return courseId;
+    }
+
+    public void setCourseId(Long courseId) {
+      this.courseId = courseId;
+    }
+
+    public String getCourseName() {
+      return courseName;
+    }
+
+    public void setCourseName(String courseName) {
+      this.courseName = courseName;
+    }
+
+    public ProfileKnowledgeLevel getKnowledgeLevel() {
+      return knowledgeLevel;
+    }
+
+    public void setKnowledgeLevel(ProfileKnowledgeLevel knowledgeLevel) {
+      this.knowledgeLevel = knowledgeLevel;
+    }
+  }
+
+  // Getters & Setters
 
   public Long getId() {
     return id;
@@ -48,7 +89,7 @@ public class UserGetDTO {
   public void setStatus(UserStatus status) {
     this.status = status;
   }
-  
+
   public String getToken() {
     return token;
   }
@@ -56,7 +97,7 @@ public class UserGetDTO {
   public void setToken(String token) {
     this.token = token;
   }
-  
+
   public LocalDateTime getCreationDate() {
     return creationDate;
   }
@@ -64,12 +105,60 @@ public class UserGetDTO {
   public void setCreationDate(LocalDateTime creationDate) {
     this.creationDate = creationDate;
   }
-  
-  public List<String> getAvailability() {
+
+  public UserAvailability getAvailability() {
     return availability;
   }
 
-  public void setAvailability(List<String> availability) {
+  public void setAvailability(UserAvailability availability) {
     this.availability = availability;
+  }
+
+  public String getStudyLevel() {
+    return studyLevel;
+  }
+
+  public void setStudyLevel(String studyLevel) {
+    this.studyLevel = studyLevel;
+  }
+
+  public String getStudyGoals() {
+    return studyGoals;
+  }
+
+  public void setStudyGoals(String studyGoals) {
+    this.studyGoals = studyGoals;
+  }
+
+  public String getBio() {
+    return bio;
+  }
+
+  public void setBio(String bio) {
+    this.bio = bio;
+  }
+
+  public String getProfilePicture() {
+    return profilePicture;
+  }
+
+  public void setProfilePicture(String profilePicture) {
+    this.profilePicture = profilePicture;
+  }
+
+  public ProfileKnowledgeLevel getKnowledgeLevel() {
+    return knowledgeLevel;
+  }
+
+  public void setKnowledgeLevel(ProfileKnowledgeLevel knowledgeLevel) {
+    this.knowledgeLevel = knowledgeLevel;
+  }
+
+  public List<UserCourseDTO> getUserCourses() {
+    return userCourses;
+  }
+
+  public void setUserCourses(List<UserCourseDTO> userCourses) {
+    this.userCourses = userCourses;
   }
 }

@@ -4,12 +4,18 @@ import ch.uzh.ifi.hase.soprafs24.constant.ProfileKnowledgeLevel;
 import ch.uzh.ifi.hase.soprafs24.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs24.entity.User;
 import ch.uzh.ifi.hase.soprafs24.entity.UserCourse;
+import ch.uzh.ifi.hase.soprafs24.entity.ChatChannel;
+import ch.uzh.ifi.hase.soprafs24.entity.ChatParticipant;
 import ch.uzh.ifi.hase.soprafs24.entity.Course;
 import ch.uzh.ifi.hase.soprafs24.entity.Match;
 import ch.uzh.ifi.hase.soprafs24.repository.UserRepository;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.CourseSelectionDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.UserPostDTO;
 import ch.uzh.ifi.hase.soprafs24.repository.MatchRepository;
+import ch.uzh.ifi.hase.soprafs24.repository.MessageRepository;
+import ch.uzh.ifi.hase.soprafs24.repository.ProfileRepository;
+import ch.uzh.ifi.hase.soprafs24.repository.ReportRepository;
+import ch.uzh.ifi.hase.soprafs24.repository.StudyPlanRepository;
 import ch.uzh.ifi.hase.soprafs24.repository.UserCourseRepository;
 
 import org.slf4j.Logger;
@@ -21,6 +27,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+
+import ch.uzh.ifi.hase.soprafs24.repository.BlockRepository;
+import ch.uzh.ifi.hase.soprafs24.repository.ChatChannelRepository;
 import ch.uzh.ifi.hase.soprafs24.repository.CourseRepository;
 
 import java.time.LocalDateTime;
@@ -56,7 +65,18 @@ public class UserService {
 
   @Autowired
   private UserCourseRepository userCourseRepository;
-
+  @Autowired
+  private MessageRepository messageRepository;
+  @Autowired
+  private BlockRepository blockRepository;
+  @Autowired
+  private ReportRepository reportRepository;
+  @Autowired
+  private ChatChannelRepository chatChannelRepository;
+  @Autowired
+  private StudyPlanRepository studyPlanRepository;
+  @Autowired
+  private ProfileRepository profileRepository;
 
 
   @Autowired
@@ -293,6 +313,27 @@ public class UserService {
   }
   
   /**
+   * Gets a user by their authentication token
+   *
+   * @param token the auth token without "Bearer " prefix
+   * @return the User associated with this token, or null if not found
+   */
+  public User getUserByToken(String token) {
+    // Check if token exists
+    if (token == null || token.isEmpty()) {
+      return null;
+    }
+    
+    // Clean the token (remove "Bearer " prefix if exists)
+    if (token.startsWith("Bearer ")) {
+      token = token.substring(7);
+    }
+    
+    // Find user by token
+    return userRepository.findByToken(token);
+  }
+  
+  /**
    * Checks if the authenticated user is authorized to modify a specific user
    * 
    * @param token the auth token
@@ -321,58 +362,48 @@ public class UserService {
   /**
    * Updates a user's profile
    * 
-   * @param userId the ID of the user to update
-   * @param userInput the updated user data
-   * @return the updated user
-   * @throws ResponseStatusException if the user is not found or the update is invalid
-   */
-  public User updateUser(Long userId, User userInput) {
-    User userToUpdate = userRepository.findById(userId)
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-            String.format("User with ID %d was not found", userId)));
-  
-    // Validate required fields
-    if (userInput.getAvailability() == null) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Availability is required.");
+    * @param userId the ID of the user to update
+    * @param updatedUser the user entity with updated fields already set (from DTOMapper)
+    * @return the updated user
+    * @throws ResponseStatusException if the user is not found or validation fails
+    */
+    public User updateUser(Long userId, User updatedUser) {
+      User existingUser = userRepository.findById(userId)
+          .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+              String.format("User with ID %d was not found", userId)));
+    
+      // Basic required field validation
+      if (updatedUser.getAvailability() == null) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Availability is required.");
     }
-  
-    if (userInput.getKnowledgeLevel() == null) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Knowledge level is required.");
-    }
-  
-    if (userInput.getStudyGoals() == null || userInput.getStudyGoals().trim().isEmpty()) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Study goals are required.");
-    }
-  
-    // Update optional and required fields
-    userToUpdate.setBio(userInput.getBio());
-    userToUpdate.setAvailability(userInput.getAvailability());
-    userToUpdate.setKnowledgeLevel(userInput.getKnowledgeLevel());
-    userToUpdate.setStudyGoals(userInput.getStudyGoals());
-  
-    // Optional: also allow updating profile picture or study level
-    if (userInput.getStudyLevel() != null) {
-      userToUpdate.setStudyLevel(userInput.getStudyLevel());
-    }
-    if (userInput.getProfilePicture() != null) {
-      userToUpdate.setProfilePicture(userInput.getProfilePicture());
-    }
-    // If course list is included in userInput, update the user's courses
-    if (userInput.getUserCourses() != null) {
-      userToUpdate.getUserCourses().clear();
-      for (UserCourse uc : userInput.getUserCourses()) {
-          uc.setUser(userToUpdate);
-          userToUpdate.getUserCourses().add(uc);
-      }
-  }
-  
 
-    // Save updated user
-    userToUpdate = userRepository.save(userToUpdate);
-    userRepository.flush();
-  
-    return userToUpdate;
+      if (updatedUser.getStudyGoals() == null || updatedUser.getStudyGoals().trim().isEmpty()) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Study goals are required.");
+      }
+
+
+   if (updatedUser.getUserCourses() == null || updatedUser.getUserCourses().isEmpty()) {
+    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "At least one course selection is required.");
   }
+
+    // Copy updated fields
+    existingUser.setBio(updatedUser.getBio());
+    existingUser.setAvailability(updatedUser.getAvailability());
+    existingUser.setStudyLevel(updatedUser.getStudyLevel());
+    existingUser.setStudyGoals(updatedUser.getStudyGoals());
+    existingUser.setProfilePicture(updatedUser.getProfilePicture());
+
+    // Update enrolled courses (with knowledge levels)
+    existingUser.getUserCourses().clear();
+    for (UserCourse userCourse : updatedUser.getUserCourses()) {
+      userCourse.setUser(existingUser); // re-link user
+      existingUser.getUserCourses().add(userCourse);
+    }
+
+    // Save changes
+    return userRepository.saveAndFlush(existingUser);
+  }
+
   
   /**
    * Logs out a user using the token by setting their status to OFFLINE
@@ -395,6 +426,8 @@ public class UserService {
     userRepository.flush();
   }
 
+  private ProfileKnowledgeLevel knowledgeLevel;
+
 
   public void assignCoursesWithKnowledgeLevels(User user, List<CourseSelectionDTO> courseSelections) {
     List<UserCourse> userCourses = courseSelections.stream().map(selection -> {
@@ -404,7 +437,7 @@ public class UserService {
         UserCourse userCourse = new UserCourse();
         userCourse.setUser(user);
         userCourse.setCourse(course);
-        userCourse.setKnowledgeLevel(ProfileKnowledgeLevel.fromString(selection.getKnowledgeLevel()));
+        userCourse.setKnowledgeLevel(selection.getKnowledgeLevel()); // Directly set enum
 
         return userCourse;
     }).toList();
@@ -412,6 +445,50 @@ public class UserService {
     // add for mapping usercourse list
     user.getUserCourses().addAll(userCourses);
     userCourseRepository.saveAll(userCourses);
-  }
+}
 
+/**
+ * Deletes a user and all associated data using their authentication token.
+ * 
+ * This includes messages, matches, chat participation, blocks, reports, 
+ * study plans, profile, enrolled courses, and the user account itself.
+ *
+ * @param token the Bearer authentication token of the user
+ * @throws ResponseStatusException if the token is invalid or user not found
+ */
+  public void deleteUserByToken(String token) {
+    if (token != null && token.startsWith("Bearer ")) {
+        token = token.substring(7);
+    }
+
+    User user = userRepository.findByToken(token);
+    if (user == null) {
+        throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid token.");
+    }
+
+    Long userId = user.getId();
+
+    messageRepository.deleteAllBySenderId(userId);
+    matchRepository.deleteAllByUserId1OrUserId2(userId, userId);
+
+    // Delete chat channels where the user is the only participant
+    List<ChatChannel> channels = chatChannelRepository.findByParticipantsUserId(userId);
+    for (ChatChannel channel : channels) {
+        List<ChatParticipant> participants = channel.getParticipants();
+
+        if (participants.size() == 1 && participants.get(0).getUser().getId().equals(userId)) {
+            chatChannelRepository.delete(channel);  // ChatParticipants are also deleted via cascade
+        }
+    }
+
+    blockRepository.deleteAllByBlockerIdOrBlockedUserId(userId, userId);
+    reportRepository.deleteAllByReporterIdOrReportedUserId(userId, userId);
+
+    studyPlanRepository.deleteAllByUserId(userId);
+    profileRepository.deleteByUserId(userId);
+    userCourseRepository.deleteAllByUserId(userId);
+
+    userRepository.delete(user);
+    userRepository.flush();
+  }
 }

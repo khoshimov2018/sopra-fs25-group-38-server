@@ -2,6 +2,7 @@ package ch.uzh.ifi.hase.soprafs24.controller;
 
 import ch.uzh.ifi.hase.soprafs24.config.TestSecurityConfig;
 import ch.uzh.ifi.hase.soprafs24.constant.ProfileKnowledgeLevel;
+import ch.uzh.ifi.hase.soprafs24.constant.UserAvailability;
 import ch.uzh.ifi.hase.soprafs24.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs24.entity.User;
 import ch.uzh.ifi.hase.soprafs24.entity.UserCourse;
@@ -25,6 +26,8 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.server.ResponseStatusException;
+import ch.uzh.ifi.hase.soprafs24.rest.dto.CourseSelectionDTO;
+
 
 import java.time.LocalDate;
 import java.util.Map;
@@ -158,13 +161,19 @@ public class UserRestIntegrationTest {
 
         @Test
         public void testUserProfileRetrieval() throws Exception {
-        // Register a user to get the token
         UserPostDTO registrationDTO = new UserPostDTO();
         registrationDTO.setName("Profile User");
         registrationDTO.setEmail("profile-test@example.com");
         registrationDTO.setPassword("password123");
         registrationDTO.setStudyLevel("Bachelor");
         registrationDTO.setStudyGoals(List.of("project work"));
+        registrationDTO.setAvailability(UserAvailability.EVENING);
+
+        // Include one course with knowledge level
+        CourseSelectionDTO courseSelection = new CourseSelectionDTO();
+        courseSelection.setCourseId(1L); // assumes course with ID 1 exists
+        courseSelection.setKnowledgeLevel(ProfileKnowledgeLevel.BEGINNER); 
+        registrationDTO.setCourseSelections(List.of(courseSelection));
 
         // Register the user
         MvcResult registrationResult = mockMvc.perform(post("/users/register")
@@ -173,7 +182,6 @@ public class UserRestIntegrationTest {
                 .andExpect(status().isCreated())
                 .andReturn();
 
-        // Extract token and user ID
         String responseContent = registrationResult.getResponse().getContentAsString();
         Map<String, Object> responseMap = objectMapper.readValue(responseContent, Map.class);
         Integer userId = (Integer) responseMap.get("id");
@@ -187,8 +195,14 @@ public class UserRestIntegrationTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.id", is(userId)))
                 .andExpect(jsonPath("$.name", is(registrationDTO.getName())))
-                .andExpect(jsonPath("$.email", is(registrationDTO.getEmail())));
+                .andExpect(jsonPath("$.email", is(registrationDTO.getEmail())))
+                .andExpect(jsonPath("$.studyLevel", is(registrationDTO.getStudyLevel())))
+                .andExpect(jsonPath("$.availability", is("EVENING")))
+                .andExpect(jsonPath("$.studyGoals", is("project work")))
+                .andExpect(jsonPath("$.userCourses[0].courseId", is(1)))
+                .andExpect(jsonPath("$.userCourses[0].knowledgeLevel", is("BEGINNER")));
         }
+
 
 
 

@@ -16,6 +16,8 @@ import org.mapstruct.factory.Mappers;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.ArrayList;
+import ch.uzh.ifi.hase.soprafs24.entity.UserCourse;
+import ch.uzh.ifi.hase.soprafs24.repository.CourseRepository;
 // import for chat system
 import ch.uzh.ifi.hase.soprafs24.entity.ChatChannel;
 import ch.uzh.ifi.hase.soprafs24.entity.Message;
@@ -60,6 +62,12 @@ public interface DTOMapper {
   @Mapping(source = "token", target = "token")
   @Mapping(source = "creationDate", target = "creationDate")
   @Mapping(source = "availability", target = "availability")
+  @Mapping(target = "studyLevel", source = "studyLevel")
+  @Mapping(target = "studyGoals", source = "studyGoals")
+  @Mapping(target = "bio", source = "bio")
+  @Mapping(target = "profilePicture", source = "profilePicture")
+  @Mapping(target = "knowledgeLevel", source = "knowledgeLevel")
+  @Mapping(target = "userCourses", expression = "java(convertUserCourses(user.getUserCourses()))")
   UserGetDTO convertEntityToUserGetDTO(User user);
 
   // Course mapping
@@ -140,7 +148,7 @@ public interface DTOMapper {
     return goals == null ? null : String.join(",", goals);
 }
 
-default void updateUserFromDTO(UserPutDTO userPutDTO, User user) {
+default void updateUserFromDTO(UserPutDTO userPutDTO, User user, CourseRepository courseRepository) {
     if (userPutDTO.getName() != null) {
         user.setName(userPutDTO.getName());
     }
@@ -160,7 +168,46 @@ default void updateUserFromDTO(UserPutDTO userPutDTO, User user) {
         user.setStudyGoals(String.join(",", userPutDTO.getStudyGoals()));
     }
 
+     // Update courses and their knowledge level
+     if (userPutDTO.getCourses() != null) {
+        user.getUserCourses().clear(); // Remove old links
+
+        for (UserPutDTO.CourseSelectionDTO selection : userPutDTO.getCourses()) {
+            Course course = courseRepository.findById(selection.getCourseId())
+                .orElseThrow(() -> new IllegalArgumentException("Course not found: " + selection.getCourseId()));
+
+            UserCourse userCourse = new UserCourse();
+            userCourse.setUser(user);
+            userCourse.setCourse(course);
+            userCourse.setKnowledgeLevel(selection.getKnowledgeLevel());
+
+            user.getUserCourses().add(userCourse);
+        }
+    }
+
+
+    
     // Do not set userCourses here — you'll do it inside the UserService
+}
+
+default UserGetDTO.UserCourseDTO mapUserCourseToDTO(UserCourse userCourse) {
+    if (userCourse == null) return null;
+
+    UserGetDTO.UserCourseDTO dto = new UserGetDTO.UserCourseDTO();
+    dto.setCourseId(userCourse.getCourse().getId());
+    dto.setCourseName(userCourse.getCourse().getCourseName());
+    dto.setKnowledgeLevel(userCourse.getKnowledgeLevel());
+    return dto;
+}
+
+default List<UserGetDTO.UserCourseDTO> convertUserCourses(List<UserCourse> userCourses) {
+    if (userCourses == null) return new ArrayList<>();
+
+    List<UserGetDTO.UserCourseDTO> dtos = new ArrayList<>();
+    for (UserCourse uc : userCourses) {
+        dtos.add(mapUserCourseToDTO(uc));
+    }
+    return dtos;
 }
 
 

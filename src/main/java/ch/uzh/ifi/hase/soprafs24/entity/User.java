@@ -76,9 +76,8 @@ public class User implements Serializable {
 
   @Column(nullable = true)
   private String bio;
-  @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-  private List<UserCourse> userCourses = new ArrayList<>();
-  
+  @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+  private List<UserCourse> userCourses = new ArrayList<>();  
 
 
   @ElementCollection(fetch = FetchType.LAZY)

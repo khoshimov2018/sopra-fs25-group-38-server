@@ -14,7 +14,9 @@ import ch.uzh.ifi.hase.soprafs24.service.ChatService;
 // springboot
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.http.ResponseEntity;
 // utils
 import java.util.List;
 import java.util.stream.Collectors;
@@ -40,12 +42,18 @@ public class ChatController {
 
     // GET /chat/channels/user/{userId} -> Get all channels for a given user.
     @GetMapping("/channels/user/{userId}")
-    @ResponseStatus(HttpStatus.OK)
-    public List<ChatChannelGetDTO> getChannelsForUser(@PathVariable Long userId) {
+    public ResponseEntity<List<ChatChannelGetDTO>> getChannelsForUser(@PathVariable Long userId) {
         List<ChatChannel> channels = chatService.getChannelsForUser(userId);
-        return channels.stream()
+        List<ChatChannelGetDTO> channelDTOs = channels.stream()
                 .map(DTOMapper.INSTANCE::convertEntityToChatChannelGetDTO)
                 .collect(Collectors.toList());
+
+        if (channelDTOs.isEmpty()) {
+            // Returns "204 No Content" without any body
+            return ResponseEntity.noContent().build();
+        }
+        // Returns "200 OK" plus the list
+        return ResponseEntity.ok(channelDTOs);
     }
 
     // POST /chat/{channelId}/message -> Send a message in a channel.
@@ -57,14 +65,20 @@ public class ChatController {
         return DTOMapper.INSTANCE.convertEntityToMessageGetDTO(createdMessage);
     }
 
-    // GET /api/chat/channels/{channelId} -> Get chat history for a channel.
+    // GET /chat/channels/{channelId} -> Get chat history for a channel.
     @GetMapping("/channels/{channelId}")
-    @ResponseStatus(HttpStatus.OK)
-    public List<MessageGetDTO> getChatHistory(@PathVariable Long channelId) {
+    public ResponseEntity<List<MessageGetDTO>> getChatHistory(@PathVariable Long channelId) {
         List<Message> messages = chatService.getChatHistory(channelId);
-        return messages.stream()
+        List<MessageGetDTO> messageDTOs = messages.stream()
                 .map(DTOMapper.INSTANCE::convertEntityToMessageGetDTO)
                 .collect(Collectors.toList());
+
+        if (messageDTOs.isEmpty()) {
+            // Returns "204 No Content" without any body
+            return ResponseEntity.noContent().build();
+        }
+        // Returns "200 OK" plus the list
+        return ResponseEntity.ok(messageDTOs);
     }
 
 }

@@ -9,4 +9,8 @@ import org.springframework.stereotype.Repository;
 @Repository("messageRepository")
 public interface MessageRepository extends JpaRepository<Message, Long> {
     Page<Message> findByChannelId(Long channelId, Pageable pageable);
+
+    // Delete all msgs involving the given senderId
+    // automatically mapping with the query: DELETE FROM messages WHERE sender_id = ?
+    void deleteAllBySenderId(Long senderId);
 }
