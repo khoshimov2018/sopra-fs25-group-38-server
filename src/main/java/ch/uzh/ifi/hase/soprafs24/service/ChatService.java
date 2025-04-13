@@ -5,20 +5,25 @@ import ch.uzh.ifi.hase.soprafs24.entity.ChatChannel;
 import ch.uzh.ifi.hase.soprafs24.entity.ChatParticipant;
 import ch.uzh.ifi.hase.soprafs24.entity.Message;
 import ch.uzh.ifi.hase.soprafs24.entity.User;
+import ch.uzh.ifi.hase.soprafs24.entity.UserTypingStatus;
 // repository
 import ch.uzh.ifi.hase.soprafs24.repository.ChatChannelRepository;
 import ch.uzh.ifi.hase.soprafs24.repository.MessageRepository;
 import ch.uzh.ifi.hase.soprafs24.repository.UserRepository;
+import ch.uzh.ifi.hase.soprafs24.repository.UserTypingStatusRepository;
 // dto
 import ch.uzh.ifi.hase.soprafs24.rest.dto.MessagePostDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.ChatChannelPostDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.mapper.DTOMapper;
+import ch.uzh.ifi.hase.soprafs24.rest.dto.UserTypingStatusPushDTO;
+import ch.uzh.ifi.hase.soprafs24.rest.dto.UserTypingStatusGetDTO;
 // springboot 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.transaction.annotation.Transactional;
 // utility
 import java.time.LocalDateTime;
 import java.util.List;
@@ -29,14 +34,17 @@ public class ChatService {
     private final ChatChannelRepository chatChannelRepository;
     private final MessageRepository messageRepository;
     private final UserRepository userRepository;
+    private final UserTypingStatusRepository userTypingStatusRepository;
 
     @Autowired
     public ChatService(ChatChannelRepository chatChannelRepository,
                        MessageRepository messageRepository,
-                       UserRepository userRepository) {
+                       UserRepository userRepository,
+                       UserTypingStatusRepository userTypingStatusRepository) {
         this.chatChannelRepository = chatChannelRepository;
         this.messageRepository = messageRepository;
         this.userRepository = userRepository;
+        this.userTypingStatusRepository = userTypingStatusRepository;
     }
 
     public ChatChannel createChatChannel(ChatChannelPostDTO chatChannelPostDTO) {
@@ -138,6 +146,40 @@ public class ChatService {
         // For simplicity, we fetch all messages in the channel sorted by id.
         Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by("id").ascending());
         return messageRepository.findByChannelId(chatChannel.getId(), pageable).getContent();
+    }
+
+    /**
+     * Updates the typing indicator based on the push DTO and returns the updated state including user status.
+     */
+    @Transactional
+    public UserTypingStatusGetDTO updateTypingStatus(UserTypingStatusPushDTO pushDTO) {
+        // Ensure the user exists.
+        User user = userRepository.findById(pushDTO.getUserId())
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User with id " + pushDTO.getUserId() + " not found"));
+
+        // Retrieve or create the typing status record.
+        UserTypingStatus typingStatus = userTypingStatusRepository.findByUserId(pushDTO.getUserId())
+            .orElse(new UserTypingStatus(user, pushDTO.isTyping()));
+        // Update typing flag.
+        typingStatus.setTyping(pushDTO.isTyping());
+        userTypingStatusRepository.save(typingStatus);
+        userTypingStatusRepository.flush();
+
+        // Return the DTO containing userId, current typing indicator, and the user's online/offline status.
+        return new UserTypingStatusGetDTO(user.getId(), typingStatus.isTyping(), user.getStatus());
+    }
+
+    /**
+     * Retrieves the current typing indicator and persistent user status.
+     */
+    public UserTypingStatusGetDTO getTypingStatus(Long userId) {
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User with id " + userId + " not found"));
+
+        UserTypingStatus typingStatus = userTypingStatusRepository.findByUserId(userId)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Typing status for user with id " + userId + " not found"));
+
+        return new UserTypingStatusGetDTO(user.getId(), typingStatus.isTyping(), user.getStatus());
     }
 
 }

@@ -9,6 +9,8 @@ import ch.uzh.ifi.hase.soprafs24.rest.dto.ChatChannelPostDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.MessageGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.MessagePostDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.mapper.DTOMapper;
+import ch.uzh.ifi.hase.soprafs24.rest.dto.UserTypingStatusPushDTO;
+import ch.uzh.ifi.hase.soprafs24.rest.dto.UserTypingStatusGetDTO;
 // service
 import ch.uzh.ifi.hase.soprafs24.service.ChatService;
 // springboot
@@ -79,6 +81,25 @@ public class ChatController {
         }
         // Returns "200 OK" plus the list
         return ResponseEntity.ok(messageDTOs);
+    }
+
+    /**
+     * PUT /chat/typing -> Update the typing indicator.
+     * Expects a JSON body corresponding to UserTypingStatusPushDTO.
+     */
+    @PutMapping("/typing")
+    public ResponseEntity<UserTypingStatusGetDTO> updateTypingStatus(@RequestBody UserTypingStatusPushDTO pushDTO) {
+        UserTypingStatusGetDTO result = chatService.updateTypingStatus(pushDTO);
+        return ResponseEntity.ok(result);
+    }
+
+    /**
+     * GET /chat/typing/{userId} -> Retrieve the current typing indicator along with the user's status.
+     */
+    @GetMapping("/typing/{userId}")
+    public ResponseEntity<UserTypingStatusGetDTO> getTypingStatus(@PathVariable Long userId) {
+        UserTypingStatusGetDTO status = chatService.getTypingStatus(userId);
+        return ResponseEntity.ok(status);
     }
 
 }
