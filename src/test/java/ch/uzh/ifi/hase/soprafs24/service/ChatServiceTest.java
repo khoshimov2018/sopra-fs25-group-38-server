@@ -1,17 +1,23 @@
 package ch.uzh.ifi.hase.soprafs24.service;
 
+import ch.uzh.ifi.hase.soprafs24.constant.UserStatus;
 // entity
 import ch.uzh.ifi.hase.soprafs24.entity.ChatChannel;
 import ch.uzh.ifi.hase.soprafs24.entity.ChatParticipant;
 import ch.uzh.ifi.hase.soprafs24.entity.Message;
 import ch.uzh.ifi.hase.soprafs24.entity.User;
+import ch.uzh.ifi.hase.soprafs24.entity.UserTypingStatus;
 // repository
 import ch.uzh.ifi.hase.soprafs24.repository.ChatChannelRepository;
 import ch.uzh.ifi.hase.soprafs24.repository.MessageRepository;
 import ch.uzh.ifi.hase.soprafs24.repository.UserRepository;
+import ch.uzh.ifi.hase.soprafs24.repository.UserTypingStatusRepository;
 // dto
 import ch.uzh.ifi.hase.soprafs24.rest.dto.ChatChannelPostDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.MessagePostDTO;
+import ch.uzh.ifi.hase.soprafs24.rest.dto.UserTypingStatusGetDTO;
+import ch.uzh.ifi.hase.soprafs24.rest.dto.UserTypingStatusPushDTO;
+
 // Spring & Junit annotations
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -37,6 +43,9 @@ public class ChatServiceTest {
 
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private UserTypingStatusRepository userTypingStatusRepository;
 
     @InjectMocks
     private ChatService chatService;
@@ -162,6 +171,74 @@ public class ChatServiceTest {
         assertNotNull(history);
         assertEquals(1, history.size());
         assertEquals(200L, history.get(0).getId());
+    }
+
+    
+    
+    // UserTypingStatus test suite
+    @Test
+    public void updateTypingStatus_validInput_success() {
+        // Given
+        Long userId = 1L;
+        User user = new User();
+        user.setId(userId);
+        user.setStatus(UserStatus.ONLINE);
+        
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        // Simulate no existing typing record so that a new record is created.
+        when(userTypingStatusRepository.findByUserId(userId)).thenReturn(Optional.empty());
+        when(userTypingStatusRepository.save(any(UserTypingStatus.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        UserTypingStatusPushDTO pushDTO = new UserTypingStatusPushDTO(userId, true);
+
+        // When
+        UserTypingStatusGetDTO result = chatService.updateTypingStatus(pushDTO);
+
+        // Then
+        assertNotNull(result);
+        assertEquals(userId, result.getUserId());
+        assertTrue(result.isTyping());
+        assertEquals(UserStatus.ONLINE, result.getUserStatus());
+    }
+
+
+
+    @Test
+    public void getTypingStatus_validInput_success() {
+        // Given
+        Long userId = 1L;
+        User user = new User();
+        user.setId(userId);
+        user.setStatus(UserStatus.ONLINE);
+        
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        
+        UserTypingStatus typingStatus = new UserTypingStatus(user, true);
+        when(userTypingStatusRepository.findByUserId(userId)).thenReturn(Optional.of(typingStatus));
+
+        // When
+        UserTypingStatusGetDTO result = chatService.getTypingStatus(userId);
+
+        // Then
+        assertNotNull(result);
+        assertEquals(userId, result.getUserId());
+        assertTrue(result.isTyping());
+        assertEquals(UserStatus.ONLINE, result.getUserStatus());
+    }
+    
+
+    @Test
+    public void updateTypingStatus_userNotFound_throwsException() {
+        // Given
+        Long userId = 999L;
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+        UserTypingStatusPushDTO pushDTO = new UserTypingStatusPushDTO(userId, true);
+        
+        // Then
+        assertThrows(ResponseStatusException.class, () -> {
+            chatService.updateTypingStatus(pushDTO);
+        });
     }
 }
 
