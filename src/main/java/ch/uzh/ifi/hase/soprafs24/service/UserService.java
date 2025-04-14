@@ -257,7 +257,7 @@ public class UserService {
    * @throws ResponseStatusException if user not found
    */
   public User getUserById(Long userId) {
-    return userRepository.findById(userId)
+    return userRepository.findWithCoursesById(userId)
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, 
             String.format("User with ID %d was not found", userId)));
   }
