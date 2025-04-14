@@ -29,11 +29,16 @@ public class SecurityConfig {
             .authorizeRequests()
                 // Public endpoints - no authentication needed
                 .antMatchers("/users/register", "/login", "/courses", "/chat/**", "/users/me").permitAll()
+                // Allow H2 console access
+                .antMatchers("/h2-console/**").permitAll()
                 // OPTIONS requests are always permitted for CORS preflight
                 .antMatchers("OPTIONS", "/**").permitAll()
                 // All other requests need authentication
-                .anyRequest().authenticated();
-                
+                .anyRequest().authenticated()
+            .and()
+            // Disable frame options to allow H2 console frames
+            .headers().frameOptions().disable();
+        
         return http.build();
     }
     
@@ -69,4 +74,3 @@ public class SecurityConfig {
         return source;
     }
 }
-
