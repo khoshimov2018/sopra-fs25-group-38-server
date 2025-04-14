@@ -474,11 +474,15 @@ public class UserService {
     // Delete chat channels where the user is the only participant
     List<ChatChannel> channels = chatChannelRepository.findByParticipantsUserId(userId);
     for (ChatChannel channel : channels) {
-        List<ChatParticipant> participants = channel.getParticipants();
+        // Deleting user from channel: participants must be removed first to avoid FK constraint errors
+        // (CascadeType.ALL and orphanRemoval handle ChatParticipant deletion)
+        channel.getParticipants().removeIf(p -> p.getUser().getId().equals(userId));
+        chatChannelRepository.save(channel);
 
-        if (participants.size() == 1 && participants.get(0).getUser().getId().equals(userId)) {
-            chatChannelRepository.delete(channel);  // ChatParticipants are also deleted via cascade
-        }
+      // (Optional) Delete chat channel if the user was the only participant left after removal.
+      if (channel.getParticipants().size() <= 1) {
+          chatChannelRepository.delete(channel);
+      }
     }
 
     blockRepository.deleteAllByBlockerIdOrBlockedUserId(userId, userId);

@@ -7,6 +7,7 @@ import ch.uzh.ifi.hase.soprafs24.repository.ChatChannelRepository;
 import ch.uzh.ifi.hase.soprafs24.repository.MessageRepository;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.ChatChannelPostDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.MessagePostDTO;
+import ch.uzh.ifi.hase.soprafs24.rest.dto.UserTypingStatusPushDTO;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -177,5 +178,44 @@ public class ChatControllerIntegrationTest {
                 .andExpect(jsonPath("$", hasSize(greaterThanOrEqualTo(1))))
                 .andExpect(jsonPath("$[0].messageId").exists())
                 .andExpect(jsonPath("$[0].context", is("Hello, everyone!")));
+    }
+
+    // UserTypingStatus test suite
+    @Test
+    public void testUpdateTypingStatus_endpoint() throws Exception {
+        Long userId = userAlice.getId();
+        // Prepare the push DTO.
+        UserTypingStatusPushDTO pushDTO = new UserTypingStatusPushDTO(userId, true);
+        String jsonBody = objectMapper.writeValueAsString(pushDTO);
+
+        mockMvc.perform(put("/chat/typing")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonBody))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.userId", is(userId.intValue())))
+                .andExpect(jsonPath("$.typing", is(true)))
+                .andExpect(jsonPath("$.userStatus", is("ONLINE")));
+    }
+    
+    @Test
+    public void testGetTypingStatus_endpoint() throws Exception {
+        Long userId = userAlice.getId();
+
+        // First, update the typing status using the PUT endpoint.
+        UserTypingStatusPushDTO pushDTO = new UserTypingStatusPushDTO(userId, false);
+        String jsonBody = objectMapper.writeValueAsString(pushDTO);
+        
+        mockMvc.perform(put("/chat/typing")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonBody))
+                .andExpect(status().isOk());
+
+        // Then, retrieve the typing status using the GET endpoint.
+        mockMvc.perform(get("/chat/typing/" + userId)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.userId", is(userId.intValue())))
+                .andExpect(jsonPath("$.typing", is(false)))
+                .andExpect(jsonPath("$.userStatus", is("ONLINE")));
     }
 }
