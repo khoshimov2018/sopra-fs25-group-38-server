@@ -182,4 +182,28 @@ public class ChatService {
         return new UserTypingStatusGetDTO(user.getId(), typingStatus.isTyping(), user.getStatus());
     }
 
+
+    /**
+     * Delete the individual channel when one user block another if the channel exists
+     */
+    public void deleteIndividualChannelBetweenUsers(Long blockerId, Long blockedUserId) {
+        // Retrieve all channels for the blocker.
+        List<ChatChannel> channels = chatChannelRepository.findByParticipantsUserId(blockerId);
+        
+        // Loop through channels to find an individual channel including the blocked user.
+        for (ChatChannel channel : channels) {
+            if ("individual".equalsIgnoreCase(channel.getType())) {
+                boolean containsBlockedUser = channel.getParticipants().stream()
+                    .anyMatch(participant -> participant.getUser().getId().equals(blockedUserId));
+                
+                if (containsBlockedUser) {
+                    // Delete the channel if found.
+                    chatChannelRepository.delete(channel);
+                }
+            }
+        }
+        chatChannelRepository.flush();
+    }
+    
+
 }

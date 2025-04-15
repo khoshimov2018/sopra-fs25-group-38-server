@@ -240,6 +240,88 @@ public class ChatServiceTest {
             chatService.updateTypingStatus(pushDTO);
         });
     }
+
+    @Test
+    public void deleteIndividualChannelBetweenUsers_channelExists_deletesChannel() {
+        // Given
+        Long blockerId = 1L;
+        Long blockedUserId = 2L;
+        
+        // Create a fake individual channel that includes both the blocker and the blocked user.
+        ChatChannel individualChannel = new ChatChannel();
+        individualChannel.setId(100L);
+        individualChannel.setType("individual");
+        
+        User blocker = new User();
+        blocker.setId(blockerId);
+        User blocked = new User();
+        blocked.setId(blockedUserId);
+        
+        ChatParticipant participantBlocker = new ChatParticipant(blocker, "admin");
+        ChatParticipant participantBlocked = new ChatParticipant(blocked, "member");
+        
+        // Create and set the participants list.
+        List<ChatParticipant> participants = List.of(participantBlocker, participantBlocked);
+        individualChannel.setParticipants(participants);
+        
+        // Simulate repository returning this channel for the blocker.
+        when(chatChannelRepository.findByParticipantsUserId(blockerId))
+                .thenReturn(List.of(individualChannel));
+        
+        // When: Invoke the method that deletes any individual channel between the two users.
+        chatService.deleteIndividualChannelBetweenUsers(blockerId, blockedUserId);
+        
+        // Then: Verify that the delete method was called for the individual channel and that flush was performed.
+        verify(chatChannelRepository, times(1)).delete(individualChannel);
+        verify(chatChannelRepository, times(1)).flush();
+    }
+
+    @Test
+    public void deleteIndividualChannelBetweenUsers_noChannelExists_noDeletion() {
+        // Given
+        Long blockerId = 1L;
+        Long blockedUserId = 2L;
+        
+        // Simulate repository returning an empty list for the blocker.
+        when(chatChannelRepository.findByParticipantsUserId(blockerId))
+                .thenReturn(List.of());
+        
+        // When: Invoke the method; no channel exists.
+        chatService.deleteIndividualChannelBetweenUsers(blockerId, blockedUserId);
+        
+        // Then: Verify that delete is never called but flush() is still invoked.
+        verify(chatChannelRepository, never()).delete(any(ChatChannel.class));
+        verify(chatChannelRepository, times(1)).flush();
+    }
+
+    @Test
+    public void deleteIndividualChannelBetweenUsers_channelExistsButNoMatch_noDeletion() {
+        // Given
+        Long blockerId = 1L;
+        Long blockedUserId = 2L;
+        
+        // Create a group channel that includes the blocker but does not contain the blocked user.
+        ChatChannel groupChannel = new ChatChannel();
+        groupChannel.setId(101L);
+        groupChannel.setType("group");
+        
+        User blocker = new User();
+        blocker.setId(blockerId);
+        
+        ChatParticipant participant = new ChatParticipant(blocker, "admin");
+        groupChannel.setParticipants(List.of(participant));
+        
+        // Simulate repository returning the group channel.
+        when(chatChannelRepository.findByParticipantsUserId(blockerId))
+                .thenReturn(List.of(groupChannel));
+        
+        // When: Invoke the method; the channel is not individual or does not include blocked user.
+        chatService.deleteIndividualChannelBetweenUsers(blockerId, blockedUserId);
+        
+        // Then: Verify that delete was not called on any channel.
+        verify(chatChannelRepository, never()).delete(any(ChatChannel.class));
+        verify(chatChannelRepository, times(1)).flush();
+    }
 }
 
 
