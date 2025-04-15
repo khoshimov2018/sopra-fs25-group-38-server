@@ -104,9 +104,9 @@ public class UserController {
     User userInput = DTOMapper.INSTANCE.convertUserPostDTOtoEntity(userPostDTO);
     User createdUser = userService.createUser(userInput, userPostDTO.getCourseSelections());
 
-    if (userPostDTO.getCourseSelections() != null && !userPostDTO.getCourseSelections().isEmpty()) {
-      userService.assignCoursesWithKnowledgeLevels(createdUser, userPostDTO.getCourseSelections());
-    }
+    // if (userPostDTO.getCourseSelections() != null && !userPostDTO.getCourseSelections().isEmpty()) {
+    //   userService.assignCoursesWithKnowledgeLevels(createdUser, userPostDTO.getCourseSelections());
+    // }
 
     HttpHeaders headers = new HttpHeaders();
     headers.add("Authorization", "Bearer " + createdUser.getToken());

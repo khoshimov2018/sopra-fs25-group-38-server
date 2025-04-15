@@ -447,52 +447,97 @@ public class UserService {
     userCourseRepository.saveAll(userCourses);
 }
 
-/**
- * Deletes a user and all associated data using their authentication token.
- * 
- * This includes messages, matches, chat participation, blocks, reports, 
- * study plans, profile, enrolled courses, and the user account itself.
- *
- * @param token the Bearer authentication token of the user
- * @throws ResponseStatusException if the token is invalid or user not found
- */
-  public void deleteUserByToken(String token) {
-    if (token != null && token.startsWith("Bearer ")) {
-        token = token.substring(7);
-    }
+  /**
+   * Deletes a user account by their user ID.
+   * 
+   * This method is intended to be used **only by administrators** to delete other users' accounts.
+   * It performs full cleanup of all associated user data.
+   *
+   * @param userId the ID of the user to delete
+   * @throws ResponseStatusException if the user with given ID is not found
+   */
+  public void deleteUserById(Long userId){
+      User user = userRepository.findById(userId).orElseThrow(() 
+                -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+      deleteUser(user); 
+    } 
 
-    User user = userRepository.findByToken(token);
-    if (user == null) {
-        throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid token.");
-    }
-
-    Long userId = user.getId();
-
-    messageRepository.deleteAllBySenderId(userId);
-    matchRepository.deleteAllByUserId1OrUserId2(userId, userId);
-
-    // Delete chat channels where the user is the only participant
-    List<ChatChannel> channels = chatChannelRepository.findByParticipantsUserId(userId);
-    for (ChatChannel channel : channels) {
-        // Deleting user from channel: participants must be removed first to avoid FK constraint errors
-        // (CascadeType.ALL and orphanRemoval handle ChatParticipant deletion)
-        channel.getParticipants().removeIf(p -> p.getUser().getId().equals(userId));
-        chatChannelRepository.save(channel);
-
-      // (Optional) Delete chat channel if the user was the only participant left after removal.
-      if (channel.getParticipants().size() <= 1) {
-          chatChannelRepository.delete(channel);
+  /**
+   * Deletes the currently authenticated user's account and all associated data.
+   * 
+   * This method is used by the user to delete **their own account** based on their authentication token.
+   * It performs full cleanup of all associated user data.
+    * @param token the Bearer authentication token of the user
+    * @throws ResponseStatusException if the token is invalid or the user is not found
+    */
+    public void deleteUserByToken(String token) {
+      if (token != null && token.startsWith("Bearer ")) {
+          token = token.substring(7);
       }
+
+      User user = userRepository.findByToken(token);
+      if (user == null) {
+          throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid token.");
+      }
+
+      deleteUser(user);
     }
 
-    blockRepository.deleteAllByBlockerIdOrBlockedUserId(userId, userId);
-    reportRepository.deleteAllByReporterIdOrReportedUserId(userId, userId);
+  /**
+   * Performs the actual deletion logic for a given user entity.
+   *
+   * It includes deletion of messages, matches, chat participation, blocks, reports, 
+   * study plans, profile, enrolled courses, and the user account itself.
+   *
+   * @param user the User entity to be deleted
+   */
+  private void deleteUser(User user){
+      Long userId = user.getId();
 
-    studyPlanRepository.deleteAllByUserId(userId);
-    profileRepository.deleteByUserId(userId);
-    userCourseRepository.deleteAllByUserId(userId);
+      messageRepository.deleteAllBySenderId(userId);
+      matchRepository.deleteAllByUserId1OrUserId2(userId, userId);
 
-    userRepository.delete(user);
-    userRepository.flush();
-  }
+      // Delete chat channels where the user is the only participant
+      List<ChatChannel> channels = chatChannelRepository.findByParticipantsUserId(userId);
+      for (ChatChannel channel : channels) {
+          // Deleting user from channel: participants must be removed first to avoid FK constraint errors
+          // (CascadeType.ALL and orphanRemoval handle ChatParticipant deletion)
+          channel.getParticipants().removeIf(p -> p.getUser().getId().equals(userId));
+          chatChannelRepository.save(channel);
+
+        // (Optional) Delete chat channel if the user was the only participant left after removal.
+        if (channel.getParticipants().size() <= 1) {
+            chatChannelRepository.delete(channel);
+        }
+      }
+
+      blockRepository.deleteAllByBlockerIdOrBlockedUserId(userId, userId);
+      reportRepository.deleteAllByReporterIdOrReportedUserId(userId, userId);
+
+      studyPlanRepository.deleteAllByUserId(userId);
+      profileRepository.deleteByUserId(userId);
+      userCourseRepository.deleteAllByUserId(userId);
+
+      userRepository.delete(user);
+      userRepository.flush();
+    }
+
+  /**
+   * Checks whether the given authentication token belongs to the administrator.
+   *
+   * @param token the Bearer authentication token from the Authorization header
+   * @return true if the token belongs to the admin account, false otherwise
+   * @throws ResponseStatusException if the token is invalid or user not found
+   */public boolean isAdmin(String token) {
+      if (token != null && token.startsWith("Bearer ")) {
+          token = token.substring(7);
+      }
+
+      User user = userRepository.findByToken(token);
+      if (user == null) {
+          throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid token");
+      }
+
+      return "admin@example.com".equals(user.getEmail()); 
+    }
 }
