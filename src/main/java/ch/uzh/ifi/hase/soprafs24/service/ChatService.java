@@ -27,6 +27,8 @@ import org.springframework.transaction.annotation.Transactional;
 // utility
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.Set;
 
 @Service
 public class ChatService {
@@ -88,27 +90,42 @@ public class ChatService {
     }
 
     public ChatChannel createIndividualChatChannelAfterMatch(User user1, User user2) {
+        // 1) Look for an existing individual channel containing exactly those two users:
+        List<ChatChannel> user1Channels =
+            chatChannelRepository.findByParticipantsUserId(user1.getId());
+        
+        for (ChatChannel existing : user1Channels) {
+            if ("individual".equalsIgnoreCase(existing.getType())) {
+                // collect the two participant IDs into a Set
+                Set<Long> ids = existing.getParticipants().stream()
+                    .map(cp -> cp.getUser().getId())
+                    .collect(Collectors.toSet());
+                
+                // if it’s exactly {user1, user2}, return it immediately
+                if (ids.size() == 2 &&
+                    ids.contains(user1.getId()) &&
+                    ids.contains(user2.getId())) {
+                    return existing;
+                }
+            }
+        }
+
+        // 2) Otherwise, build & save a new channel as before
         ChatChannel channel = new ChatChannel();
         channel.setType("individual");
-        // Set the channel name in the format "username1&username2"
         channel.setName(user1.getName() + "&" + user2.getName());
         channel.setChannelProfileImage(null);
         channel.setCreatedAt(LocalDateTime.now());
         channel.setUpdatedAt(LocalDateTime.now());
-    
-        // Create ChatParticipant for each user.
-        ChatParticipant participant1 = new ChatParticipant(user1, "member");
-        ChatParticipant participant2 = new ChatParticipant(user2, "member");
-    
-        // Add participants to the channel using the helper method.
-        channel.addParticipant(participant1);
-        channel.addParticipant(participant2);
-    
-        // Save the channel (cascading saves the ChatParticipants).
-        ChatChannel savedChannel = chatChannelRepository.save(channel);
+
+        channel.addParticipant(new ChatParticipant(user1, "member"));
+        channel.addParticipant(new ChatParticipant(user2, "member"));
+
+        ChatChannel saved = chatChannelRepository.save(channel);
         chatChannelRepository.flush();
-        return savedChannel;
+        return saved;
     }
+
     
 
     // Get all channels for a given user (for sidebar display)
