@@ -359,7 +359,7 @@ public class UserService {
     }
   }
   
-
+    @Transactional 
     public User updateUser(Long userId, User updatedUser) {
       User existingUser = userRepository.findById(userId)
           .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
