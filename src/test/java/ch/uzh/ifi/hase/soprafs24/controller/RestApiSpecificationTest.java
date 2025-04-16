@@ -224,35 +224,35 @@ public class RestApiSpecificationTest {
 
 
 
+  
     @Test
     public void updateUser_validData_updatesSuccessfully() throws Exception {
         Long userId = 1L;
-
+    
         // Existing user mock
         User existingUser = new User();
         existingUser.setId(userId);
         existingUser.setToken("validToken");
         existingUser.setUserCourses(new ArrayList<>()); // Important for update logic
-
+    
         // Mock course entity
         Course mockCourse = mock(Course.class);
         when(mockCourse.getId()).thenReturn(10L);
         when(mockCourse.getCourseName()).thenReturn("AI");
-
-        // Required mock setups
+    
         when(courseRepository.findById(10L)).thenReturn(Optional.of(mockCourse));
         when(userService.getUserById(userId)).thenReturn(existingUser);
-
+    
         doNothing().when(userService).authenticateByToken("validToken");
         doNothing().when(userService).checkAuthorizationById("validToken", userId);
-
+    
         when(userService.updateUser(eq(userId), any(User.class))).thenReturn(existingUser);
-
+    
         // Build DTO for update
-        UserPutDTO.CourseSelectionDTO courseSelection = new UserPutDTO.CourseSelectionDTO();
+        CourseSelectionDTO courseSelection = new CourseSelectionDTO();
         courseSelection.setCourseId(10L);
         courseSelection.setKnowledgeLevel(ProfileKnowledgeLevel.INTERMEDIATE);
-
+    
         UserPutDTO userPutDTO = new UserPutDTO();
         userPutDTO.setName("Updated Name");
         userPutDTO.setBio("Updated Bio");
@@ -260,20 +260,20 @@ public class RestApiSpecificationTest {
         userPutDTO.setAvailability(UserAvailability.EVENING);
         userPutDTO.setStudyLevel("BSc");
         userPutDTO.setStudyGoals(Arrays.asList("Thesis"));
-        userPutDTO.setCourses(Arrays.asList(courseSelection));
-
+        userPutDTO.setCourseSelections(Arrays.asList(courseSelection)); // ✅ FIXED
+    
         mockMvc.perform(put("/users/1")
                 .header("Authorization", "validToken")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(asJsonString(userPutDTO)))
                 .andExpect(status().isNoContent());
     }
-
+    
     @Test
     public void updateUser_validData_updatesSuccessfully2() throws Exception {
         Long userId = 1L;
         String token = "validToken";
-
+    
         // Mock courses
         Course course1 = mock(Course.class);
         Course course2 = mock(Course.class);
@@ -281,34 +281,31 @@ public class RestApiSpecificationTest {
         when(course1.getCourseName()).thenReturn("AI");
         when(course2.getId()).thenReturn(200L);
         when(course2.getCourseName()).thenReturn("Data Science");
-
+    
         when(courseRepository.findById(100L)).thenReturn(Optional.of(course1));
         when(courseRepository.findById(200L)).thenReturn(Optional.of(course2));
-
+    
         // Mock existing user from DB
         User existingUser = new User();
         existingUser.setId(userId);
         existingUser.setToken(token);
-        existingUser.setUserCourses(new ArrayList<>()); // Important!
-
+        existingUser.setUserCourses(new ArrayList<>());
+    
         when(userService.getUserById(userId)).thenReturn(existingUser);
-
-        // Auth & authorization
+    
         doNothing().when(userService).authenticateByToken(token);
         doNothing().when(userService).checkAuthorizationById(token, userId);
-
-        // Mock the update call
         when(userService.updateUser(eq(userId), any(User.class))).thenReturn(existingUser);
-
+    
         // Prepare input DTO
-        UserPutDTO.CourseSelectionDTO courseSel1 = new UserPutDTO.CourseSelectionDTO();
+        CourseSelectionDTO courseSel1 = new CourseSelectionDTO();
         courseSel1.setCourseId(100L);
         courseSel1.setKnowledgeLevel(ProfileKnowledgeLevel.INTERMEDIATE);
-
-        UserPutDTO.CourseSelectionDTO courseSel2 = new UserPutDTO.CourseSelectionDTO();
+    
+        CourseSelectionDTO courseSel2 = new CourseSelectionDTO();
         courseSel2.setCourseId(200L);
         courseSel2.setKnowledgeLevel(ProfileKnowledgeLevel.INTERMEDIATE);
-
+    
         UserPutDTO userPutDTO = new UserPutDTO();
         userPutDTO.setName("Updated Name");
         userPutDTO.setBio("Updated Bio");
@@ -316,20 +313,19 @@ public class RestApiSpecificationTest {
         userPutDTO.setAvailability(UserAvailability.EVENING);
         userPutDTO.setStudyLevel("MSc");
         userPutDTO.setStudyGoals(Arrays.asList("Thesis", "Internship"));
-        userPutDTO.setCourses(Arrays.asList(courseSel1, courseSel2));
-
-        // Perform PUT request
+        userPutDTO.setCourseSelections(Arrays.asList(courseSel1, courseSel2)); // ✅ FIXED
+    
         mockMvc.perform(put("/users/{userId}", userId)
                 .header("Authorization", token)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(asJsonString(userPutDTO)))
             .andExpect(status().isNoContent());
-
-        // Optional: verify service calls
+    
         verify(userService).authenticateByToken(token);
         verify(userService).checkAuthorizationById(token, userId);
         verify(userService).updateUser(eq(userId), any(User.class));
     }
+    
 
 
     private String asJsonString(final Object object) {

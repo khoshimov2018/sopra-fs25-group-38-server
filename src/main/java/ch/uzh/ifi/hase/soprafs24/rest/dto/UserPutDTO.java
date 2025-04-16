@@ -8,38 +8,14 @@ import java.util.List;
 public class UserPutDTO {
 
     private String name;
+    private String email;
     private String bio;
-    private String profilePicture;
-    private UserAvailability availability;
     private String studyLevel;
     private List<String> studyGoals;
+    private UserAvailability availability;
+    private List<CourseSelectionDTO> courseSelections;
 
-    // Improved: Renamed + type-safe
-    private List<CourseSelectionDTO> courses;
-
-    public static class CourseSelectionDTO {
-        private Long courseId;
-        private ProfileKnowledgeLevel knowledgeLevel;
-
-        public Long getCourseId() {
-            return courseId;
-        }
-
-        public void setCourseId(Long courseId) {
-            this.courseId = courseId;
-        }
-
-        public ProfileKnowledgeLevel getKnowledgeLevel() {
-            return knowledgeLevel;
-        }
-
-        public void setKnowledgeLevel(ProfileKnowledgeLevel knowledgeLevel) {
-            this.knowledgeLevel = knowledgeLevel;
-        }
-    }
-
-    // Getters and Setters
-
+    // Getters & Setters
     public String getName() {
         return name;
     }
@@ -48,28 +24,20 @@ public class UserPutDTO {
         this.name = name;
     }
 
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
     public String getBio() {
         return bio;
     }
 
     public void setBio(String bio) {
         this.bio = bio;
-    }
-
-    public String getProfilePicture() {
-        return profilePicture;
-    }
-
-    public void setProfilePicture(String profilePicture) {
-        this.profilePicture = profilePicture;
-    }
-
-    public UserAvailability getAvailability() {
-        return availability;
-    }
-
-    public void setAvailability(UserAvailability availability) {
-        this.availability = availability;
     }
 
     public String getStudyLevel() {
@@ -88,11 +56,30 @@ public class UserPutDTO {
         this.studyGoals = studyGoals;
     }
 
-    public List<CourseSelectionDTO> getCourses() {
-        return courses;
+    public UserAvailability getAvailability() {
+        return availability;
     }
 
-    public void setCourses(List<CourseSelectionDTO> courses) {
-        this.courses = courses;
+    public void setAvailability(UserAvailability availability) {
+        this.availability = availability;
     }
+
+    public List<CourseSelectionDTO> getCourseSelections() {
+        return courseSelections;
+    }
+
+    public void setCourseSelections(List<CourseSelectionDTO> courseSelections) {
+        this.courseSelections = courseSelections;
+    }
+
+    private String profilePicture;
+
+    public String getProfilePicture() {
+        return profilePicture;
+    }
+
+    public void setProfilePicture(String profilePicture) {
+        this.profilePicture = profilePicture;
+    }
+
 }

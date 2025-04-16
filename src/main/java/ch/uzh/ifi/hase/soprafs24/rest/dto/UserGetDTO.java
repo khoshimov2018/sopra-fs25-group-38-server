@@ -18,7 +18,7 @@ public class UserGetDTO {
 
   private UserAvailability availability;
   private String studyLevel;
-  private String studyGoals;
+  private List<String> studyGoals;
   private String bio;
   private String profilePicture;
   private ProfileKnowledgeLevel knowledgeLevel;
@@ -122,11 +122,11 @@ public class UserGetDTO {
     this.studyLevel = studyLevel;
   }
 
-  public String getStudyGoals() {
+  public List<String> getStudyGoals() {
     return studyGoals;
   }
 
-  public void setStudyGoals(String studyGoals) {
+  public void setStudyGoals(List<String> studyGoals) {
     this.studyGoals = studyGoals;
   }
 

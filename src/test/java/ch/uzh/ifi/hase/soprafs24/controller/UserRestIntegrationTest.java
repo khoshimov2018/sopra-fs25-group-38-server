@@ -9,6 +9,7 @@ import ch.uzh.ifi.hase.soprafs24.entity.UserCourse;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.CourseSelectionDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.UserLoginDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.UserPostDTO;
+import ch.uzh.ifi.hase.soprafs24.rest.dto.UserPutDTO;
 import ch.uzh.ifi.hase.soprafs24.service.UserService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -198,106 +199,73 @@ public class UserRestIntegrationTest {
                 .andExpect(jsonPath("$.email", is(registrationDTO.getEmail())))
                 .andExpect(jsonPath("$.studyLevel", is(registrationDTO.getStudyLevel())))
                 .andExpect(jsonPath("$.availability", is("EVENING")))
-                .andExpect(jsonPath("$.studyGoals", is("project work")))
+                .andExpect(jsonPath("$.studyGoals[0]", is("project work")))
                 .andExpect(jsonPath("$.userCourses[0].courseId", is(1)))
                 .andExpect(jsonPath("$.userCourses[0].knowledgeLevel", is("BEGINNER")));
         }
 
 
+        @Test
+        public void testUserProfileUpdate_success() throws Exception {
+        // 1. Register user
+        UserPostDTO userPostDTO = new UserPostDTO();
+        userPostDTO.setName("Original Name");
+        userPostDTO.setEmail("update-test@example.com");
+        userPostDTO.setPassword("originalPassword");
+        userPostDTO.setStudyLevel("Bachelor");
+        userPostDTO.setStudyGoals(List.of("prep"));
+        userPostDTO.setAvailability(UserAvailability.EVENING);
 
+        CourseSelectionDTO courseSelection = new CourseSelectionDTO();
+        courseSelection.setCourseId(1L); // assumes course ID 1 exists
+        courseSelection.setKnowledgeLevel(ProfileKnowledgeLevel.BEGINNER);
+        userPostDTO.setCourseSelections(List.of(courseSelection));
 
-    /**
-     * Integration Test 5: Complete User Profile Update Flow
-     * 
-     * Tests the REST protocol behavior for updating a user profile:
-     * 1. Register a user
-     * 2. Extract token
-     * 3. Update the user profile with PUT /users/{userId}
-     * 4. Verify 204 NO_CONTENT status
-     * 5. Verify the changes were made by retrieving the profile
-     */
-    /* @Test
-    public void testUserProfileUpdate() throws Exception {
-        // First register a user to get a token
-        UserPostDTO registrationDTO = new UserPostDTO();
-        registrationDTO.setName("Original Name");
-        registrationDTO.setEmail("update-test");
-        registrationDTO.setPassword("password123");
-        
-        // Register the user
-        MvcResult registrationResult = mockMvc.perform(post("/users")
+        MvcResult registrationResult = mockMvc.perform(post("/users/register")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(asJsonString(registrationDTO)))
+                .content(asJsonString(userPostDTO)))
                 .andExpect(status().isCreated())
                 .andReturn();
-                
-        // Extract token and ID
+
         String responseContent = registrationResult.getResponse().getContentAsString();
         Map<String, Object> responseMap = objectMapper.readValue(responseContent, Map.class);
         Integer userId = (Integer) responseMap.get("id");
         String token = registrationResult.getResponse().getHeader(HttpHeaders.AUTHORIZATION);
-        
-        // Create update DTO
-        UserPostDTO updateDTO = new UserPostDTO();
+
+        // 2. Prepare update DTO
+        UserPutDTO updateDTO = new UserPutDTO();
         updateDTO.setName("Updated Name");
-        updateDTO.setEmail("update-test"); // Username remains the same
-        
-        // Update the profile
+        updateDTO.setBio("Updated bio");
+        updateDTO.setStudyLevel("Master");
+        updateDTO.setStudyGoals(List.of("career"));
+        updateDTO.setAvailability(UserAvailability.MORNING);
+
+        CourseSelectionDTO updatedCourse = new CourseSelectionDTO();
+        updatedCourse.setCourseId(1L);
+        updatedCourse.setKnowledgeLevel(ProfileKnowledgeLevel.ADVANCED);
+        updateDTO.setCourseSelections(List.of(updatedCourse));
+
+        // 3. Perform PUT /users/{id}
         mockMvc.perform(put("/users/" + userId)
-                .contentType(MediaType.APPLICATION_JSON)
                 .header(HttpHeaders.AUTHORIZATION, token)
+                .contentType(MediaType.APPLICATION_JSON)
                 .content(asJsonString(updateDTO)))
                 .andExpect(status().isNoContent());
-        
-        // Verify that we can still access the profile after the update
-        // Note: We're just checking we can retrieve the profile, not checking specific field values
-        // This is because the actual update functionality might vary in implementation
+
+        // 4. Fetch updated user and verify fields
         mockMvc.perform(get("/users/" + userId)
-                .header(HttpHeaders.AUTHORIZATION, token)
-                .accept(MediaType.APPLICATION_JSON))
+                .header(HttpHeaders.AUTHORIZATION, token))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(userId)))
-                .andExpect(jsonPath("$.username", is(updateDTO.getEmail())));
-    }
- */
-    /**
-     * Integration Test 6: User Profile Update Without Authentication
-     * 
-     * Tests the REST protocol behavior when trying to update a profile without authentication:
-     * 1. Register a user
-     * 2. Try to update the profile without a token
-     * 3. Verify 401 UNAUTHORIZED status
-     */
-   /*  @Test
-    public void testProfileUpdateWithoutAuthentication() throws Exception {
-        // First register a user
-        UserPostDTO registrationDTO = new UserPostDTO();
-        registrationDTO.setName("NoAuth User");
-        registrationDTO.setEmail("no-auth-test");
-        registrationDTO.setPassword("password123");
+                .andExpect(jsonPath("$.name", is("Updated Name")))
+                .andExpect(jsonPath("$.bio", is("Updated bio")))
+                .andExpect(jsonPath("$.studyLevel", is("Master")))
+                .andExpect(jsonPath("$.studyGoals[0]", is("career")))
+                .andExpect(jsonPath("$.availability", is("MORNING")))
+                .andExpect(jsonPath("$.userCourses[0].courseId", is(1)))
+                .andExpect(jsonPath("$.userCourses[0].knowledgeLevel", is("ADVANCED")));
+        }
+
         
-        // Register the user
-        MvcResult registrationResult = mockMvc.perform(post("/users")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(asJsonString(registrationDTO)))
-                .andExpect(status().isCreated())
-                .andReturn();
-                
-        // Extract the user ID
-        String responseContent = registrationResult.getResponse().getContentAsString();
-        Map<String, Object> responseMap = objectMapper.readValue(responseContent, Map.class);
-        Integer userId = (Integer) responseMap.get("id");
-        
-        // Create update DTO
-        UserPostDTO updateDTO = new UserPostDTO();
-        updateDTO.setName("Updated Without Auth");
-        
-        // Try to update without token
-        mockMvc.perform(put("/users/" + userId)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(asJsonString(updateDTO)))
-                .andExpect(status().isUnauthorized());
-    }
 
     /**
      * Helper Method to convert objects into a JSON string
