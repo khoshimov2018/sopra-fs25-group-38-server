@@ -359,50 +359,43 @@ public class UserService {
     }
   }
   
-  /**
-   * Updates a user's profile
-   * 
-    * @param userId the ID of the user to update
-    * @param updatedUser the user entity with updated fields already set (from DTOMapper)
-    * @return the updated user
-    * @throws ResponseStatusException if the user is not found or validation fails
-    */
+
     public User updateUser(Long userId, User updatedUser) {
       User existingUser = userRepository.findById(userId)
           .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-              String.format("User with ID %d was not found", userId)));
-    
-      // Basic required field validation
-      if (updatedUser.getAvailability() == null) {
-        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Availability is required.");
-    }
+                  String.format("User with ID %d was not found", userId)));
 
-      if (updatedUser.getStudyGoals() == null || updatedUser.getStudyGoals().trim().isEmpty()) {
-        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Study goals are required.");
+      // Validate required fields
+      if (updatedUser.getAvailability() == null) {
+          throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Availability is required.");
       }
 
+      if (updatedUser.getStudyGoals() == null || updatedUser.getStudyGoals().trim().isEmpty()) {
+          throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Study goals are required.");
+      }
 
-   if (updatedUser.getUserCourses() == null || updatedUser.getUserCourses().isEmpty()) {
-    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "At least one course selection is required.");
+      if (updatedUser.getUserCourses() == null || updatedUser.getUserCourses().isEmpty()) {
+          throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "At least one course selection is required.");
+      }
+
+      // Merge updated fields into the existing entity
+      existingUser.setName(updatedUser.getName());
+      existingUser.setBio(updatedUser.getBio());
+      existingUser.setProfilePicture(updatedUser.getProfilePicture());
+      existingUser.setAvailability(updatedUser.getAvailability());
+      existingUser.setStudyLevel(updatedUser.getStudyLevel());
+      existingUser.setStudyGoals(updatedUser.getStudyGoals());
+
+      // Handle userCourses update
+      existingUser.getUserCourses().clear();
+      for (UserCourse uc : updatedUser.getUserCourses()) {
+          uc.setUser(existingUser); // re-link to this user
+          existingUser.getUserCourses().add(uc);
+      }
+
+      return userRepository.saveAndFlush(existingUser);
   }
 
-    // Copy updated fields
-    existingUser.setBio(updatedUser.getBio());
-    existingUser.setAvailability(updatedUser.getAvailability());
-    existingUser.setStudyLevel(updatedUser.getStudyLevel());
-    existingUser.setStudyGoals(updatedUser.getStudyGoals());
-    existingUser.setProfilePicture(updatedUser.getProfilePicture());
-
-    // Update enrolled courses (with knowledge levels)
-    existingUser.getUserCourses().clear();
-    for (UserCourse userCourse : updatedUser.getUserCourses()) {
-      userCourse.setUser(existingUser); // re-link user
-      existingUser.getUserCourses().add(userCourse);
-    }
-
-    // Save changes
-    return userRepository.saveAndFlush(existingUser);
-  }
 
   
   /**

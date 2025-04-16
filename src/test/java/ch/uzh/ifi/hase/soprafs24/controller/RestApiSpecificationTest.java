@@ -1,53 +1,74 @@
 package ch.uzh.ifi.hase.soprafs24.controller;
 
-import ch.uzh.ifi.hase.soprafs24.constant.UserStatus;
-import ch.uzh.ifi.hase.soprafs24.entity.User;
-import ch.uzh.ifi.hase.soprafs24.entity.Course;
+import ch.uzh.ifi.hase.soprafs24.constant.ProfileKnowledgeLevel;
 import ch.uzh.ifi.hase.soprafs24.constant.UserAvailability;
-import ch.uzh.ifi.hase.soprafs24.rest.dto.CourseGetDTO;
+import ch.uzh.ifi.hase.soprafs24.constant.UserStatus;
+import ch.uzh.ifi.hase.soprafs24.entity.Course;
+import ch.uzh.ifi.hase.soprafs24.entity.User;
+import ch.uzh.ifi.hase.soprafs24.entity.UserCourse;
+import ch.uzh.ifi.hase.soprafs24.repository.CourseRepository;
+import ch.uzh.ifi.hase.soprafs24.rest.dto.CourseSelectionDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.UserLoginDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.UserPostDTO;
+import ch.uzh.ifi.hase.soprafs24.rest.dto.UserPutDTO;
+import ch.uzh.ifi.hase.soprafs24.service.CourseService;
 import ch.uzh.ifi.hase.soprafs24.service.UserService;
-/* import ch.uzh.ifi.hase.soprafs24.service.CourseService; */
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.ArgumentCaptor;
+
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
+
+
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.willDoNothing;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+
+import antlr.collections.List;
+
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.hamcrest.Matchers.*;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import org.springframework.test.web.servlet.MvcResult;
 
-/**
- * RestApiSpecificationTest
- * 
- * This class specifically tests that the REST API specification is
- * correctly implemented for all required endpoints.
- */
 @WebMvcTest(UserController.class)
-@AutoConfigureMockMvc(addFilters = false) 
-
+@AutoConfigureMockMvc(addFilters = false)
 public class RestApiSpecificationTest {
 
     @Autowired
@@ -56,320 +77,269 @@ public class RestApiSpecificationTest {
     @MockBean
     private UserService userService;
 
-    /* @MockBean
-    private CourseService courseService; */
+    @MockBean
+    private CourseService courseService;
 
-    /**
-     * Test 9: GET /courses
-     * Verifies that a user can successfully retrieve the list of enrolled courses (200 OK).
-     */
-   /*  @Test
-    public void getUserCourses_validData_returnsCourses() throws Exception {
-        //given
+    @MockBean
+    private CourseRepository courseRepository;
+
+    @Test
+    public void createUser_checkResponseHeaders() throws Exception {
+        // mock return user
         User user = new User();
-        user.setId(1L); 
-        Course course = new Course(user, "Test courseName");  */
-      
-        // Mock the CourseService behavior
-       /*  given(courseService.getAllCourses()).willReturn(List.of(course));
- */
-        // when/then
-/*         MvcResult result = mockMvc.perform(get("/courses")
-        .contentType(MediaType.APPLICATION_JSON)
-        .header("Authorization", "Bearer valid-token")
-        .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$", hasSize(greaterThanOrEqualTo(0))))
-        .andExpect(jsonPath("$[0].courseName", is(course.getCourseName())))
-        .andExpect(jsonPath("$[0].userId", is(course.getUserId().intValue())))
-        .andReturn(); 
+        user.setId(1L);
+        user.setName("Test User");
+        user.setEmail("testuser@email.com");
+        user.setPassword("password");
+        user.setToken("token123");
+        user.setStatus(UserStatus.ONLINE);
+        user.setCreationDate(LocalDateTime.now());
 
-        System.out.println("Status: " + result.getResponse().getStatus());
-        System.out.println("Response Body: " + result.getResponse().getContentAsString());
-    } */
-    /**
-     * Test 10: GET /students?availability={filter} 
-     * Verifies that a user can retrieve students with matching availability (200 OK).
-     */
- /*    @Test
-    public void getStudents_validAvailability_returnsStudents() throws Exception {
-        // given - user1 (match)
-        User user1 = new User();
-        user1.setId(1L);
-        user1.setEmail("user1@email.com");
-        user1.setName("User One");
-        user1.setPassword("password123");
-        user1.setAvailability(UserAvailability.EVENING);
+        // input DTO
+        UserPostDTO userPostDTO = new UserPostDTO();
+        userPostDTO.setName("Test User");
+        userPostDTO.setEmail("testuser@email.com");
+        userPostDTO.setPassword("password");
+        userPostDTO.setCourseSelections(Collections.emptyList()); // IMPORTANT
 
-        // given - user2 (no match)
-        User user2 = new User();
-        user2.setId(2L);
-        user2.setEmail("user2@email.com");
-        user2.setName("User Two");
-        user2.setPassword("password123");
-        user2.setAvailability(UserAvailability.MORNING);
+        // make sure the mock actually triggers
+        when(userService.createUser(any(User.class), anyList())).thenReturn(user);
 
-        List<User> userList = List.of(user1, user2);
-        List<Long> matchedIds = List.of(user1.getId()); */
+        mockMvc.perform(post("/users/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(asJsonString(userPostDTO)))
+                .andExpect(status().isCreated())
+                .andExpect(header().string("Authorization", "Bearer token123"))
+                .andExpect(jsonPath("$.email", is("testuser@email.com")))
+                .andExpect(jsonPath("$.name", is("Test User")));
+    }
 
-/*         // Mock the userService, CourseService behavior
-        given(userService.getUsers()).willReturn(userList);
-        given(courseService.findUserIdsEnrolledInAllAvailability(List.of("EVENING"))).willReturn(matchedIds);
- */
-        // when/then
-/*         MvcResult result = mockMvc.perform(get("/students")
-        .param("availability", "EVENING")
-        .header("Authorization", "Bearer valid-token")
-        .contentType(MediaType.APPLICATION_JSON))
-        .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$", hasSize(1)))
-        .andExpect(jsonPath("$[0].email", is(user1.getEmail())))
-        .andExpect(jsonPath("$[0].id", is(user1.getId().intValue())))
-        .andReturn();
+    @Test
+    public void createUser_invalidData_returnsBadRequest() throws Exception {
+        UserPostDTO userPostDTO = new UserPostDTO();
+        userPostDTO.setName("Invalid User");
+        userPostDTO.setEmail(""); // Invalid
+        userPostDTO.setPassword(""); // Invalid
 
-    System.out.println("Status: " + result.getResponse().getStatus());
-    System.out.println("Response Body: " + result.getResponse().getContentAsString());
-    } */
+        mockMvc.perform(post("/users/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(asJsonString(userPostDTO)))
+                .andExpect(status().isBadRequest());
+    }
 
-    // /**
-    //  * Test 1: POST /users - User Creation with Required Headers
-    //  * Verifies that the response has the correct Content-Type and Location headers
-    //  */
-    // @Test
-    // public void createUser_checkResponseHeaders() throws Exception {
-    //     // given
-    //     User user = new User();
-    //     user.setId(1L);
-    //     user.setName("Test User");
-    //     user.setUsername("testuser");
-    //     user.setPassword("password");
-    //     user.setToken("token123");
-    //     user.setStatus(UserStatus.ONLINE);
-    //     user.setCreationDate(LocalDateTime.now());
+    @Test
+    public void getUserById_withSpecificAcceptHeader() throws Exception {
+        User user = new User();
+        user.setId(1L);
+        user.setName("Test User");
+        user.setEmail("testuser@email.com");
+        user.setStatus(UserStatus.ONLINE);
+        user.setToken("token123");
 
-    //     UserPostDTO userPostDTO = new UserPostDTO();
-    //     userPostDTO.setName("Test User");
-    //     userPostDTO.setUsername("testuser");
-    //     userPostDTO.setPassword("password");
+        given(userService.getUserById(1L)).willReturn(user);
 
-    //     given(userService.createUser(Mockito.any())).willReturn(user);
+        mockMvc.perform(get("/users/1")
+                        .header("Authorization", "token123")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.email").value("testuser@email.com"));
+    }
 
-    //     // when/then
-    //     MockHttpServletRequestBuilder postRequest = post("/users")
-    //             .contentType(MediaType.APPLICATION_JSON)
-    //             .content(asJsonString(userPostDTO))
-    //             .accept(MediaType.APPLICATION_JSON);
+        @Test
+    public void loginUser_successful_returnsTokenAndUser() throws Exception {
+        UserLoginDTO loginDTO = new UserLoginDTO();
+        loginDTO.setEmail("user@example.com");
+        loginDTO.setPassword("password");
 
-    //     // then
-    //     mockMvc.perform(postRequest)
-    //             .andExpect(status().isCreated())
-    //             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-    //             .andExpect(header().exists(HttpHeaders.AUTHORIZATION))
-    //             .andExpect(header().string(HttpHeaders.AUTHORIZATION, "Bearer " + user.getToken()))
-    //             .andExpect(jsonPath("$.username", is(user.getUsername())));
-    // }
+        User user = new User();
+        user.setId(1L);
+        user.setEmail("user@example.com");
+        user.setToken("token123");
 
-    // /**
-    //  * Test 2: POST /users - User Creation with Invalid Data
-    //  * Verifies that sending invalid data (missing required fields) returns a 400 BAD_REQUEST
-    //  */
-    // @Test
-    // public void createUser_invalidData_returnsBadRequest() throws Exception {
-    //     // given
-    //     UserPostDTO invalidDTO = new UserPostDTO();
-    //     // Missing required username and password
+        given(userService.loginUser("user@example.com", "password")).willReturn(user);
 
-    //     given(userService.createUser(Mockito.any())).willThrow(
-    //             new ResponseStatusException(HttpStatus.BAD_REQUEST, "Username and password are required"));
+        mockMvc.perform(post("/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(asJsonString(loginDTO)))
+                .andExpect(status().isOk())
+                .andExpect(header().string("Authorization", "Bearer token123"))
+                .andExpect(jsonPath("$.email", is("user@example.com")));
+    }
 
-    //     // when/then
-    //     MockHttpServletRequestBuilder postRequest = post("/users")
-    //             .contentType(MediaType.APPLICATION_JSON)
-    //             .content(asJsonString(invalidDTO))
-    //             .accept(MediaType.APPLICATION_JSON);
+    @Test
+    public void logoutUser_validToken_returnsNoContent() throws Exception {
+        mockMvc.perform(post("/users/logout")
+                        .header("Authorization", "Bearer token123"))
+                .andExpect(status().isNoContent());
+    }
 
-    //     // then
-    //     mockMvc.perform(postRequest)
-    //             .andExpect(status().isBadRequest());
-    // }
+    @Test
+    public void updateUser_validData_returnsNoContent() throws Exception {
+        UserPutDTO putDTO = new UserPutDTO();
+        putDTO.setName("Updated Name");
 
-    // /**
-    //  * Test 3: GET /users/{userId} - Check that Accept header is respected
-    //  * Verifies that the endpoint returns data in the format specified by the Accept header
-    //  */
-    // @Test
-    // public void getUserById_withSpecificAcceptHeader_returnsCorrectContentType() throws Exception {
-    //     // given
-    //     User user = new User();
-    //     user.setId(1L);
-    //     user.setName("Test User");
-    //     user.setUsername("testuser");
-    //     user.setStatus(UserStatus.ONLINE);
-    //     user.setToken("valid-token");
-    //     user.setCreationDate(LocalDateTime.now());
-        
-    //     doNothing().when(userService).authenticateByToken(anyString());
-    //     given(userService.getUserById(1L)).willReturn(user);
+        User existingUser = new User();
+        existingUser.setId(1L);
 
-    //     // when/then
-    //     MockHttpServletRequestBuilder getRequest = get("/users/1")
-    //             .header("Authorization", "Bearer valid-token")
-    //             .accept(MediaType.APPLICATION_JSON);
+        given(userService.getUserById(1L)).willReturn(existingUser);
 
-    //     // then
-    //     mockMvc.perform(getRequest)
-    //             .andExpect(status().isOk())
-    //             .andExpect(content().contentType(MediaType.APPLICATION_JSON));
-    // }
+        mockMvc.perform(put("/users/1")
+                        .header("Authorization", "Bearer token123")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(asJsonString(putDTO)))
+                .andExpect(status().isNoContent());
+    }
 
-    // /**
-    //  * Test 4: GET /users/{userId} - Valid ID with incorrect path format
-    //  * Verifies that using an incorrect format for ID in the path returns a 400 BAD_REQUEST
-    //  */
-    // @Test
-    // public void getUserById_invalidIdFormat_returnsBadRequest() throws Exception {
-    //     // when/then
-    //     MockHttpServletRequestBuilder getRequest = get("/users/invalid-id")
-    //             .header("Authorization", "Bearer valid-token")
-    //             .accept(MediaType.APPLICATION_JSON);
+    @Test
+    public void getCurrentUser_validToken_returnsUser() throws Exception {
+        User user = new User();
+        user.setId(1L);
+        user.setEmail("user@example.com");
+        user.setToken("token123");
 
-    //     // then
-    //     mockMvc.perform(getRequest)
-    //             .andExpect(status().isBadRequest());
-    // }
+        given(userService.getUserByToken("token123")).willReturn(user);
 
-    // /**
-    //  * Test 5: PUT /users/{userId} - Verify all updated fields
-    //  * Tests that when updating a user, all provided fields are correctly updated
-    //  */
-    // @Test
-    // public void updateUser_checkAllFieldsUpdated() throws Exception {
-    //     // given
-    //     Long userId = 1L;
-        
-    //     UserPostDTO updateDTO = new UserPostDTO();
-    //     updateDTO.setName("Updated User");
-    //     updateDTO.setUsername("updateduser");
-        
-    //     User updatedUser = new User();
-    //     updatedUser.setId(userId);
-    //     updatedUser.setName("Updated User");
-    //     updatedUser.setUsername("updateduser");
-    //     updatedUser.setStatus(UserStatus.ONLINE);
-    //     updatedUser.setToken("valid-token");
-        
-    //     // Mock passing authentication
-    //     doNothing().when(userService).authenticateByToken(anyString());
-    //     doNothing().when(userService).checkAuthorizationById(anyString(), eq(userId));
-        
-    //     // Mock the update method and capture the argument
-    //     doAnswer(invocation -> {
-    //         User userArg = invocation.getArgument(1);
-    //         // Verify that all fields from the DTO were set on the user entity
-    //         assert userArg.getName().equals(updateDTO.getName());
-    //         assert userArg.getUsername().equals(updateDTO.getUsername());
-    //         return null;
-    //     }).when(userService).updateUser(eq(userId), any(User.class));
+        mockMvc.perform(get("/users/me")
+                        .header("Authorization", "Bearer token123"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.email", is("user@example.com")));
+    }
 
-    //     // when/then
-    //     MockHttpServletRequestBuilder putRequest = put("/users/" + userId)
-    //             .contentType(MediaType.APPLICATION_JSON)
-    //             .content(asJsonString(updateDTO))
-    //             .header("Authorization", "Bearer valid-token");
+    @Test
+    public void getCurrentUser_invalidToken_returnsUnauthorized() throws Exception {
+        given(userService.getUserByToken("invalidtoken")).willReturn(null);
 
-    //     // then
-    //     mockMvc.perform(putRequest)
-    //             .andExpect(status().isNoContent());
-        
-    //     // Verify service method was called with correct parameters
-    //     verify(userService).updateUser(eq(userId), any(User.class));
-    // }
+        mockMvc.perform(get("/users/me")
+                        .header("Authorization", "Bearer invalidtoken"))
+                .andExpect(status().isUnauthorized());
+    }
 
-    // /**
-    //  * Test 6: POST /login - Test login endpoint Content-Type negotiation
-    //  * Ensures that the login endpoint correctly handles content type negotiation
-    //  */
-    // @Test
-    // public void loginUser_contentTypeNegotiation() throws Exception {
-    //     // given
-    //     User user = new User();
-    //     user.setId(1L);
-    //     user.setName("Test User");
-    //     user.setUsername("testuser");
-    //     user.setPassword("password");
-    //     user.setToken("login-token");
-    //     user.setStatus(UserStatus.ONLINE);
-    //     user.setCreationDate(LocalDateTime.now());
+    @Test
+    public void deleteMyAccount_validToken_returnsNoContent() throws Exception {
+        mockMvc.perform(delete("/users/me")
+                        .header("Authorization", "Bearer token123"))
+                .andExpect(status().isNoContent());
+    }
 
-    //     UserLoginDTO loginDTO = new UserLoginDTO();
-    //     loginDTO.setUsername("testuser");
-    //     loginDTO.setPassword("password");
 
-    //     given(userService.loginUser(anyString(), anyString())).willReturn(user);
 
-    //     // when/then
-    //     MockHttpServletRequestBuilder postRequest = post("/login")
-    //             .contentType(MediaType.APPLICATION_JSON)
-    //             .content(asJsonString(loginDTO))
-    //             .accept(MediaType.APPLICATION_JSON);
+    @Test
+    public void updateUser_validData_updatesSuccessfully() throws Exception {
+        Long userId = 1L;
 
-    //     // then
-    //     mockMvc.perform(postRequest)
-    //             .andExpect(status().isOk())
-    //             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-    //             .andExpect(header().exists(HttpHeaders.AUTHORIZATION))
-    //             .andExpect(header().string(HttpHeaders.AUTHORIZATION, "Bearer " + user.getToken()));
-    // }
+        // Existing user mock
+        User existingUser = new User();
+        existingUser.setId(userId);
+        existingUser.setToken("validToken");
+        existingUser.setUserCourses(new ArrayList<>()); // Important for update logic
 
-    // /**
-    //  * Test 7: PUT /users - Test invalid userId format
-    //  * Verifies that the endpoint returns 400 BAD_REQUEST when userId is invalid
-    //  */
-    // @Test
-    // public void updateUser_invalidIdFormat_returnsBadRequest() throws Exception {
-    //     // Invalid ID (not a number)
-    //     String invalidUserId = "invalid-id";
-        
-    //     // Empty update body
-    //     String emptyJson = "{}";
+        // Mock course entity
+        Course mockCourse = mock(Course.class);
+        when(mockCourse.getId()).thenReturn(10L);
+        when(mockCourse.getCourseName()).thenReturn("AI");
 
-    //     // Send request with invalid ID
-    //     MockHttpServletRequestBuilder putRequest = put("/users/" + invalidUserId)
-    //             .contentType(MediaType.APPLICATION_JSON)
-    //             .content(emptyJson)
-    //             .header("Authorization", "Bearer valid-token");
+        // Required mock setups
+        when(courseRepository.findById(10L)).thenReturn(Optional.of(mockCourse));
+        when(userService.getUserById(userId)).thenReturn(existingUser);
 
-    //     // Should return 400 Bad Request
-    //     mockMvc.perform(putRequest)
-    //             .andExpect(status().isBadRequest());
-    // }
+        doNothing().when(userService).authenticateByToken("validToken");
+        doNothing().when(userService).checkAuthorizationById("validToken", userId);
 
-    // /**
-    //  * Test 8: GET /users - Test options request for CORS support
-    //  * Verifies that the API supports CORS preflight requests
-    //  */
-    // @Test
-    // public void checkCorsSupport() throws Exception {
-    //     // when/then
-    //     mockMvc.perform(options("/users")
-    //             .header("Access-Control-Request-Method", "GET")
-    //             .header("Origin", "http://localhost:3000"))
-    //             .andExpect(status().isOk())
-    //             .andExpect(header().exists("Access-Control-Allow-Origin"))
-    //             .andExpect(header().exists("Access-Control-Allow-Methods"));
-    // }
+        when(userService.updateUser(eq(userId), any(User.class))).thenReturn(existingUser);
 
-    /**
-     * Helper Method to convert objects into a JSON string
-     */
+        // Build DTO for update
+        UserPutDTO.CourseSelectionDTO courseSelection = new UserPutDTO.CourseSelectionDTO();
+        courseSelection.setCourseId(10L);
+        courseSelection.setKnowledgeLevel(ProfileKnowledgeLevel.INTERMEDIATE);
+
+        UserPutDTO userPutDTO = new UserPutDTO();
+        userPutDTO.setName("Updated Name");
+        userPutDTO.setBio("Updated Bio");
+        userPutDTO.setProfilePicture("img.png");
+        userPutDTO.setAvailability(UserAvailability.EVENING);
+        userPutDTO.setStudyLevel("BSc");
+        userPutDTO.setStudyGoals(Arrays.asList("Thesis"));
+        userPutDTO.setCourses(Arrays.asList(courseSelection));
+
+        mockMvc.perform(put("/users/1")
+                .header("Authorization", "validToken")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(asJsonString(userPutDTO)))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    public void updateUser_validData_updatesSuccessfully2() throws Exception {
+        Long userId = 1L;
+        String token = "validToken";
+
+        // Mock courses
+        Course course1 = mock(Course.class);
+        Course course2 = mock(Course.class);
+        when(course1.getId()).thenReturn(100L);
+        when(course1.getCourseName()).thenReturn("AI");
+        when(course2.getId()).thenReturn(200L);
+        when(course2.getCourseName()).thenReturn("Data Science");
+
+        when(courseRepository.findById(100L)).thenReturn(Optional.of(course1));
+        when(courseRepository.findById(200L)).thenReturn(Optional.of(course2));
+
+        // Mock existing user from DB
+        User existingUser = new User();
+        existingUser.setId(userId);
+        existingUser.setToken(token);
+        existingUser.setUserCourses(new ArrayList<>()); // Important!
+
+        when(userService.getUserById(userId)).thenReturn(existingUser);
+
+        // Auth & authorization
+        doNothing().when(userService).authenticateByToken(token);
+        doNothing().when(userService).checkAuthorizationById(token, userId);
+
+        // Mock the update call
+        when(userService.updateUser(eq(userId), any(User.class))).thenReturn(existingUser);
+
+        // Prepare input DTO
+        UserPutDTO.CourseSelectionDTO courseSel1 = new UserPutDTO.CourseSelectionDTO();
+        courseSel1.setCourseId(100L);
+        courseSel1.setKnowledgeLevel(ProfileKnowledgeLevel.INTERMEDIATE);
+
+        UserPutDTO.CourseSelectionDTO courseSel2 = new UserPutDTO.CourseSelectionDTO();
+        courseSel2.setCourseId(200L);
+        courseSel2.setKnowledgeLevel(ProfileKnowledgeLevel.INTERMEDIATE);
+
+        UserPutDTO userPutDTO = new UserPutDTO();
+        userPutDTO.setName("Updated Name");
+        userPutDTO.setBio("Updated Bio");
+        userPutDTO.setProfilePicture("updated-pic.png");
+        userPutDTO.setAvailability(UserAvailability.EVENING);
+        userPutDTO.setStudyLevel("MSc");
+        userPutDTO.setStudyGoals(Arrays.asList("Thesis", "Internship"));
+        userPutDTO.setCourses(Arrays.asList(courseSel1, courseSel2));
+
+        // Perform PUT request
+        mockMvc.perform(put("/users/{userId}", userId)
+                .header("Authorization", token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(asJsonString(userPutDTO)))
+            .andExpect(status().isNoContent());
+
+        // Optional: verify service calls
+        verify(userService).authenticateByToken(token);
+        verify(userService).checkAuthorizationById(token, userId);
+        verify(userService).updateUser(eq(userId), any(User.class));
+    }
+
+
     private String asJsonString(final Object object) {
         try {
             return new ObjectMapper().writeValueAsString(object);
         } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, 
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     String.format("The request body could not be created.%s", e));
         }
     }
+
+    
 }

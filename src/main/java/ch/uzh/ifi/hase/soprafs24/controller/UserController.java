@@ -13,6 +13,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
+
 import ch.uzh.ifi.hase.soprafs24.rest.dto.UserPutDTO;
 
 import java.util.ArrayList;
@@ -101,20 +103,22 @@ public class UserController {
 
   @PostMapping("/users/register")
   public ResponseEntity<UserGetDTO> registerUser(@RequestBody UserPostDTO userPostDTO) {
-    User userInput = DTOMapper.INSTANCE.convertUserPostDTOtoEntity(userPostDTO);
-    User createdUser = userService.createUser(userInput, userPostDTO.getCourseSelections());
+      User userInput = DTOMapper.INSTANCE.convertUserPostDTOtoEntity(userPostDTO);
+      User createdUser = userService.createUser(userInput, userPostDTO.getCourseSelections());
 
-    // if (userPostDTO.getCourseSelections() != null && !userPostDTO.getCourseSelections().isEmpty()) {
-    //   userService.assignCoursesWithKnowledgeLevels(createdUser, userPostDTO.getCourseSelections());
-    // }
+      if (createdUser == null) {
+          throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid user registration data.");
+      }
 
-    HttpHeaders headers = new HttpHeaders();
-    headers.add("Authorization", "Bearer " + createdUser.getToken());
+      HttpHeaders headers = new HttpHeaders();
+      headers.add("Authorization", "Bearer " + createdUser.getToken());
+      headers.add("Location", "/users/" + createdUser.getId());
 
-    UserGetDTO userGetDTO = DTOMapper.INSTANCE.convertEntityToUserGetDTO(createdUser);
+      UserGetDTO userGetDTO = DTOMapper.INSTANCE.convertEntityToUserGetDTO(createdUser);
 
-    return ResponseEntity.status(HttpStatus.CREATED).headers(headers).body(userGetDTO);
+      return ResponseEntity.status(HttpStatus.CREATED).headers(headers).body(userGetDTO);
   }
+
   
   /**
    * Endpoint that uses the Authorization token to identify and return the current user
