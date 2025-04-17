@@ -102,4 +102,15 @@ public class ChatController {
         return ResponseEntity.ok(status);
     }
 
+    /**
+     * PUT /chat/channels/{channelId} -> update a channel (mainly group channels)
+     */
+    @PutMapping("/channels/{channelId}")
+    public ChatChannelGetDTO updateChatChannel(
+            @PathVariable Long channelId,
+            @RequestBody ChatChannelPostDTO updateDTO) {
+        ChatChannel updated = chatService.updateChatChannel(channelId, updateDTO);
+        return DTOMapper.INSTANCE.convertEntityToChatChannelGetDTO(updated);
+    }
+
 }

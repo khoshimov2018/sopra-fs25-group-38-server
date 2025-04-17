@@ -18,6 +18,7 @@ import org.springframework.http.MediaType;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.test.web.servlet.MockMvc;
 import java.util.Arrays;
+import java.util.List;
 import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -218,4 +219,96 @@ public class ChatControllerIntegrationTest {
                 .andExpect(jsonPath("$.typing", is(false)))
                 .andExpect(jsonPath("$.userStatus", is("ONLINE")));
     }
+
+    /**
+     * PUT /chat/channels/{channelId}
+     * - changes name, profileImage, and participants.
+     */
+    @Test
+    public void testUpdateChatChannel_success() throws Exception {
+        // 1) create an initial group channel with Alice & Bob
+        ChatChannelPostDTO createDTO = new ChatChannelPostDTO();
+        createDTO.setChannelName("Old Name");
+        createDTO.setChannelType("group");
+        createDTO.setChannelProfileImage("old.png");
+        createDTO.setParticipantIds(Arrays.asList(userAlice.getId(), userBob.getId()));
+
+        String createJson = objectMapper.writeValueAsString(createDTO);
+        String createResponse = mockMvc.perform(post("/chat/channels")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(createJson))
+                .andExpect(status().isCreated())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        Long channelId = objectMapper.readTree(createResponse).get("channelId").asLong();
+
+        // 2) PUT an update: rename, new image, add Carol, remove Bob
+        ChatChannelPostDTO updateDTO = new ChatChannelPostDTO();
+        updateDTO.setChannelName("New Name");
+        updateDTO.setChannelProfileImage("new.png");
+        updateDTO.setParticipantIds(Arrays.asList(userAlice.getId(), userCarol.getId()));
+
+        String updateJson = objectMapper.writeValueAsString(updateDTO);
+
+        mockMvc.perform(put("/chat/channels/" + channelId)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(updateJson))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.channelId", is(channelId.intValue())))
+                .andExpect(jsonPath("$.channelName", is("New Name")))
+                .andExpect(jsonPath("$.channelProfileImage", is("new.png")))
+                .andExpect(jsonPath("$.participants", hasSize(2)))
+                .andExpect(jsonPath("$.participants[*].userId",
+                                   containsInAnyOrder(
+                                     userAlice.getId().intValue(),
+                                     userCarol.getId().intValue()
+                                   )));
+    }
+
+    @Test
+    public void testUpdateChatChannel_notFound() throws Exception {
+        ChatChannelPostDTO dto = new ChatChannelPostDTO();
+        dto.setChannelName("X");
+        dto.setChannelProfileImage("x.png");
+        dto.setParticipantIds(List.of(userAlice.getId()));
+
+        mockMvc.perform(put("/chat/channels/9999")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void testUpdateChatChannel_individualForbidden() throws Exception {
+        // create an individual channel first
+        ChatChannelPostDTO createDTO = new ChatChannelPostDTO();
+        createDTO.setChannelType("individual");
+        createDTO.setParticipantIds(Arrays.asList(userAlice.getId(), userBob.getId()));
+        createDTO.setChannelName("Alice&Bob");
+        createDTO.setChannelProfileImage(null);
+
+        String createJson = objectMapper.writeValueAsString(createDTO);
+        String resp = mockMvc.perform(post("/chat/channels")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(createJson))
+                .andExpect(status().isCreated())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+        Long indId = objectMapper.readTree(resp).get("channelId").asLong();
+
+        // now try to PUT on it
+        ChatChannelPostDTO update = new ChatChannelPostDTO();
+        update.setChannelName("ShouldFail");
+        update.setChannelProfileImage("fail.png");
+        update.setParticipantIds(Arrays.asList(userAlice.getId(), userBob.getId()));
+
+        mockMvc.perform(put("/chat/channels/" + indId)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(update)))
+                .andExpect(status().isBadRequest());
+    }
+
 }

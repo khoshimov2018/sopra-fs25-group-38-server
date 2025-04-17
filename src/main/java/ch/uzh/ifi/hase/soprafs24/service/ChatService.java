@@ -26,9 +26,11 @@ import org.springframework.web.server.ResponseStatusException;
 import org.springframework.transaction.annotation.Transactional;
 // utility
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.Set;
+import java.util.Iterator;
 
 @Service
 public class ChatService {
@@ -220,6 +222,71 @@ public class ChatService {
             }
         }
         chatChannelRepository.flush();
+    }
+
+    /*
+     * response to the PUT /chat/channels/{channelId} request - update the chatchannel that's already been created
+     */
+    public ChatChannel updateChatChannel(Long channelId, ChatChannelPostDTO dto) {
+        // 1) load & verify
+        ChatChannel channel = chatChannelRepository.findById(channelId)
+            .orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "ChatChannel with id " + channelId + " not found"));
+
+        // only allow updating of group channels
+        if ("individual".equalsIgnoreCase(channel.getType())) {
+            throw new ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "Cannot update an individual channel via this endpoint");
+        }
+
+        // 2) update name & image
+        if (dto.getChannelName() != null) {
+            channel.setName(dto.getChannelName());
+        }
+        channel.setChannelProfileImage(dto.getChannelProfileImage());
+        channel.setUpdatedAt(LocalDateTime.now());
+
+        // 3) reconcile participants
+        List<Long> newIds = dto.getParticipantIds();
+        if (newIds == null || newIds.isEmpty()) {
+            throw new ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "At least one participant is required");
+        }
+        Set<Long> newIdSet = new HashSet<>(newIds);
+
+        // a) remove participants no longer in the new list
+        Iterator<ChatParticipant> it = channel.getParticipants().iterator();
+        while (it.hasNext()) {
+            ChatParticipant cp = it.next();
+            if (!newIdSet.contains(cp.getUser().getId())) {
+                it.remove();
+                cp.setChannel(null);  // orphanRemoval will delete
+            }
+        }
+
+        // b) add any new participants
+        Set<Long> existingIds = channel.getParticipants().stream()
+            .map(p -> p.getUser().getId())
+            .collect(Collectors.toSet());
+
+        for (Long uid : newIdSet) {
+            if (!existingIds.contains(uid)) {
+                User user = userRepository.findById(uid)
+                    .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "User with id " + uid + " not found"));
+                ChatParticipant p = new ChatParticipant(user, "member");
+                channel.addParticipant(p);
+            }
+        }
+
+        // 4) save & return
+        ChatChannel saved = chatChannelRepository.save(channel);
+        chatChannelRepository.flush();
+        return saved;
     }
     
 
