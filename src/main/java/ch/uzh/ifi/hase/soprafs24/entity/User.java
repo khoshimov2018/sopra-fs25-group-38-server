@@ -74,6 +74,7 @@ public class User implements Serializable {
   @Column(nullable = true)
   private String profilePicture;
 
+  @Lob
   @Column(nullable = true)
   private String bio;
   @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
