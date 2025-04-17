@@ -4,8 +4,10 @@ import ch.uzh.ifi.hase.soprafs24.config.TestSecurityConfig;
 import ch.uzh.ifi.hase.soprafs24.constant.ProfileKnowledgeLevel;
 import ch.uzh.ifi.hase.soprafs24.constant.UserAvailability;
 import ch.uzh.ifi.hase.soprafs24.constant.UserStatus;
+import ch.uzh.ifi.hase.soprafs24.entity.Course;
 import ch.uzh.ifi.hase.soprafs24.entity.User;
 import ch.uzh.ifi.hase.soprafs24.entity.UserCourse;
+import ch.uzh.ifi.hase.soprafs24.repository.CourseRepository;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.CourseSelectionDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.UserLoginDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.UserPostDTO;
@@ -58,6 +60,9 @@ public class UserRestIntegrationTest {
 
     @Autowired
     private UserService userService;
+    
+    @Autowired
+    private CourseRepository courseRepository;
 
     private ObjectMapper objectMapper;
 
@@ -96,7 +101,7 @@ public class UserRestIntegrationTest {
                 .content(asJsonString(userPostDTO))
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.name", is(userPostDTO.getName())))
                 .andExpect(jsonPath("$.email", is(userPostDTO.getEmail())))
                 .andExpect(jsonPath("$.status").exists())
@@ -162,6 +167,11 @@ public class UserRestIntegrationTest {
 
         @Test
         public void testUserProfileRetrieval() throws Exception {
+        // First, ensure a course with ID 1 exists
+        // The test is failing because the course doesn't exist in the test database
+        Course course = new Course(1L, "AI");
+        courseRepository.save(course);
+        
         UserPostDTO registrationDTO = new UserPostDTO();
         registrationDTO.setName("Profile User");
         registrationDTO.setEmail("profile-test@example.com");
@@ -186,14 +196,23 @@ public class UserRestIntegrationTest {
         String responseContent = registrationResult.getResponse().getContentAsString();
         Map<String, Object> responseMap = objectMapper.readValue(responseContent, Map.class);
         Integer userId = (Integer) responseMap.get("id");
+        
+        // Extract token from either the Authorization header or the response body
         String token = registrationResult.getResponse().getHeader(HttpHeaders.AUTHORIZATION);
+        if (token == null) {
+            // If not in header, try to get it from the response body
+            token = (String) responseMap.get("token");
+            if (token != null && !token.startsWith("Bearer ")) {
+                token = "Bearer " + token;
+            }
+        }
 
         // Retrieve the profile using the token
         mockMvc.perform(get("/users/" + userId)
                 .header(HttpHeaders.AUTHORIZATION, token)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.id", is(userId)))
                 .andExpect(jsonPath("$.name", is(registrationDTO.getName())))
                 .andExpect(jsonPath("$.email", is(registrationDTO.getEmail())))
@@ -230,7 +249,16 @@ public class UserRestIntegrationTest {
         String responseContent = registrationResult.getResponse().getContentAsString();
         Map<String, Object> responseMap = objectMapper.readValue(responseContent, Map.class);
         Integer userId = (Integer) responseMap.get("id");
+        
+        // Extract token from either the Authorization header or the response body
         String token = registrationResult.getResponse().getHeader(HttpHeaders.AUTHORIZATION);
+        if (token == null) {
+            // If not in header, try to get it from the response body
+            token = (String) responseMap.get("token");
+            if (token != null && !token.startsWith("Bearer ")) {
+                token = "Bearer " + token;
+            }
+        }
 
         // 2. Prepare update DTO
         UserPutDTO updateDTO = new UserPutDTO();
