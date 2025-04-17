@@ -31,14 +31,20 @@ public class StudentFilterController {
     public List<UserGetDTO> getFilteredStudents(
             @RequestParam(required = false) List<Long> courseIds,
             // firstly, receive the availability as string.
-            @RequestParam(required = false) List<String> availability) {
-
+            @RequestParam(required = false) List<String> availability,
+            @RequestParam(defaultValue = "false") boolean matchAny
+            ) {
+        
         List<User> allUsers = userService.getUsers();
         List<UserGetDTO> userGetDTOs = new ArrayList<>();
 
         List<Long> courseMatchedUserIds = new ArrayList<>();
         if (courseIds != null && !courseIds.isEmpty()) {
-            courseMatchedUserIds = courseService.findUserIdsEnrolledInAllCourses(courseIds);
+            if (matchAny) {
+                courseMatchedUserIds = courseService.findUserIdsByAnyCourseIds(courseIds);
+            } else {
+                courseMatchedUserIds = courseService.findUserIdsEnrolledInAllCourses(courseIds);
+            }        
         }
 
         List<UserAvailability> availabilityEnums = new ArrayList<>();

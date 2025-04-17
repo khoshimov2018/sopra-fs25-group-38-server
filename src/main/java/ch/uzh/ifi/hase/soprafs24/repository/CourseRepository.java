@@ -16,12 +16,17 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
         SELECT "USER_ID"
         FROM "USER_COURSE"
         WHERE "COURSE_ID" IN (:courseIds)
+    """, nativeQuery = true)
+    List<Long> findUserIdsByAnyCourseIds(@Param("courseIds") List<Long> courseIds);
+    
+    @Query(value = """
+        SELECT "USER_ID"
+        FROM "USER_COURSE"
+        WHERE "COURSE_ID" IN (:courseIds)
         GROUP BY "USER_ID"
         HAVING COUNT(DISTINCT "COURSE_ID") = :count
     """, nativeQuery = true)
     List<Long> findUserIdsByAllCourseIds(@Param("courseIds") List<Long> courseIds, @Param("count") Long count);
-    
-    
 
     // Using JPQL instead of native query to ensure proper binding of enums in IN clauses
     @Query("SELECT u.id FROM User u WHERE u.availability IN :availability GROUP BY u.id HAVING COUNT(u.id) = :count")
