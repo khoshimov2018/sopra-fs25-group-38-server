@@ -128,5 +128,11 @@ public class MatchService {
             matchRepository.save(newMatch);
         }
     }
+
+    public void deleteMatchBetweenUsers(Long userAId, Long userBId) {
+        Optional<Match> matchOptional = matchRepository.findMatchByUsers(userAId, userBId);
+        matchOptional.ifPresent(matchRepository::delete);
+    }
+    
     
 }

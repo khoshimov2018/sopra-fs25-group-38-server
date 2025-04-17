@@ -6,6 +6,8 @@ import ch.uzh.ifi.hase.soprafs24.entity.User;
 import ch.uzh.ifi.hase.soprafs24.repository.BlockRepository;
 import ch.uzh.ifi.hase.soprafs24.repository.ReportRepository;
 import ch.uzh.ifi.hase.soprafs24.repository.UserRepository;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,13 +22,20 @@ public class ReportBlockService {
     private final ReportRepository reportRepository;
     private final BlockRepository blockRepository;
     private final UserRepository userRepository;
+    private final ChatService chatService;
+    private final MatchService matchService;
 
+    @Autowired
     public ReportBlockService(ReportRepository reportRepository,
                               BlockRepository blockRepository,
-                              UserRepository userRepository) {
+                              UserRepository userRepository,
+                              ChatService chatService,
+                              MatchService matchService) {
         this.reportRepository = reportRepository;
         this.blockRepository = blockRepository;
         this.userRepository = userRepository;
+        this.chatService = chatService;
+        this.matchService = matchService;
     }
 
     public void reportUser(Long reporterId, Long reportedUserId, String reason) {
@@ -41,6 +50,14 @@ public class ReportBlockService {
 
         Report report = new Report(reporter, reportedUser, reason);
         reportRepository.save(report);
+
+        if (!blockRepository.existsByBlockerIdAndBlockedUserId(reporterId, reportedUserId)) {
+            Block block = new Block(reporter, reportedUser);
+            blockRepository.save(block);
+        }
+
+        chatService.deleteIndividualChannelBetweenUsers(reporterId, reportedUserId);
+        matchService.deleteMatchBetweenUsers(reporterId, reportedUserId);
     }
 
     public void blockUser(Long blockerId, Long blockedUserId) {
@@ -59,6 +76,8 @@ public class ReportBlockService {
 
         Block block = new Block(blocker, blockedUser);
         blockRepository.save(block);
+        chatService.deleteIndividualChannelBetweenUsers(blockerId, blockedUserId);
+        matchService.deleteMatchBetweenUsers(blockerId, blockedUserId);
     }
 
     public List<Report> getAllReports() {
@@ -70,6 +89,8 @@ public class ReportBlockService {
     }
 
     public boolean isInteractionBlocked(Long userId1, Long userId2) {
-        return blockRepository.existsByBlockerIdAndBlockedUserIdOrBlockedUserIdAndBlockerId(userId1, userId2, userId1, userId2);
+        return blockRepository.existsByBlockerIdAndBlockedUserIdOrBlockedUserIdAndBlockerId(
+                userId1, userId2, userId1, userId2
+        );
     }
 }

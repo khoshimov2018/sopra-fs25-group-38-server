@@ -3,6 +3,8 @@ package ch.uzh.ifi.hase.soprafs24.repository;
 import ch.uzh.ifi.hase.soprafs24.entity.Block;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
@@ -23,4 +25,6 @@ public interface BlockRepository extends JpaRepository<Block, Long> {
 
     // Delete all records involving the given user(both of blockId, blockedUserId)
     void deleteAllByBlockerIdOrBlockedUserId(Long blockerId, Long blockedUserId);
+
+
 }

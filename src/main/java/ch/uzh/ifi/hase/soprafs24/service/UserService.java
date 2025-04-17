@@ -4,6 +4,7 @@ import ch.uzh.ifi.hase.soprafs24.constant.ProfileKnowledgeLevel;
 import ch.uzh.ifi.hase.soprafs24.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs24.entity.User;
 import ch.uzh.ifi.hase.soprafs24.entity.UserCourse;
+import ch.uzh.ifi.hase.soprafs24.entity.Block;
 import ch.uzh.ifi.hase.soprafs24.entity.ChatChannel;
 import ch.uzh.ifi.hase.soprafs24.entity.ChatParticipant;
 import ch.uzh.ifi.hase.soprafs24.entity.Course;
@@ -36,6 +37,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.stream.Stream;
 import java.util.Set;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -63,6 +65,7 @@ public class UserService {
   private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
   private final CourseRepository courseRepository;
 
+
   @Autowired
   private UserCourseRepository userCourseRepository;
   @Autowired
@@ -79,14 +82,35 @@ public class UserService {
   private ProfileRepository profileRepository;
 
 
+  public List<Long> getBlockedOrBlockingUserIds(Long userId) {
+      List<Long> blocked = blockRepository.findByBlockerId(userId)
+          .stream().map(Block::getBlockedUserId).toList();
+
+      List<Long> blocking = blockRepository.findByBlockedUserId(userId)
+          .stream().map(Block::getBlockerId).toList();
+
+      return Stream.concat(blocked.stream(), blocking.stream())
+          .distinct()
+          .toList();
+  }
+
   @Autowired
   public UserService(@Qualifier("userRepository") UserRepository userRepository,
-                     MatchRepository matchRepository,
-                     CourseRepository courseRepository) {
+                    MatchRepository matchRepository,
+                    CourseRepository courseRepository,
+                    BlockRepository blockRepository) {
       this.userRepository = userRepository;
       this.matchRepository = matchRepository;
       this.courseRepository = courseRepository;
+      this.blockRepository = blockRepository;
   }
+
+
+  public List<User> getDiscoverableUsers(Long currentUserId) {
+    List<Long> excludedUserIds = getBlockedOrBlockingUserIds(currentUserId);
+    return userRepository.findDiscoverableUsers(currentUserId, excludedUserIds);
+  }
+
   
 
   public List<User> getUsers() {

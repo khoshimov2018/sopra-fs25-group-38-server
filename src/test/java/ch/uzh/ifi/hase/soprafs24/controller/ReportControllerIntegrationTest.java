@@ -2,6 +2,8 @@ package ch.uzh.ifi.hase.soprafs24.controller;
 
 import ch.uzh.ifi.hase.soprafs24.config.TestSecurityConfig;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.ReportDTO;
+import ch.uzh.ifi.hase.soprafs24.rest.dto.UserGetDTO;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,11 +15,14 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 
 import java.util.List;
 import java.util.Map;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -56,19 +61,62 @@ public class ReportControllerIntegrationTest {
             .andExpect(status().isCreated());
     }
 
+    @Test
+    public void testAdminCanViewReports() throws Exception {
+        // First report a user
+        testReportUserSuccessfully();
+
+        // Login using the seeded admin account
+        String adminToken = loginAs("admin@example.com", "securePassword123");
+
+        mockMvc.perform(get("/reports")
+                .header("Authorization", "Bearer " + adminToken))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$[0].reason").value("Spamming inappropriate content"));
+    }
+
     private Long registerTestUser(String email) throws Exception {
+        return registerTestUser(email, "password123");
+    }
+
+    private Long registerTestUser(String email, String password) throws Exception {
         var user = Map.of(
                 "name", "User",
                 "email", email,
-                "password", "password123",
+                "password", password,
                 "studyLevel", "Bachelor",
                 "studyGoals", List.of("exam prep")
         );
+
         var result = mockMvc.perform(post("/users/register")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(user)))
+            .andExpect(status().isCreated())
             .andReturn();
+
         Map<String, Object> response = objectMapper.readValue(result.getResponse().getContentAsString(), Map.class);
         return Long.valueOf((Integer) response.get("id"));
+    }
+
+    private String loginAs(String email) throws Exception {
+        return loginAs(email, "password123");
+    }
+
+    private String loginAs(String email, String password) throws Exception {
+        String requestBody = String.format("{\"email\": \"%s\", \"password\": \"%s\"}", email, password);
+
+        MvcResult result = mockMvc.perform(post("/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody))
+            .andExpect(status().isOk())
+            .andReturn();
+
+        String content = result.getResponse().getContentAsString();
+        if (content == null || content.isBlank()) {
+            throw new IllegalStateException("Login response body was empty");
+        }
+
+        UserGetDTO user = objectMapper.readValue(content, UserGetDTO.class);
+        return user.getToken();
     }
 }

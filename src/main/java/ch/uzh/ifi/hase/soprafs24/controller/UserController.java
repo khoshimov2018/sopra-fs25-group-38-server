@@ -20,6 +20,7 @@ import ch.uzh.ifi.hase.soprafs24.rest.dto.UserPutDTO;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @CrossOrigin(origins = {"http://localhost:3000", "https://sopra-fs25-group-38-client.vercel.app"})
 @RestController
@@ -160,4 +161,13 @@ public class UserController {
       userService.deleteUserByToken(token);
       return ResponseEntity.noContent().build();
   }
+
+  @GetMapping("/users/discoverable/{userId}")
+  public List<UserGetDTO> getDiscoverableUsers(@PathVariable Long userId) {
+      List<User> discoverable = userService.getDiscoverableUsers(userId);
+      return discoverable.stream()
+          .map(DTOMapper.INSTANCE::convertEntityToUserGetDTO)
+          .collect(Collectors.toList());
+  }
+
 }
