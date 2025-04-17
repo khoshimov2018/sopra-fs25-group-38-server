@@ -12,7 +12,6 @@ import java.util.Set;
 import java.time.LocalDateTime;
 import java.util.List;
 import ch.uzh.ifi.hase.soprafs24.entity.Course;
-import java.util.List;
 /**
  * Internal User Representation
  * This class composes the internal representation of the user and defines how
@@ -71,7 +70,8 @@ public class User implements Serializable {
   @Column(nullable = false)
   private String studyLevel;
 
-  @Column(nullable = true)
+  @Lob
+  @Column(nullable = true, columnDefinition = "CLOB") 
   private String profilePicture;
 
   @Lob
