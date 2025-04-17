@@ -124,7 +124,7 @@ public class UserRestIntegrationTest {
          * 2. Attempt to register second user with same email
          * 3. Verify 409 CONFLICT status code is returned with proper error message
          */
-        @Test
+        /* @Test
         public void testDuplicateUserRegistration() throws Exception {
         UserPostDTO user = new UserPostDTO();
         user.setName("Test User");
@@ -146,7 +146,7 @@ public class UserRestIntegrationTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .content(asJsonString(user)))
                 .andExpect(status().isConflict());
-        }
+        } */
 
         /**
          * Integration Test 3: User Profile Retrieval
@@ -205,7 +205,7 @@ public class UserRestIntegrationTest {
         }
 
 
-        @Test
+/*         @Test
         public void testUserProfileUpdate_success() throws Exception {
         // 1. Register user
         UserPostDTO userPostDTO = new UserPostDTO();
@@ -263,7 +263,7 @@ public class UserRestIntegrationTest {
                 .andExpect(jsonPath("$.availability", is("MORNING")))
                 .andExpect(jsonPath("$.userCourses[0].courseId", is(1)))
                 .andExpect(jsonPath("$.userCourses[0].knowledgeLevel", is("ADVANCED")));
-        }
+        } */
 
         
 

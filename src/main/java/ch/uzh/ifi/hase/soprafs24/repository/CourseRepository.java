@@ -13,13 +13,14 @@ import java.util.Optional;
 @Repository
 public interface CourseRepository extends JpaRepository<Course, Long> {
     @Query(value = """
-        SELECT u.user_id
-        FROM user_course u
-        WHERE u.course_id IN (:courseIds)
-        GROUP BY u.user_id
-        HAVING COUNT(DISTINCT u.course_id) = :count
+        SELECT "USER_ID"
+        FROM "USER_COURSE"
+        WHERE "COURSE_ID" IN (:courseIds)
+        GROUP BY "USER_ID"
+        HAVING COUNT(DISTINCT "COURSE_ID") = :count
     """, nativeQuery = true)
     List<Long> findUserIdsByAllCourseIds(@Param("courseIds") List<Long> courseIds, @Param("count") Long count);
+    
     
 
     // Using JPQL instead of native query to ensure proper binding of enums in IN clauses

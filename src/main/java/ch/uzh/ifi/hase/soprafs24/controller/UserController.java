@@ -77,22 +77,15 @@ public class UserController {
 
   @PutMapping("/users/{userId}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
-  public void updateUser(
-      @PathVariable Long userId,
-      @RequestBody UserPutDTO userUpdateDTO,
-      @RequestHeader(value = "Authorization", required = false) String token) {
-
-    userService.authenticateByToken(token);
-    userService.checkAuthorizationById(token, userId);
-
-    // Get the user from the DB
-    User existingUser = userService.getUserById(userId);
-   
-    // Apply updates from DTO to entity
-    DTOMapper.INSTANCE.updateUserFromDTO(userUpdateDTO, existingUser, courseRepository);
+  public void updateUser(@PathVariable Long userId,
+                         @RequestBody UserPutDTO dto,
+                         @RequestHeader("Authorization") String token) {
+      userService.authenticateByToken(token);
+      userService.checkAuthorizationById(token, userId);
   
-    // Save updated user
-    userService.updateUser(userId, existingUser);
+      User user = userService.getUserById(userId);
+      DTOMapper.INSTANCE.updateUserFromDTO(dto, user, courseRepository);
+      userService.updateUser(userId, user);
   }
 
   @GetMapping("users/{userId}/accepted-matches")

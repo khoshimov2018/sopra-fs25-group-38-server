@@ -257,10 +257,10 @@ public class UserService {
    * @throws ResponseStatusException if user not found
    */
   public User getUserById(Long userId) {
-    return userRepository.findWithCoursesById(userId)
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, 
-            String.format("User with ID %d was not found", userId)));
-  }
+    return userRepository.findById(userId)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+}
+
   
   //find userIds for matches
   public Set<Long> getMatchIdsForUser(Long userId) {
@@ -359,42 +359,26 @@ public class UserService {
     }
   }
   
-    @Transactional 
-    public User updateUser(Long userId, User updatedUser) {
-      User existingUser = userRepository.findById(userId)
-          .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                  String.format("User with ID %d was not found", userId)));
+  @Transactional
+  public User updateUser(Long userId, User updatedUser) {
+    User existingUser = userRepository.findById(userId)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
-      // Validate required fields
-      if (updatedUser.getAvailability() == null) {
-          throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Availability is required.");
-      }
+    // Just validate here
+    if (updatedUser.getAvailability() == null) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Availability is required.");
+    }
+    if (updatedUser.getStudyGoals() == null || updatedUser.getStudyGoals().trim().isEmpty()) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Study goals are required.");
+    }
+    if (updatedUser.getUserCourses() == null || updatedUser.getUserCourses().isEmpty()) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "At least one course must be selected.");
+    }
 
-      if (updatedUser.getStudyGoals() == null || updatedUser.getStudyGoals().trim().isEmpty()) {
-          throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Study goals are required.");
-      }
-
-      if (updatedUser.getUserCourses() == null || updatedUser.getUserCourses().isEmpty()) {
-          throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "At least one course selection is required.");
-      }
-
-      // Merge updated fields into the existing entity
-      existingUser.setName(updatedUser.getName());
-      existingUser.setBio(updatedUser.getBio());
-      existingUser.setProfilePicture(updatedUser.getProfilePicture());
-      existingUser.setAvailability(updatedUser.getAvailability());
-      existingUser.setStudyLevel(updatedUser.getStudyLevel());
-      existingUser.setStudyGoals(updatedUser.getStudyGoals());
-
-      // Handle userCourses update
-      existingUser.getUserCourses().clear();
-      for (UserCourse uc : updatedUser.getUserCourses()) {
-          uc.setUser(existingUser); // re-link to this user
-          existingUser.getUserCourses().add(uc);
-      }
-
-      return userRepository.saveAndFlush(existingUser);
+    return userRepository.saveAndFlush(updatedUser); // DTOMapper already applied changes to existingUser
   }
+
+  
 
 
   

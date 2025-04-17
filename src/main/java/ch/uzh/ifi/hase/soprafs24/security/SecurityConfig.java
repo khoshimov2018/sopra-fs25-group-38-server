@@ -28,7 +28,7 @@ public class SecurityConfig {
             .and()
             .authorizeRequests()
                 // Public endpoints - no authentication needed
-                .antMatchers("/users/register", "/login", "/courses", "/chat/**", "/users/me").permitAll()
+                .antMatchers("/users/register", "/login", "/courses", "/chat/**", "/users/me", "/users/**").permitAll()
                 // Allow H2 console access
                 .antMatchers("/h2-console/**").permitAll()
                 // OPTIONS requests are always permitted for CORS preflight

@@ -229,9 +229,6 @@ public class User implements Serializable {
     return userCourses;
   }
 
-  public void setUserCourses(List<UserCourse> userCourses) {
-      this.userCourses = userCourses;
-  }
 
   // A no-argument constructor is required by JPA for creating instances via reflection.
   public User() {
@@ -244,4 +241,16 @@ public class User implements Serializable {
     this.password = password;
     this.creationDate = LocalDateTime.now();
   }
+
+  public void setUserCourses(List<UserCourse> newCourses) {
+    this.userCourses.clear();
+    if (newCourses != null) {
+        for (UserCourse uc : newCourses) {
+            uc.setUser(this); // link each course
+            this.userCourses.add(uc);
+        }
+    }
+}
+
+
 }

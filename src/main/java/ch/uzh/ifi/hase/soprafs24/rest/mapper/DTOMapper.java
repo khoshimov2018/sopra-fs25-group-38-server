@@ -39,21 +39,28 @@ public interface DTOMapper {
         if (userPutDTO.getAvailability() != null) user.setAvailability(userPutDTO.getAvailability());
         if (userPutDTO.getStudyLevel() != null) user.setStudyLevel(userPutDTO.getStudyLevel());
         if (userPutDTO.getStudyGoals() != null) user.setStudyGoals(joinStudyGoals(userPutDTO.getStudyGoals()));
-
+    
+        // Properly rebuild userCourses
         if (userPutDTO.getCourseSelections() != null) {
-            user.getUserCourses().clear();
+            List<UserCourse> updatedCourses = new ArrayList<>();
+    
             for (CourseSelectionDTO selection : userPutDTO.getCourseSelections()) {
                 Course course = courseRepository.findById(selection.getCourseId())
-                        .orElseThrow(() -> new IllegalArgumentException("Course not found: " + selection.getCourseId()));
-
+                    .orElseThrow(() -> new IllegalArgumentException("Course not found: " + selection.getCourseId()));
+    
                 UserCourse userCourse = new UserCourse();
-                userCourse.setUser(user);
+                userCourse.setUser(user); // link back
                 userCourse.setCourse(course);
                 userCourse.setKnowledgeLevel(selection.getKnowledgeLevel());
-                user.getUserCourses().add(userCourse);
+    
+                updatedCourses.add(userCourse);
             }
+    
+            user.setUserCourses(updatedCourses); // ✅ Replace collection
         }
     }
+    
+    
 
     // --- STUDY GOALS MAPPING HELPERS ---
 

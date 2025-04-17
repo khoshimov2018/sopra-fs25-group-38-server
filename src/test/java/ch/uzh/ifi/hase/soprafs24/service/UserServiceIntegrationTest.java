@@ -1,18 +1,41 @@
 package ch.uzh.ifi.hase.soprafs24.service;
 
+import ch.uzh.ifi.hase.soprafs24.constant.ProfileKnowledgeLevel;
+import ch.uzh.ifi.hase.soprafs24.constant.UserAvailability;
 import ch.uzh.ifi.hase.soprafs24.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs24.entity.User;
 import ch.uzh.ifi.hase.soprafs24.repository.UserRepository;
+import ch.uzh.ifi.hase.soprafs24.rest.dto.CourseSelectionDTO;
+import ch.uzh.ifi.hase.soprafs24.rest.dto.UserPostDTO;
+import ch.uzh.ifi.hase.soprafs24.rest.dto.UserPutDTO;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.web.server.ResponseStatusException;
 
+import antlr.collections.List;
+
+import static org.hamcrest.Matchers.anyOf;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.net.http.HttpHeaders;
+import java.util.Arrays;
+import java.util.Map;
+
+import org.apache.tomcat.util.http.parser.MediaType;
 
 /**
  * Test class for the UserResource REST resource.
@@ -36,6 +59,7 @@ public class UserServiceIntegrationTest {
     userRepository.deleteAll();
   }
 
+
 /*   @Test
   public void createUser_validInputs_success() {
     // given
@@ -56,6 +80,12 @@ public class UserServiceIntegrationTest {
     assertNotNull(createdUser.getToken());
     assertEquals(UserStatus.OFFLINE, createdUser.getStatus());
   } */
+
+
+  private Object asJsonString(UserPutDTO updateDTO) {
+    // TODO Auto-generated method stub
+    throw new UnsupportedOperationException("Unimplemented method 'asJsonString'");
+  }
 
   /* @Test
   public void createUser_duplicateUsername_throwsException() {
