@@ -49,7 +49,7 @@ public class User implements Serializable {
   @Column(nullable = false)
   private LocalDateTime creationDate;
 
-  @Column(nullable = false, unique = true)
+  @Column(nullable = true, unique = true)
   private String token;
 
   @Column(nullable = true, unique = true)

@@ -413,19 +413,29 @@ public class UserService {
    * @throws ResponseStatusException if token is invalid or user not found
    */
   public void logoutUserByToken(String token) {
+    System.out.println(">>> Incoming token: " + token);
+  
     if (token != null && token.startsWith("Bearer ")) {
       token = token.substring(7);
     }
-
+  
     User user = userRepository.findByToken(token);
+  
     if (user == null) {
+      System.out.println(">>> No user found for this token!");
       throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid token.");
     }
-
+  
+    System.out.println(">>> Logging out user: " + user.getEmail());
+  
     user.setStatus(UserStatus.OFFLINE);
+    user.setToken(null);
     userRepository.save(user);
     userRepository.flush();
+  
+    System.out.println(">>> Status set to OFFLINE and token cleared for: " + user.getEmail());
   }
+  
 
   private ProfileKnowledgeLevel knowledgeLevel;
 
