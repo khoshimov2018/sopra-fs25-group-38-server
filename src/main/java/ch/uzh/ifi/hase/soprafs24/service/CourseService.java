@@ -30,7 +30,11 @@ public class CourseService {
         return courseRepository.findUserIdsByAllCourseIds(courseIds, (long) courseIds.size());
     }
 
-    // find userId who have same availability.
+    // find userId who have at least one same course
+    public List<Long> findUserIdsByAnyCourseIds(List<Long> courseIds) {
+        return courseRepository.findUserIdsByAnyCourseIds(courseIds);
+    }
+    
     // uses JPQL, allowing direct enum binding, not native query, required converting enums to Strings
     public List<Long> findUserIdsEnrolledInAllAvailability(List<UserAvailability> availability) {
         return courseRepository.findUserIdsEnrolledInAllAvailability(availability, (long) availability.size());
