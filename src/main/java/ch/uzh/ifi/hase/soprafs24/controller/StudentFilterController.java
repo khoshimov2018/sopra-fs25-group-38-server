@@ -59,6 +59,11 @@ public class StudentFilterController {
             Long userId = user.getId();
             if (userId == null) continue;
 
+            // Skip admin user
+            if ("admin@example.com".equalsIgnoreCase(user.getEmail())) {
+                continue;
+            }
+
             boolean matchesCourse = courseMatchedUserIds.isEmpty() || courseMatchedUserIds.contains(userId);
             boolean matchesAvailability = availabilityMatchedUserIds.isEmpty() || availabilityMatchedUserIds.contains(userId);
 
