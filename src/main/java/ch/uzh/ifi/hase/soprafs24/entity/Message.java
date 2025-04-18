@@ -2,8 +2,6 @@ package ch.uzh.ifi.hase.soprafs24.entity;
 
 import javax.persistence.*;
 
-import org.apache.tomcat.jni.Local;
-
 import java.io.Serializable;
 import java.time.LocalDateTime;
 

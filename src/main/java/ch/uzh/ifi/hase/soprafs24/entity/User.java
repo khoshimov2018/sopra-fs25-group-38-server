@@ -11,7 +11,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.time.LocalDateTime;
 import java.util.List;
-import ch.uzh.ifi.hase.soprafs24.entity.Course;
+
 /**
  * Internal User Representation
  * This class composes the internal representation of the user and defines how
