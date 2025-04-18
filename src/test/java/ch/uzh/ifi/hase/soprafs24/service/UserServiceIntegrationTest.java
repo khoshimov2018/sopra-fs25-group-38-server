@@ -1,111 +1,111 @@
 package ch.uzh.ifi.hase.soprafs24.service;
 
-import ch.uzh.ifi.hase.soprafs24.constant.ProfileKnowledgeLevel;
-import ch.uzh.ifi.hase.soprafs24.constant.UserAvailability;
 import ch.uzh.ifi.hase.soprafs24.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs24.entity.User;
 import ch.uzh.ifi.hase.soprafs24.repository.UserRepository;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.CourseSelectionDTO;
-import ch.uzh.ifi.hase.soprafs24.rest.dto.UserPostDTO;
-import ch.uzh.ifi.hase.soprafs24.rest.dto.UserPutDTO;
-
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.web.WebAppConfiguration;
-import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.web.server.ResponseStatusException;
 
-import antlr.collections.List;
+import java.util.List;
 
-import static org.hamcrest.Matchers.anyOf;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.assertj.core.api.Assertions.*;
 
-import java.net.http.HttpHeaders;
-import java.util.Arrays;
-import java.util.Map;
-
-import org.apache.tomcat.util.http.parser.MediaType;
-
-/**
- * Test class for the UserResource REST resource.
- *
- * @see UserService
- */
-@WebAppConfiguration
 @SpringBootTest
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class UserServiceIntegrationTest {
 
-  @Qualifier("userRepository")
-  @Autowired
-  private UserRepository userRepository;
+    @Autowired
+    private UserService userService;
 
-  @Autowired
-  private UserService userService;
+    @Autowired
+    private UserRepository userRepository;
 
-  @BeforeEach
-  public void setup() {
-    userRepository.deleteAll();
-  }
+    @Test
+    public void createUser_validInput_userCreatedSuccessfully() {
+        User user = new User();
+        user.setEmail("testuser@example.com");
+        user.setPassword("securePass123");
+        user.setName("Test User");
+        user.setStudyLevel("Bachelor");
+        user.setStudyGoals("AI and ML");
 
+        User createdUser = userService.createUser(user, List.of());
 
-/*   @Test
-  public void createUser_validInputs_success() {
-    // given
-    assertNull(userRepository.findByEmail("testUsername"));
+        assertThat(createdUser.getId()).isNotNull();
+        assertThat(createdUser.getToken()).isNotNull();
+        assertThat(createdUser.getStatus()).isEqualTo(UserStatus.ONLINE);
+    }
 
-    User testUser = new User();
-    testUser.setName("testName");
-    testUser.setEmail("testUsername");
-    testUser.setPassword("testPassword");
+    @Test
+    public void createUser_duplicateEmail_throwsException() {
+        // Create initial user
+        User user1 = new User();
+        user1.setEmail("duplicate@example.com");
+        user1.setPassword("securePass123");
+        user1.setName("Original User");
+        user1.setStudyLevel("Bachelor");
+        user1.setStudyGoals("Goals A");
+        userService.createUser(user1, List.of());
 
-    // when
-    User createdUser = userService.createUser(testUser);
+        // Attempt to register a second user with the same email
+        User user2 = new User();
+        user2.setEmail("duplicate@example.com");
+        user2.setPassword("securePass123");
+        user2.setName("Other User");
+        user2.setStudyLevel("Master");
+        user2.setStudyGoals("Goals B");
 
-    // then
-    assertEquals(testUser.getId(), createdUser.getId());
-    assertEquals(testUser.getName(), createdUser.getName());
-    assertEquals(testUser.getEmail(), createdUser.getEmail());
-    assertNotNull(createdUser.getToken());
-    assertEquals(UserStatus.OFFLINE, createdUser.getStatus());
-  } */
+        assertThatThrownBy(() -> userService.createUser(user2, List.of()))
+                .isInstanceOf(ResponseStatusException.class)
+                .hasMessageContaining("Email already exists");
+    }
 
+    @Test
+    public void loginUser_validCredentials_successfulLogin() {
+        User user = new User();
+        user.setEmail("login@example.com");
+        user.setPassword("securePass123");
+        user.setName("Login User");
+        user.setStudyLevel("PhD");
+        user.setStudyGoals("Deep Learning");
+        userService.createUser(user, List.of());
 
-  private Object asJsonString(UserPutDTO updateDTO) {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'asJsonString'");
-  }
+        User loggedIn = userService.loginUser("login@example.com", "securePass123");
 
-  /* @Test
-  public void createUser_duplicateUsername_throwsException() {
-    assertNull(userRepository.findByEmail("testUsername"));
+        assertThat(loggedIn).isNotNull();
+        assertThat(loggedIn.getStatus()).isEqualTo(UserStatus.ONLINE);
+    }
 
-    User testUser = new User();
-    testUser.setName("testName");
-    testUser.setEmail("testUsername");
-    testUser.setPassword("testPassword");
-    User createdUser = userService.createUser(testUser);
+    @Test
+    public void loginUser_invalidPassword_throwsException() {
+        User user = new User();
+        user.setEmail("wrongpass@example.com");
+        user.setPassword("correctPass123");
+        user.setName("Wrong Pass");
+        user.setStudyLevel("MSc");
+        user.setStudyGoals("Bioinformatics");
+        userService.createUser(user, List.of());
 
-    // attempt to create second user with same username
-    User testUser2 = new User();
+        assertThatThrownBy(() -> userService.loginUser("wrongpass@example.com", "incorrectPassword"))
+                .isInstanceOf(ResponseStatusException.class)
+                .hasMessageContaining("Invalid email or password");
+    }
 
-    // change the name but forget about the username
-    testUser2.setName("testName2");
-    testUser2.setEmail("testUsername");
-    testUser2.setPassword("testPassword2");
+    @Test
+    public void getUserById_validId_returnsUser() {
+        User user = new User();
+        user.setEmail("fetch@example.com");
+        user.setPassword("fetchPass123");
+        user.setName("Fetch Me");
+        user.setStudyLevel("Bachelor");
+        user.setStudyGoals("Genetics");
+        User created = userService.createUser(user, List.of());
 
-    // check that an error is thrown
-    assertThrows(ResponseStatusException.class, () -> userService.createUser(testUser2));
-  } */
+        User fetched = userService.getUserById(created.getId());
+
+        assertThat(fetched.getEmail()).isEqualTo("fetch@example.com");
+        assertThat(fetched.getName()).isEqualTo("Fetch Me");
+    }
 }
