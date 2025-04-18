@@ -6,7 +6,6 @@ import ch.uzh.ifi.hase.soprafs24.service.ReportBlockService;
 import ch.uzh.ifi.hase.soprafs24.service.UserService;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -17,7 +16,6 @@ import org.springframework.web.server.ResponseStatusException;
 public class ReportController {
 
     private final ReportBlockService reportBlockService;
-
     private final UserService userService;
 
     public ReportController(ReportBlockService reportBlockService, UserService userService) {
@@ -36,7 +34,8 @@ public class ReportController {
         if (!userService.isAdmin(token)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only admins can view reports");
         }
-            List<Report> reports = reportBlockService.getAllReports();
+
+        List<Report> reports = reportBlockService.getAllReports();
 
         return reports.stream()
                 .map(report -> {
@@ -44,10 +43,8 @@ public class ReportController {
                     dto.setReporterId(report.getReporterId());
                     dto.setReportedId(report.getreportedUserId());
                     dto.setReason(report.getReason());
-                    // Optionally add timestamp if needed
                     return dto;
                 })
-                .collect(Collectors.toList());
+                .toList();
     }
-
 }
