@@ -8,6 +8,8 @@ import ch.uzh.ifi.hase.soprafs24.rest.dto.UserPostDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.mapper.DTOMapper;
 import ch.uzh.ifi.hase.soprafs24.service.UserService;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
@@ -17,11 +19,11 @@ import java.util.List;
 @Component
 public class DataInitializer implements ApplicationRunner {
 
+    private static final Logger log = LoggerFactory.getLogger(DataInitializer.class);
+
     private final CourseRepository courseRepository;
     private final UserRepository userRepository;
     private final UserService userService;
-
-
 
     public DataInitializer(CourseRepository courseRepository, 
                            UserRepository userRepository,
@@ -45,12 +47,12 @@ public class DataInitializer implements ApplicationRunner {
             );
 
             courseRepository.saveAll(courses);
-            System.out.println("Predefined courses inserted into the database.");
+            log.info("Predefined courses inserted into the database.");
         } else {
-            System.out.println("Courses already exist — skipping initialization.");
+            log.info("Courses already exist — skipping initialization.");
         }
 
-        // Check if Admin account already exist
+        // Check if Admin account already exists
         if (!userRepository.existsByEmail("admin@example.com")) {
             UserPostDTO adminDTO = new UserPostDTO();
             adminDTO.setName("Admin");
@@ -62,10 +64,9 @@ public class DataInitializer implements ApplicationRunner {
             User admin = DTOMapper.INSTANCE.convertUserPostDTOtoEntity(adminDTO);
             User createdAdmin = userService.createUser(admin, null); 
 
-            System.out.println("Admin account created with token: " + createdAdmin.getToken());
+            log.info("Admin account created with token: {}", createdAdmin.getToken());
         } else {
-            System.out.println("Admin account already exists — skipping.");
+            log.info("Admin account already exists — skipping.");
         }
     }
 }
-
