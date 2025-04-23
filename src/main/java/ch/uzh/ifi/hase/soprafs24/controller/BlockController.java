@@ -1,41 +1,32 @@
 package ch.uzh.ifi.hase.soprafs24.controller;
 
-import ch.uzh.ifi.hase.soprafs24.entity.Block;
-import ch.uzh.ifi.hase.soprafs24.entity.User;
-import ch.uzh.ifi.hase.soprafs24.repository.BlockRepository;
-import ch.uzh.ifi.hase.soprafs24.repository.UserRepository;
+import ch.uzh.ifi.hase.soprafs24.service.ReportBlockService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.Map;
+
 @RestController
-@RequestMapping("/block")
+@RequestMapping("/blocks")
 public class BlockController {
 
-    private final BlockRepository blockRepository;
-    private final UserRepository userRepository;
+    private final ReportBlockService reportBlockService;
 
-    public BlockController(BlockRepository blockRepository, UserRepository userRepository) {
-        this.blockRepository = blockRepository;
-        this.userRepository = userRepository;
+    public BlockController(ReportBlockService reportBlockService) {
+        this.reportBlockService = reportBlockService;
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public void blockUser(@RequestParam Long blockerId, @RequestParam Long blockedUserId) {
-        // Check if both users exist
-        User blocker = userRepository.findById(blockerId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Blocker user not found"));
-        User blocked = userRepository.findById(blockedUserId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Blocked user not found"));
+    public void blockUser(@RequestBody Map<String, Long> payload) {
+        Long blockerId = payload.get("blockerId");
+        Long blockedUserId = payload.get("blockedUserId");
 
-        // Prevent duplicate blocks
-        if (blockRepository.existsByBlockerIdAndBlockedUserId(blockerId, blockedUserId)) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "User already blocked.");
+        if (blockerId == null || blockedUserId == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Both blockerId and blockedUserId must be provided.");
         }
 
-        // Create and save the block
-        Block newBlock = new Block(blocker, blocked);
-        blockRepository.save(newBlock);
+        reportBlockService.blockUser(blockerId, blockedUserId);
     }
 }

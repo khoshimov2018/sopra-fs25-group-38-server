@@ -26,6 +26,9 @@ public class ReportController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public void createReport(@RequestBody ReportDTO reportDTO) {
+        if (reportDTO.getReporterId() == null || reportDTO.getReportedId() == null || reportDTO.getReason() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Missing required report information");
+        }
         reportBlockService.reportUser(reportDTO.getReporterId(), reportDTO.getReportedId(), reportDTO.getReason());
     }
 

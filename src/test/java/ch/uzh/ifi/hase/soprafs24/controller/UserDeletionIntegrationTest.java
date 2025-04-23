@@ -1,5 +1,6 @@
 package ch.uzh.ifi.hase.soprafs24.controller;
 
+import ch.uzh.ifi.hase.soprafs24.config.DataInitializer;
 import ch.uzh.ifi.hase.soprafs24.config.TestSecurityConfig;
 import ch.uzh.ifi.hase.soprafs24.constant.ProfileKnowledgeLevel;
 import ch.uzh.ifi.hase.soprafs24.constant.UserAvailability;
@@ -64,7 +65,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @Transactional
-@Import(TestSecurityConfig.class)
+@Import({TestSecurityConfig.class, DataInitializer.class})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class UserDeletionIntegrationTest {
 
@@ -174,6 +175,7 @@ public class UserDeletionIntegrationTest {
 
         Map<String, Object> sample2Map = registerUser(sampleuser2);
         Long sample2Id = Long.valueOf((Integer) sample2Map.get("id"));
+        String sample2Token = (String) sample2Map.get("token");
 
         // 3. Create mutual match between target user and sample user1
         // 3-1. sample1Id likes targetId
@@ -235,10 +237,16 @@ public class UserDeletionIntegrationTest {
         block1.setBlockerId(targetId);
         block1.setBlockedUserId(sample1Id);
 
-        mockMvc.perform(post("/block")
-        .param("blockerId", String.valueOf(targetId))
-        .param("blockedUserId", String.valueOf(sample1Id)))
-        .andExpect(status().isCreated());
+        Map<String, Long> blockPayload1 = Map.of(
+                "blockerId", targetId,
+                "blockedUserId", sample1Id
+        );
+        
+        mockMvc.perform(post("/blocks")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(blockPayload1)))
+                .andExpect(status().isCreated());
+        
 
 
         // 5-2. Target user is blocked by sampleUser2
@@ -246,36 +254,42 @@ public class UserDeletionIntegrationTest {
         block2.setBlockerId(sample2Id);
         block2.setBlockedUserId(targetId);
 
-        mockMvc.perform(post("/block")
-        .param("blockerId", String.valueOf(sample2Id))
-        .param("blockedUserId", String.valueOf(targetId)))
-        .andExpect(status().isCreated());
+        Map<String, Long> blockPayload2 = Map.of(
+                "blockerId", sample2Id,
+                "blockedUserId", targetId
+        );
+        
+        mockMvc.perform(post("/blocks")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(blockPayload2)))
+                .andExpect(status().isCreated());
+        
 
         // 6. Create report relations
         // 6-1. Target user reports sampleUser1
         ReportDTO report1 = new ReportDTO();
-        report1.setReporterId(targetId);     
-        report1.setReportedId(sample1Id);    
+        report1.setReporterId(targetId);
+        report1.setReportedId(sample1Id);
         report1.setReason("Inappropriate behavior");
-
+    
         mockMvc.perform(post("/reports")
+                .header("Authorization", "Bearer " + targetToken)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(report1)))
             .andExpect(status().isCreated());
-
-
+    
         // 6-2. Target user is reported by sampleUser2
         ReportDTO report2 = new ReportDTO();
-        report2.setReporterId(sample2Id);     
-        report2.setReportedId(targetId);    
+        report2.setReporterId(sample2Id);
+        report2.setReportedId(targetId);
         report2.setReason("Inappropriate behavior");
-
+    
         mockMvc.perform(post("/reports")
+                .header("Authorization", "Bearer " + sample2Token)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(report2)))
             .andExpect(status().isCreated());
-
-
+    
         // 7. Delete the target user account using DELETE /users/me
         mockMvc.perform(delete("/users/me")
         .header("Authorization", "Bearer " + targetToken))
