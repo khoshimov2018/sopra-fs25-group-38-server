@@ -193,12 +193,14 @@ public class ChatService {
      */
     public UserTypingStatusGetDTO getTypingStatus(Long userId) {
         User user = userRepository.findById(userId)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User with id " + userId + " not found"));
-
-        UserTypingStatus typingStatus = userTypingStatusRepository.findByUserId(userId)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Typing status for user with id " + userId + " not found"));
-
-        return new UserTypingStatusGetDTO(user.getId(), typingStatus.isTyping(), user.getStatus());
+            .orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.NOT_FOUND, "User with id " + userId + " not found"));
+    
+        boolean typing = userTypingStatusRepository.findByUserId(userId)
+                           .map(UserTypingStatus::isTyping)
+                           .orElse(false);        // default
+    
+        return new UserTypingStatusGetDTO(user.getId(), typing, user.getStatus());
     }
 
 
