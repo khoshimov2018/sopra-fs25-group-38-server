@@ -145,6 +145,18 @@ public class UserController {
     return ResponseEntity.noContent().build();
   }
 
+  @DeleteMapping("/delete/{userId}")
+  public ResponseEntity<Void> deleteUserByAdmin(
+    @PathVariable Long userId, @RequestHeader("Authorization") String token) {
+
+    if (!userService.isAdmin(token)) {
+      return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+    }
+
+    userService.deleteUserById(userId);
+    return ResponseEntity.noContent().build();
+  }
+
   @GetMapping("/users/discoverable/{userId}")
   public List<UserGetDTO> getDiscoverableUsers(@PathVariable Long userId) {
     List<User> discoverable = userService.getDiscoverableUsers(userId);

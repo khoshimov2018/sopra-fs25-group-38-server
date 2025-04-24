@@ -149,4 +149,9 @@ public interface DTOMapper {
     @Mapping(source = "likedByUser1", target = "likedByUser1")
     @Mapping(source = "likedByUser2", target = "likedByUser2")
     MatchGetDTO convertEntityToMatchGetDTO(Match match);
+
+    // --- BLOCK MAPPINGS ---
+    @Mapping(source = "blockerId", target = "blockerId")
+    @Mapping(source = "blockedUserId", target = "blockedUserId")
+    BlockDTO convertToBlockDTO(Block block);
 }

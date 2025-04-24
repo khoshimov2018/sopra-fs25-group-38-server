@@ -84,6 +84,10 @@ public class ReportBlockService {
         return reportRepository.findAll();
     }
 
+    public List<Block> getAllBlocks() {
+        return blockRepository.findAll(); 
+    }
+    
     public List<Block> getBlocksByBlocker(Long blockerId) {
         return blockRepository.findByBlockerId(blockerId);
     }
