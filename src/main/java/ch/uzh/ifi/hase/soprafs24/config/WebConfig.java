@@ -25,7 +25,8 @@ public class WebConfig implements WebMvcConfigurer {
     registry.addMapping("/**")
             .allowedOrigins(
                 "http://localhost:3000", // Local development frontend
-                "https://sopra-fs25-group-38-client.vercel.app" // Production frontend
+                "https://sopra-fs25-group-38-client.vercel.app", // Production frontend
+                "https://sopra-fs25-group-38-client-notsofuns-projects.vercel.app"
             )
             .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH")
             .allowedHeaders("*")

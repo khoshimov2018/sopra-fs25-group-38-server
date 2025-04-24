@@ -49,7 +49,8 @@ public class SecurityConfig {
         // Set allowed origins
         configuration.setAllowedOrigins(Arrays.asList(
             "http://localhost:3000",
-            "https://sopra-fs25-group-38-client.vercel.app"
+            "https://sopra-fs25-group-38-client.vercel.app",
+            "https://sopra-fs25-group-38-client-notsofuns-projects.vercel.app"
         ));
         
         // Set allowed methods
