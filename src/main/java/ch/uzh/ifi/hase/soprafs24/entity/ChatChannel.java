@@ -13,7 +13,6 @@ public class ChatChannel implements Serializable{
 
     private static final long serialVersionUID = 10L;
 
-    // @GeneratedValue with strategy=GenerationType.IDENTITY tells JPA that the database generates the unique ID.
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -26,24 +25,18 @@ public class ChatChannel implements Serializable{
 
     private String channelProfileImage;
 
-    // One channel can have many participants.
-    // mappedBy = "channel" means the "channel" field in ChatParticipant owns the relationship. the ChatParticipant entity has a field called channel that holds the foreign key.
-    // cascade = CascadeType.ALL ensures that any changes to ChatChannel cascade to its child entity - ChatParticipant.
-    // Orphan removal ensures that if a ChatParticipant is removed from the participants list in ChatChannel, JPA will delete that participant row from the database.
     @OneToMany(mappedBy = "channel", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ChatParticipant> participants = new ArrayList<>();
 
-    // Timestamps for creation and last update.
+
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    // Default constructor: sets creation and update timestamps.
     public ChatChannel() {
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
     }
 
-    // Parameterized constructor to set name and type.
     public ChatChannel(String name, String type, String channelProfileImage) {
         this();
         this.name = name;
@@ -51,7 +44,7 @@ public class ChatChannel implements Serializable{
         this.channelProfileImage = channelProfileImage;
     }
 
-    // Getters and setters for each field.
+
     public Long getId() {
         return id;
     }
@@ -95,13 +88,13 @@ public class ChatChannel implements Serializable{
         this.updatedAt = updatedAt;
     }
 
-    // Helper method to add a participant.
+    // method to add a participant.
     public void addParticipant(ChatParticipant participant) {
         participants.add(participant);
         participant.setChannel(this); // Sets the bidirectional link.
     }
 
-    // Helper method to remove a participant.
+    // method to remove a participant.
     public void removeParticipant(ChatParticipant participant) {
         participants.remove(participant);
         participant.setChannel(null);

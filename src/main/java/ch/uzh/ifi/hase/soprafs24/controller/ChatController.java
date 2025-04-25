@@ -51,10 +51,10 @@ public class ChatController {
                 .collect(Collectors.toList());
 
         if (channelDTOs.isEmpty()) {
-            // Returns "204 No Content" without any body
+            // Returns 204
             return ResponseEntity.noContent().build();
         }
-        // Returns "200 OK" plus the list
+        // Returns 200
         return ResponseEntity.ok(channelDTOs);
     }
 
@@ -76,35 +76,28 @@ public class ChatController {
                 .collect(Collectors.toList());
 
         if (messageDTOs.isEmpty()) {
-            // Returns "204 No Content" without any body
+            // 204
             return ResponseEntity.noContent().build();
         }
-        // Returns "200 OK" plus the list
+        // 200
         return ResponseEntity.ok(messageDTOs);
     }
 
-    /**
-     * PUT /chat/typing -> Update the typing indicator.
-     * Expects a JSON body corresponding to UserTypingStatusPushDTO.
-     */
+    // PUT /chat/typing -> Update the typing indicator.
     @PutMapping("/typing")
     public ResponseEntity<UserTypingStatusGetDTO> updateTypingStatus(@RequestBody UserTypingStatusPushDTO pushDTO) {
         UserTypingStatusGetDTO result = chatService.updateTypingStatus(pushDTO);
         return ResponseEntity.ok(result);
     }
 
-    /**
-     * GET /chat/typing/{userId} -> Retrieve the current typing indicator along with the user's status.
-     */
+    // GET /chat/typing/{userId} -> Retrieve the current typing indicator along with the user's status.
     @GetMapping("/typing/{userId}")
     public ResponseEntity<UserTypingStatusGetDTO> getTypingStatus(@PathVariable Long userId) {
         UserTypingStatusGetDTO status = chatService.getTypingStatus(userId);
         return ResponseEntity.ok(status);
     }
 
-    /**
-     * PUT /chat/channels/{channelId} -> update a channel (mainly group channels)
-     */
+    // PUT /chat/channels/{channelId} -> update a channel (group channels)
     @PutMapping("/channels/{channelId}")
     public ChatChannelGetDTO updateChatChannel(
             @PathVariable Long channelId,

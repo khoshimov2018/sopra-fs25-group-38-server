@@ -15,12 +15,10 @@ public class Message implements Serializable{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Reference to the channel where the message is posted
     @ManyToOne
     @JoinColumn(name = "channel_id")
     private ChatChannel channel;
 
-    // Sender of the message
     @ManyToOne
     @JoinColumn(name = "sender_id")
     private User sender;

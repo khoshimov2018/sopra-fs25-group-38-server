@@ -1,5 +1,7 @@
 package ch.uzh.ifi.hase.soprafs24.rest.dto;
 
+// used to update a user's typing status
+
 public class UserTypingStatusPushDTO {
     private Long userId;
     private boolean typing;

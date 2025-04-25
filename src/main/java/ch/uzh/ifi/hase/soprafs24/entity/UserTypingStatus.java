@@ -10,12 +10,11 @@ public class UserTypingStatus {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Association with User.
     @OneToOne
     @JoinColumn(name = "user_id", unique = true, nullable = false)
     private User user;
     
-    // Typing flag: true if the user is currently typing.
+    // true -> the uesr is typing now
     @Column(nullable = false)
     private boolean typing;
 

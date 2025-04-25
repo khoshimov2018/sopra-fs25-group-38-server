@@ -2,6 +2,8 @@ package ch.uzh.ifi.hase.soprafs24.rest.dto;
 
 import ch.uzh.ifi.hase.soprafs24.constant.UserStatus;
 
+// used to return a user's typing status & online status back to the frontend
+
 public class UserTypingStatusGetDTO {
     private Long userId;
     private boolean typing;
