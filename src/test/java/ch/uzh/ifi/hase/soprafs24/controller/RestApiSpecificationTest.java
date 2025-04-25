@@ -260,7 +260,7 @@ public class RestApiSpecificationTest {
         userPutDTO.setAvailability(UserAvailability.EVENING);
         userPutDTO.setStudyLevel("BSc");
         userPutDTO.setStudyGoals(Arrays.asList("Thesis"));
-        userPutDTO.setCourseSelections(Arrays.asList(courseSelection)); // ✅ FIXED
+        userPutDTO.setCourseSelections(Arrays.asList(courseSelection)); 
     
         mockMvc.perform(put("/users/1")
                 .header("Authorization", "validToken")
@@ -313,7 +313,7 @@ public class RestApiSpecificationTest {
         userPutDTO.setAvailability(UserAvailability.EVENING);
         userPutDTO.setStudyLevel("MSc");
         userPutDTO.setStudyGoals(Arrays.asList("Thesis", "Internship"));
-        userPutDTO.setCourseSelections(Arrays.asList(courseSel1, courseSel2)); // ✅ FIXED
+        userPutDTO.setCourseSelections(Arrays.asList(courseSel1, courseSel2)); 
     
         mockMvc.perform(put("/users/{userId}", userId)
                 .header("Authorization", token)

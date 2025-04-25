@@ -55,7 +55,7 @@ public interface DTOMapper {
                 updatedCourses.add(userCourse);
             }
     
-            user.setUserCourses(updatedCourses); // ✅ Replace collection
+            user.setUserCourses(updatedCourses); // Replace collection
         }
     }
     
