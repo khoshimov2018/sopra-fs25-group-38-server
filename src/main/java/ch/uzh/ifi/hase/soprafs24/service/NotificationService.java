@@ -133,4 +133,18 @@ public class NotificationService {
         String message2 = "You matched with " + user1.getName() + "!";
         createNotification(userId2, message2, "MATCH", matchId);
     }
+    
+    public void createMessageNotification(Long recipientId, Long senderId, String messageContent, Long channelId) {
+        User sender = userRepository.findById(senderId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, 
+                        "User with ID " + senderId + " not found."));
+                        
+        String truncatedMessage = messageContent;
+        if (truncatedMessage.length() > 50) {
+            truncatedMessage = truncatedMessage.substring(0, 47) + "...";
+        }
+        
+        String notificationMessage = sender.getName() + ": " + truncatedMessage;
+        createNotification(recipientId, notificationMessage, "MESSAGE", channelId);
+    }
 }

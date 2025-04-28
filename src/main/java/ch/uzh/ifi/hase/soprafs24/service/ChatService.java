@@ -39,16 +39,19 @@ public class ChatService {
     private final MessageRepository messageRepository;
     private final UserRepository userRepository;
     private final UserTypingStatusRepository userTypingStatusRepository;
+    private final NotificationService notificationService;
 
     @Autowired
     public ChatService(ChatChannelRepository chatChannelRepository,
                        MessageRepository messageRepository,
                        UserRepository userRepository,
-                       UserTypingStatusRepository userTypingStatusRepository) {
+                       UserTypingStatusRepository userTypingStatusRepository,
+                       NotificationService notificationService) {
         this.chatChannelRepository = chatChannelRepository;
         this.messageRepository = messageRepository;
         this.userRepository = userRepository;
         this.userTypingStatusRepository = userTypingStatusRepository;
+        this.notificationService = notificationService;
     }
 
     public ChatChannel createChatChannel(ChatChannelPostDTO chatChannelPostDTO) {
@@ -149,10 +152,23 @@ public class ChatService {
         message.setChannel(chatChannel);
         message.setSender(sender);
         message.setTimestamp(LocalDateTime.now());
-        message = messageRepository.save(message);
+        final Message savedMessage = messageRepository.save(message);
         messageRepository.flush();
 
-        return message;
+        // Create notifications for all other participants
+        chatChannel.getParticipants().stream()
+                .map(participant -> participant.getUser())
+                .filter(user -> !user.getId().equals(sender.getId())) // Exclude the sender
+                .forEach(recipient -> {
+                    notificationService.createMessageNotification(
+                            recipient.getId(),
+                            sender.getId(),
+                            savedMessage.getContent(),
+                            channelId
+                    );
+                });
+
+        return savedMessage;
     }
 
     // Get chat history of a channel given the channel Id
