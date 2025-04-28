@@ -154,4 +154,14 @@ public interface DTOMapper {
     @Mapping(source = "blockerId", target = "blockerId")
     @Mapping(source = "blockedUserId", target = "blockedUserId")
     BlockDTO convertToBlockDTO(Block block);
+    
+    // --- NOTIFICATION MAPPINGS ---
+    @Mapping(source = "id", target = "id")
+    @Mapping(source = "userId", target = "userId")
+    @Mapping(source = "message", target = "message")
+    @Mapping(source = "read", target = "read")
+    @Mapping(source = "type", target = "type")
+    @Mapping(source = "relatedEntityId", target = "relatedEntityId")
+    @Mapping(target = "creationDate", expression = "java(notification.getCreationDate().toString())")
+    NotificationGetDTO convertEntityToNotificationGetDTO(Notification notification);
 }

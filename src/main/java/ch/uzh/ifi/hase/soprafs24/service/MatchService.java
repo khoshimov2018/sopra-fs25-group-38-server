@@ -25,15 +25,18 @@ public class MatchService {
     private final MatchRepository matchRepository;
     private final UserRepository userRepository;
     private final ChatService chatService;
+    private final NotificationService notificationService;
     private final DTOMapper dtoMapper = DTOMapper.INSTANCE;
 
     @Autowired
     public MatchService(MatchRepository matchRepository,
                         UserRepository userRepository,
-                        ChatService chatService) {
+                        ChatService chatService,
+                        NotificationService notificationService) {
         this.matchRepository = matchRepository;
         this.userRepository = userRepository;
         this.chatService = chatService;
+        this.notificationService = notificationService;
     }
     /**
      * Processes a "like" action.
@@ -53,15 +56,20 @@ public class MatchService {
                 matchPostDTO.getUserId(), matchPostDTO.getTargetUserId());
 
         Match match;
+        boolean wasAlreadyLikedByTargetUser = false;
+        
         if (existingMatch.isPresent()) {
             match = existingMatch.get();
              // Check if the match has been rejected. This is used for blocking.
             if (match.getStatus() == MatchStatus.REJECTED) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This match has been rejected due to a block.");
             }
+            
             if (Objects.equals(match.getUserId1(), matchPostDTO.getUserId())) {
+                wasAlreadyLikedByTargetUser = match.isLikedByUser2();
                 match.setLikedByUser1(true);
             } else {
+                wasAlreadyLikedByTargetUser = match.isLikedByUser1();
                 match.setLikedByUser2(true);
             }
         } else {
@@ -73,6 +81,8 @@ public class MatchService {
             match.setLikedByUser2(false);
             // Set an initial status (e.g., PENDING).
             match.setStatus(MatchStatus.PENDING);
+            
+            notificationService.createLikeNotification(matchPostDTO.getTargetUserId(), matchPostDTO.getUserId());
         }
 
         // Check if both users have liked each other and update status to ACCEPTED.
@@ -89,8 +99,10 @@ public class MatchService {
 
             // Call ChatService's method to create a channel.
             chatService.createIndividualChatChannelAfterMatch(user1, user2);
+            notificationService.createMatchNotification(match.getUserId1(), match.getUserId2(), match.getId());
+        } else if (!wasAlreadyLikedByTargetUser) {
+            notificationService.createLikeNotification(matchPostDTO.getTargetUserId(), matchPostDTO.getUserId());
         }
-
 
         Match savedMatch = matchRepository.save(match);
         return dtoMapper.convertEntityToMatchGetDTO(savedMatch);
@@ -129,6 +141,4 @@ public class MatchService {
         Optional<Match> matchOptional = matchRepository.findMatchByUsers(userAId, userBId);
         matchOptional.ifPresent(matchRepository::delete);
     }
-    
-    
 }
