@@ -3,15 +3,10 @@ package ch.uzh.ifi.hase.soprafs24.controller;
 import ch.uzh.ifi.hase.soprafs24.config.TestSecurityConfig;
 import ch.uzh.ifi.hase.soprafs24.constant.ProfileKnowledgeLevel;
 import ch.uzh.ifi.hase.soprafs24.constant.UserAvailability;
-import ch.uzh.ifi.hase.soprafs24.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs24.entity.Course;
-import ch.uzh.ifi.hase.soprafs24.entity.User;
-import ch.uzh.ifi.hase.soprafs24.entity.UserCourse;
 import ch.uzh.ifi.hase.soprafs24.repository.CourseRepository;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.CourseSelectionDTO;
-import ch.uzh.ifi.hase.soprafs24.rest.dto.UserLoginDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.UserPostDTO;
-import ch.uzh.ifi.hase.soprafs24.rest.dto.UserPutDTO;
 import ch.uzh.ifi.hase.soprafs24.service.UserService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -29,15 +24,10 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.server.ResponseStatusException;
-import ch.uzh.ifi.hase.soprafs24.rest.dto.CourseSelectionDTO;
-
-
-import java.time.LocalDate;
 import java.util.Map;
 import java.util.List;
 
 import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -120,38 +110,7 @@ public class UserRestIntegrationTest {
         }
  
 
-    
-    /**
-         * Integration Test 2: User Registration with Duplicate Username
-         *
-         * Tests the REST protocol behavior when registering with a duplicate username:
-         * 1. Register first user successfully
-         * 2. Attempt to register second user with same email
-         * 3. Verify 409 CONFLICT status code is returned with proper error message
-         */
-        /* @Test
-        public void testDuplicateUserRegistration() throws Exception {
-        UserPostDTO user = new UserPostDTO();
-        user.setName("Test User");
-        user.setEmail("duplicate@example.com");
-        user.setPassword("Password123");
-        user.setStudyLevel("Bachelor");
-        user.setStudyGoals(List.of("exam prep"));
 
-        // First registration should succeed
-        mockMvc.perform(post("/users/register")
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON)
-                .content(asJsonString(user)))
-                .andExpect(status().isCreated());
-
-        // Second registration with same email should fail
-        mockMvc.perform(post("/users/register")
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON)
-                .content(asJsonString(user)))
-                .andExpect(status().isConflict());
-        } */
 
         /**
          * Integration Test 3: User Profile Retrieval
@@ -223,75 +182,6 @@ public class UserRestIntegrationTest {
                 .andExpect(jsonPath("$.userCourses[0].knowledgeLevel", is("BEGINNER")));
         }
 
-
-/*         @Test
-        public void testUserProfileUpdate_success() throws Exception {
-        // 1. Register user
-        UserPostDTO userPostDTO = new UserPostDTO();
-        userPostDTO.setName("Original Name");
-        userPostDTO.setEmail("update-test@example.com");
-        userPostDTO.setPassword("originalPassword");
-        userPostDTO.setStudyLevel("Bachelor");
-        userPostDTO.setStudyGoals(List.of("prep"));
-        userPostDTO.setAvailability(UserAvailability.EVENING);
-
-        CourseSelectionDTO courseSelection = new CourseSelectionDTO();
-        courseSelection.setCourseId(1L); // assumes course ID 1 exists
-        courseSelection.setKnowledgeLevel(ProfileKnowledgeLevel.BEGINNER);
-        userPostDTO.setCourseSelections(List.of(courseSelection));
-
-        MvcResult registrationResult = mockMvc.perform(post("/users/register")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(asJsonString(userPostDTO)))
-                .andExpect(status().isCreated())
-                .andReturn();
-
-        String responseContent = registrationResult.getResponse().getContentAsString();
-        Map<String, Object> responseMap = objectMapper.readValue(responseContent, Map.class);
-        Integer userId = (Integer) responseMap.get("id");
-        
-        // Extract token from either the Authorization header or the response body
-        String token = registrationResult.getResponse().getHeader(HttpHeaders.AUTHORIZATION);
-        if (token == null) {
-            // If not in header, try to get it from the response body
-            token = (String) responseMap.get("token");
-            if (token != null && !token.startsWith("Bearer ")) {
-                token = "Bearer " + token;
-            }
-        }
-
-        // 2. Prepare update DTO
-        UserPutDTO updateDTO = new UserPutDTO();
-        updateDTO.setName("Updated Name");
-        updateDTO.setBio("Updated bio");
-        updateDTO.setStudyLevel("Master");
-        updateDTO.setStudyGoals(List.of("career"));
-        updateDTO.setAvailability(UserAvailability.MORNING);
-
-        CourseSelectionDTO updatedCourse = new CourseSelectionDTO();
-        updatedCourse.setCourseId(1L);
-        updatedCourse.setKnowledgeLevel(ProfileKnowledgeLevel.ADVANCED);
-        updateDTO.setCourseSelections(List.of(updatedCourse));
-
-        // 3. Perform PUT /users/{id}
-        mockMvc.perform(put("/users/" + userId)
-                .header(HttpHeaders.AUTHORIZATION, token)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(asJsonString(updateDTO)))
-                .andExpect(status().isNoContent());
-
-        // 4. Fetch updated user and verify fields
-        mockMvc.perform(get("/users/" + userId)
-                .header(HttpHeaders.AUTHORIZATION, token))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name", is("Updated Name")))
-                .andExpect(jsonPath("$.bio", is("Updated bio")))
-                .andExpect(jsonPath("$.studyLevel", is("Master")))
-                .andExpect(jsonPath("$.studyGoals[0]", is("career")))
-                .andExpect(jsonPath("$.availability", is("MORNING")))
-                .andExpect(jsonPath("$.userCourses[0].courseId", is(1)))
-                .andExpect(jsonPath("$.userCourses[0].knowledgeLevel", is("ADVANCED")));
-        } */
 
         
 

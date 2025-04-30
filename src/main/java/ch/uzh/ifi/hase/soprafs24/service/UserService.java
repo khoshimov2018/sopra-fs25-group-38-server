@@ -1,6 +1,5 @@
 package ch.uzh.ifi.hase.soprafs24.service;
 
-import ch.uzh.ifi.hase.soprafs24.constant.ProfileKnowledgeLevel;
 import ch.uzh.ifi.hase.soprafs24.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs24.entity.User;
 import ch.uzh.ifi.hase.soprafs24.entity.UserCourse;
@@ -20,7 +19,6 @@ import ch.uzh.ifi.hase.soprafs24.repository.UserCourseRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -57,51 +55,57 @@ public class UserService {
 
   private final Logger log = LoggerFactory.getLogger(UserService.class);
 
+  private static final String USER_NOT_FOUND_MSG = "User not found";
+  private static final String BEARER_PREFIX = "Bearer ";
+
   private final UserRepository userRepository;
   private final MatchRepository matchRepository;
   private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
   private final CourseRepository courseRepository;
 
 
-  @Autowired
-  private UserCourseRepository userCourseRepository;
-  @Autowired
-  private MessageRepository messageRepository;
-  @Autowired
-  private BlockRepository blockRepository;
-  @Autowired
-  private ReportRepository reportRepository;
-  @Autowired
-  private ChatChannelRepository chatChannelRepository;
-  @Autowired
-  private StudyPlanRepository studyPlanRepository;
-  @Autowired
-  private ProfileRepository profileRepository;
-
-
-  public List<Long> getBlockedOrBlockingUserIds(Long userId) {
-      List<Long> blocked = blockRepository.findByBlockerId(userId)
-          .stream().map(Block::getBlockedUserId).toList();
-
-      List<Long> blocking = blockRepository.findByBlockedUserId(userId)
-          .stream().map(Block::getBlockerId).toList();
-
-      return Stream.concat(blocked.stream(), blocking.stream())
-          .distinct()
-          .toList();
-  }
+  private final UserCourseRepository userCourseRepository;
+  private final MessageRepository messageRepository;
+  private final BlockRepository blockRepository;
+  private final ReportRepository reportRepository;
+  private final ChatChannelRepository chatChannelRepository;
+  private final StudyPlanRepository studyPlanRepository;
+  private final ProfileRepository profileRepository;
 
   @Autowired
-  public UserService(@Qualifier("userRepository") UserRepository userRepository,
-                    MatchRepository matchRepository,
-                    CourseRepository courseRepository,
-                    BlockRepository blockRepository) {
+  public UserService(UserRepository userRepository,
+                     MatchRepository matchRepository,
+                     CourseRepository courseRepository,
+                     UserCourseRepository userCourseRepository,
+                     MessageRepository messageRepository,
+                     BlockRepository blockRepository,
+                     ReportRepository reportRepository,
+                     ChatChannelRepository chatChannelRepository,
+                     StudyPlanRepository studyPlanRepository,
+                     ProfileRepository profileRepository) {
       this.userRepository = userRepository;
       this.matchRepository = matchRepository;
       this.courseRepository = courseRepository;
+      this.userCourseRepository = userCourseRepository;
+      this.messageRepository = messageRepository;
       this.blockRepository = blockRepository;
+      this.reportRepository = reportRepository;
+      this.chatChannelRepository = chatChannelRepository;
+      this.studyPlanRepository = studyPlanRepository;
+      this.profileRepository = profileRepository;
   }
 
+  public List<Long> getBlockedOrBlockingUserIds(Long userId) {
+    List<Long> blocked = blockRepository.findByBlockerId(userId)
+        .stream().map(Block::getBlockedUserId).toList();
+
+    List<Long> blocking = blockRepository.findByBlockedUserId(userId)
+        .stream().map(Block::getBlockerId).toList();
+
+    return Stream.concat(blocked.stream(), blocking.stream())
+        .distinct()
+        .toList();
+  }
 
   public List<User> getDiscoverableUsers(Long currentUserId) {
     List<Long> excludedUserIds = getBlockedOrBlockingUserIds(currentUserId);
@@ -184,45 +188,7 @@ public class UserService {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Study goals are required.");
     }
   }
-  
-  /**
-   * Checks if a email already exists in the database
-   * 
-   * @param email the email to check
-   * @throws ResponseStatusException if email already exists
-   */
-  private void checkIfEmailExists(String email) {
-    User userByEmail = userRepository.findByEmail(email);
-    
-    if (userByEmail != null) {
-      throw new ResponseStatusException(HttpStatus.CONFLICT, "Email already exists. Please choose another email.");
-    }
-  }
-  
-  /**
-   * This is a helper method that will check the uniqueness criteria of the
-   * email and the name defined in the User entity. The method will do nothing 
-   * if the input is unique and throw an error otherwise.
-   *
-   * @param userToBeCreated
-   * @throws org.springframework.web.server.ResponseStatusException
-   * @see User
-   */
-  private void checkIfUserExists(User userToBeCreated) {
-    User userByEmail = userRepository.findByEmail(userToBeCreated.getEmail());
-    User userByName = userRepository.findByName(userToBeCreated.getName());
 
-    String baseErrorMessage = "The %s provided %s not unique. Therefore, the user could not be created!";
-    if (userByEmail != null && userByName != null) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          String.format(baseErrorMessage, "email and the name", "are"));
-    } else if (userByEmail != null) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format(baseErrorMessage, "email", "is"));
-    } else if (userByName != null) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format(baseErrorMessage, "name", "is"));
-    }
-  }
-  
   /**
    * Logs in a user with the provided email and password
    *
@@ -263,7 +229,7 @@ public class UserService {
    */
   public void logoutUser(Long userId) {
     User user = userRepository.findById(userId)
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, USER_NOT_FOUND_MSG));
     
     user.setStatus(UserStatus.OFFLINE);
     userRepository.save(user);
@@ -279,14 +245,14 @@ public class UserService {
    */
   public User getUserById(Long userId) {
     return userRepository.findById(userId)
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, USER_NOT_FOUND_MSG));
 }
 
   
   //find userIds for matches
   public Set<Long> getMatchIdsForUser(Long userId) {
     User user = userRepository.findById(userId)
-            .orElseThrow(() -> new RuntimeException("User not found"));
+            .orElseThrow(() -> new RuntimeException(USER_NOT_FOUND_MSG));
     return user.getMatchIds();
   }
   
@@ -294,12 +260,6 @@ public class UserService {
     List<Match> acceptedMatches = matchRepository.findAcceptedMatchesByUserId(userId);
     Set<Long> partnerIds = new HashSet<>();
     for (Match match : acceptedMatches) {
-        // Determine the partner: if the given user is userId1, then partner is userId2, and vice versa.
-        // if (Objects.equals(match.getUser1Id(), userId)) {
-        //     partnerIds.add(match.getUser2Id());
-        // } else {
-        //     partnerIds.add(match.getUser1Id());
-        // }
         if (Objects.equals(match.getUserId1(), userId)) {
           partnerIds.add(match.getUserId2());
       } else {
@@ -322,7 +282,7 @@ public class UserService {
     }
     
     // Clean the token (remove "Bearer " prefix if exists)
-    if (token.startsWith("Bearer ")) {
+    if (token.startsWith(BEARER_PREFIX)) {
       token = token.substring(7);
     }
     
@@ -346,7 +306,7 @@ public class UserService {
     }
     
     // Clean the token (remove "Bearer " prefix if exists)
-    if (token.startsWith("Bearer ")) {
+    if (token.startsWith(BEARER_PREFIX)) {
       token = token.substring(7);
     }
     
@@ -363,7 +323,7 @@ public class UserService {
    */
   public void checkAuthorizationById(String token, Long userId) {
     // Clean the token (remove "Bearer " prefix if exists)
-    if (token != null && token.startsWith("Bearer ")) {
+    if (token != null && token.startsWith(BEARER_PREFIX)) {
       token = token.substring(7);
     }
     
@@ -382,8 +342,8 @@ public class UserService {
   
   @Transactional
   public User updateUser(Long userId, User updatedUser) {
-    User existingUser = userRepository.findById(userId)
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+    userRepository.findById(userId)
+    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, USER_NOT_FOUND_MSG)    );
 
     // Just validate here
     if (updatedUser.getAvailability() == null) {
@@ -412,7 +372,7 @@ public class UserService {
   public void logoutUserByToken(String token) {
     System.out.println(">>> Incoming token: " + token);
   
-    if (token != null && token.startsWith("Bearer ")) {
+    if (token != null && token.startsWith(BEARER_PREFIX)) {
       token = token.substring(7);
     }
   
@@ -432,9 +392,6 @@ public class UserService {
   
     System.out.println(">>> Status set to OFFLINE and token cleared for: " + user.getEmail());
   }
-  
-
-  private ProfileKnowledgeLevel knowledgeLevel;
 
 
   public void assignCoursesWithKnowledgeLevels(User user, List<CourseSelectionDTO> courseSelections) {
@@ -466,7 +423,7 @@ public class UserService {
    */
   public void deleteUserById(Long userId){
       User user = userRepository.findById(userId).orElseThrow(() 
-                -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+                -> new ResponseStatusException(HttpStatus.NOT_FOUND, USER_NOT_FOUND_MSG));
       deleteUser(user); 
     } 
 
@@ -479,7 +436,7 @@ public class UserService {
     * @throws ResponseStatusException if the token is invalid or the user is not found
     */
     public void deleteUserByToken(String token) {
-      if (token != null && token.startsWith("Bearer ")) {
+      if (token != null && token.startsWith(BEARER_PREFIX)) {
           token = token.substring(7);
       }
 
@@ -536,8 +493,9 @@ public class UserService {
    * @param token the Bearer authentication token from the Authorization header
    * @return true if the token belongs to the admin account, false otherwise
    * @throws ResponseStatusException if the token is invalid or user not found
-   */public boolean isAdmin(String token) {
-      if (token != null && token.startsWith("Bearer ")) {
+   */
+  public boolean isAdmin(String token) {
+      if (token != null && token.startsWith(BEARER_PREFIX)) {
           token = token.substring(7);
       }
 

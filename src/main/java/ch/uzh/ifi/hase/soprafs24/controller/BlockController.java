@@ -11,7 +11,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/blocks")
@@ -46,7 +45,7 @@ public class BlockController {
         }
 
         return reportBlockService.getAllBlocks().stream()
-            .map(block -> DTOMapper.INSTANCE.convertToBlockDTO(block))
-            .collect(Collectors.toList());
+            .map(DTOMapper.INSTANCE::convertToBlockDTO)
+            .toList();
     }
 }

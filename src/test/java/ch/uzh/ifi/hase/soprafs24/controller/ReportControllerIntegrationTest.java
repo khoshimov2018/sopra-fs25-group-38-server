@@ -98,9 +98,6 @@ public class ReportControllerIntegrationTest {
         return Long.valueOf((Integer) response.get("id"));
     }
 
-    private String loginAs(String email) throws Exception {
-        return loginAs(email, "password123");
-    }
 
     private String loginAs(String email, String password) throws Exception {
         String requestBody = String.format("{\"email\": \"%s\", \"password\": \"%s\"}", email, password);

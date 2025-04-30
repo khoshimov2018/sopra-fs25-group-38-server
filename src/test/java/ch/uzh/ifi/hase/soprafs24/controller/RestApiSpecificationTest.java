@@ -5,7 +5,6 @@ import ch.uzh.ifi.hase.soprafs24.constant.UserAvailability;
 import ch.uzh.ifi.hase.soprafs24.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs24.entity.Course;
 import ch.uzh.ifi.hase.soprafs24.entity.User;
-import ch.uzh.ifi.hase.soprafs24.entity.UserCourse;
 import ch.uzh.ifi.hase.soprafs24.repository.CourseRepository;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.CourseSelectionDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.UserLoginDTO;
@@ -15,54 +14,31 @@ import ch.uzh.ifi.hase.soprafs24.service.CourseService;
 import ch.uzh.ifi.hase.soprafs24.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.ArgumentCaptor;
-
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 
 import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.willDoNothing;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-import antlr.collections.List;
-
-import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Optional;
-import java.util.Set;
-
-import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.nullable;
-import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -174,22 +150,6 @@ public class RestApiSpecificationTest {
                 .andExpect(status().isNoContent());
     }
 
-    /* @Test
-    public void updateUser_validData_returnsNoContent() throws Exception {
-        UserPutDTO putDTO = new UserPutDTO();
-        putDTO.setName("Updated Name");
-
-        User existingUser = new User();
-        existingUser.setId(1L);
-
-        given(userService.getUserById(1L)).willReturn(existingUser);
-
-        mockMvc.perform(put("/users/1")
-                        .header("Authorization", "Bearer token123")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(asJsonString(putDTO)))
-                .andExpect(status().isNoContent());
-    } */
 
     @Test
     public void getCurrentUser_validToken_returnsUser() throws Exception {

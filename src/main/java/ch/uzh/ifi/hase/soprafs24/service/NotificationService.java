@@ -4,7 +4,6 @@ import ch.uzh.ifi.hase.soprafs24.entity.Notification;
 import ch.uzh.ifi.hase.soprafs24.entity.User;
 import ch.uzh.ifi.hase.soprafs24.repository.NotificationRepository;
 import ch.uzh.ifi.hase.soprafs24.repository.UserRepository;
-import ch.uzh.ifi.hase.soprafs24.rest.dto.NotificationGetDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +15,6 @@ import org.springframework.web.server.ResponseStatusException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional

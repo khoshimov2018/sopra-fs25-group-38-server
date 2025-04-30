@@ -4,6 +4,7 @@ public class BlockDTO {
     private Long blockerId;
     private Long blockedUserId;
 
+    // Default constructor required for JSON deserialization and mapping frameworks
     public BlockDTO() {}
 
     public Long getBlockerId() {
