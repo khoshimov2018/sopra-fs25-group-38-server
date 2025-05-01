@@ -20,9 +20,6 @@ import ch.uzh.ifi.hase.soprafs24.rest.dto.UserTypingStatusPushDTO;
 // Spring & Junit annotations
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
-import org.junit.jupiter.params.provider.NullSource;
 import org.mockito.*;
 import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
@@ -33,7 +30,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 // junit & Mockito
 import static org.junit.jupiter.api.Assertions.*;

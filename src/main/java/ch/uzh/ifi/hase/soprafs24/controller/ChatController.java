@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.*;
 
 // utils
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/chat")

@@ -5,13 +5,10 @@ import ch.uzh.ifi.hase.soprafs24.config.TestSecurityConfig;
 import ch.uzh.ifi.hase.soprafs24.constant.ProfileKnowledgeLevel;
 import ch.uzh.ifi.hase.soprafs24.constant.UserAvailability;
 
-import ch.uzh.ifi.hase.soprafs24.constant.UserStatus;
-import ch.uzh.ifi.hase.soprafs24.entity.User;
-
 import ch.uzh.ifi.hase.soprafs24.entity.UserCourse;
 import ch.uzh.ifi.hase.soprafs24.entity.Match;
 import ch.uzh.ifi.hase.soprafs24.entity.Block;
-import ch.uzh.ifi.hase.soprafs24.entity.ChatChannel;
+
 import ch.uzh.ifi.hase.soprafs24.entity.Report;
 
 import ch.uzh.ifi.hase.soprafs24.rest.dto.ChatChannelPostDTO;
