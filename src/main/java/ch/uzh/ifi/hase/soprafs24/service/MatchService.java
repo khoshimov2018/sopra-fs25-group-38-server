@@ -2,8 +2,10 @@ package ch.uzh.ifi.hase.soprafs24.service;
 
 
 import ch.uzh.ifi.hase.soprafs24.constant.MatchStatus;
+import ch.uzh.ifi.hase.soprafs24.entity.Block;
 import ch.uzh.ifi.hase.soprafs24.entity.Match;
 import ch.uzh.ifi.hase.soprafs24.entity.User;
+import ch.uzh.ifi.hase.soprafs24.repository.BlockRepository;
 import ch.uzh.ifi.hase.soprafs24.repository.MatchRepository;
 import ch.uzh.ifi.hase.soprafs24.repository.UserRepository;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.MatchGetDTO;
@@ -15,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -24,6 +27,7 @@ public class MatchService {
 
     private final MatchRepository matchRepository;
     private final UserRepository userRepository;
+    private final BlockRepository blockRepository;
     private final ChatService chatService;
     private final NotificationService notificationService;
     private final DTOMapper dtoMapper = DTOMapper.INSTANCE;
@@ -31,10 +35,12 @@ public class MatchService {
     @Autowired
     public MatchService(MatchRepository matchRepository,
                         UserRepository userRepository,
+                        BlockRepository blockRepository,
                         ChatService chatService,
                         NotificationService notificationService) {
         this.matchRepository = matchRepository;
         this.userRepository = userRepository;
+        this.blockRepository = blockRepository;
         this.chatService = chatService;
         this.notificationService = notificationService;
     }
@@ -65,12 +71,20 @@ public class MatchService {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This match has been rejected due to a block.");
             }
             
+            boolean previouslyLikedBySameUser = false;
             if (Objects.equals(match.getUserId1(), matchPostDTO.getUserId())) {
                 wasAlreadyLikedByTargetUser = match.isLikedByUser2();
+                previouslyLikedBySameUser = match.isLikedByUser1();
                 match.setLikedByUser1(true);
             } else {
                 wasAlreadyLikedByTargetUser = match.isLikedByUser1();
+                previouslyLikedBySameUser = match.isLikedByUser2();
                 match.setLikedByUser2(true);
+            }
+            
+            // Only send a like notification if this user hasn't previously liked the target user
+            if (!previouslyLikedBySameUser) {
+                notificationService.createLikeNotification(matchPostDTO.getTargetUserId(), matchPostDTO.getUserId());
             }
         } else {
             // No existing match: create a new one.
@@ -100,8 +114,6 @@ public class MatchService {
             // Call ChatService's method to create a channel.
             chatService.createIndividualChatChannelAfterMatch(user1, user2);
             notificationService.createMatchNotification(match.getUserId1(), match.getUserId2(), match.getId());
-        } else if (!wasAlreadyLikedByTargetUser) {
-            notificationService.createLikeNotification(matchPostDTO.getTargetUserId(), matchPostDTO.getUserId());
         }
 
         Match savedMatch = matchRepository.save(match);
@@ -140,5 +152,44 @@ public class MatchService {
     public void deleteMatchBetweenUsers(Long userAId, Long userBId) {
         Optional<Match> matchOptional = matchRepository.findMatchByUsers(userAId, userBId);
         matchOptional.ifPresent(matchRepository::delete);
+    }
+    
+
+    public List<Long> getUsersLikedBy(Long userId) {
+        List<Match> matches = matchRepository.findAllByUserIdEither(userId);
+        return matches.stream()
+            .filter(match -> {
+                if (match.getUserId1().equals(userId)) {
+                    return match.isLikedByUser1();
+                } else if (match.getUserId2().equals(userId)) {
+                    return match.isLikedByUser2();
+                }
+                return false;
+            })
+            .map(match -> {
+                return match.getUserId1().equals(userId) ? match.getUserId2() : match.getUserId1();
+            })
+            .toList();
+    }
+    
+ 
+    public List<Long> getUsersMatchedWith(Long userId) {
+        List<Match> matches = matchRepository.findAllByUserIdEither(userId);
+        return matches.stream()
+            .filter(match -> match.isLikedByUser1() && match.isLikedByUser2())
+            .map(match -> {
+                // Return the ID of the other user in the match
+                return match.getUserId1().equals(userId) ? match.getUserId2() : match.getUserId1();
+            })
+            .toList();
+    }
+    
+    
+    public List<Long> getUsersBlockedBy(Long userId) {
+        // Get blocks where this user is the blocker
+        List<Block> blocks = blockRepository.findByBlockerId(userId);
+        return blocks.stream()
+            .map(Block::getBlockedUserId)
+            .toList();
     }
 }

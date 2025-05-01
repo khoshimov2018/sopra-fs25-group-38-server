@@ -7,7 +7,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 
 //exposes all matching endpoints 
@@ -32,5 +34,19 @@ public class MatchController {
     public ResponseEntity<Void> dislikeMatch(@RequestBody MatchPostDTO matchPostDTO) {
         matchService.processDislike(matchPostDTO);
         return ResponseEntity.ok().build();
+    }
+    
+    @GetMapping("/user/{userId}/interacted")
+    public ResponseEntity<Map<String, List<Long>>> getInteractedUsers(@PathVariable Long userId) {
+        List<Long> likedIds = matchService.getUsersLikedBy(userId);
+        List<Long> matchedIds = matchService.getUsersMatchedWith(userId);
+        List<Long> blockedIds = matchService.getUsersBlockedBy(userId);
+        
+        Map<String, List<Long>> result = new HashMap<>();
+        result.put("likedIds", likedIds);
+        result.put("matchedIds", matchedIds);
+        result.put("blockedIds", blockedIds);
+        
+        return ResponseEntity.ok(result);
     }
 }
