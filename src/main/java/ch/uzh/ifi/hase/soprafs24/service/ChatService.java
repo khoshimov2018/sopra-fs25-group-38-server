@@ -1,11 +1,10 @@
 package ch.uzh.ifi.hase.soprafs24.service;
 
-// entity
-import ch.uzh.ifi.hase.soprafs24.entity.ChatChannel;
 import ch.uzh.ifi.hase.soprafs24.entity.ChatParticipant;
 import ch.uzh.ifi.hase.soprafs24.entity.Message;
 import ch.uzh.ifi.hase.soprafs24.entity.User;
 import ch.uzh.ifi.hase.soprafs24.entity.UserTypingStatus;
+import ch.uzh.ifi.hase.soprafs24.entity.chat.ChatChannel;
 // repository
 import ch.uzh.ifi.hase.soprafs24.repository.ChatChannelRepository;
 import ch.uzh.ifi.hase.soprafs24.repository.MessageRepository;
@@ -39,6 +38,12 @@ public class ChatService {
     private final MessageRepository messageRepository;
     private final UserRepository userRepository;
     private final UserTypingStatusRepository userTypingStatusRepository;
+    
+    private static final String USER_NOT_FOUND_MSG = "User with id %d not found";
+    private static final String CHANNEL_NOT_FOUND_MSG = "ChatChannel with id %d not found";
+    private static final String ROLE_ADMIN  = "admin";
+    private static final String ROLE_MEMBER = "member";
+    private static final String TYPE_INDIVIDUAL = "individual";
 
     @Autowired
     public ChatService(ChatChannelRepository chatChannelRepository,
@@ -62,24 +67,24 @@ public class ChatService {
         for (int i = 0; i < participantIds.size(); i++) {
             Long participantId = participantIds.get(i);
             User user = userRepository.findById(participantId)
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User with id " + participantId + " not found"));
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, String.format(USER_NOT_FOUND_MSG, participantId)));
             // First participant is designated as admin
-            String role = (i == 0) ? "admin" : "member";
+            String role = (i == 0) ? ROLE_ADMIN: ROLE_MEMBER;
             ChatParticipant participant = new ChatParticipant(user, role);
             chatChannel.addParticipant(participant);
         }
 
         // For individual chat, set the channel name as "username1&username2"
-        if (chatChannel.getType().equalsIgnoreCase("individual")) {
+        if (chatChannel.getType().equalsIgnoreCase(TYPE_INDIVIDUAL)) {
             if (participantIds.size() != 2) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "Individual channels must have exactly two participants");
             }
 
             User user1 = userRepository.findById(participantIds.get(0))
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User with id " + participantIds.get(0) + " not found"));
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, String.format(USER_NOT_FOUND_MSG, participantIds.get(0))));
             User user2 = userRepository.findById(participantIds.get(1))
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User with id " + participantIds.get(1) + " not found"));
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, String.format(USER_NOT_FOUND_MSG, participantIds.get(1))));
 
             chatChannel.setName(user1.getName() + "&" + user2.getName());
         }
@@ -95,7 +100,7 @@ public class ChatService {
             chatChannelRepository.findByParticipantsUserId(user1.getId());
         
         for (ChatChannel existing : user1Channels) {
-            if ("individual".equalsIgnoreCase(existing.getType())) {
+            if (TYPE_INDIVIDUAL.equalsIgnoreCase(existing.getType())) {
                 
                 Set<Long> ids = existing.getParticipants().stream()
                     .map(cp -> cp.getUser().getId())
@@ -112,14 +117,14 @@ public class ChatService {
 
         // if there is no channel between the two users, build a new channel for them
         ChatChannel channel = new ChatChannel();
-        channel.setType("individual");
+        channel.setType(TYPE_INDIVIDUAL);
         channel.setName(user1.getName() + "&" + user2.getName());
         channel.setChannelProfileImage(null);
         channel.setCreatedAt(LocalDateTime.now());
         channel.setUpdatedAt(LocalDateTime.now());
 
-        channel.addParticipant(new ChatParticipant(user1, "member"));
-        channel.addParticipant(new ChatParticipant(user2, "member"));
+        channel.addParticipant(new ChatParticipant(user1, ROLE_MEMBER));
+        channel.addParticipant(new ChatParticipant(user2, ROLE_MEMBER));
 
         ChatChannel saved = chatChannelRepository.save(channel);
         chatChannelRepository.flush();
@@ -136,9 +141,9 @@ public class ChatService {
     // Send a message in a channel
     public Message sendMessage(Long channelId, MessagePostDTO messagePostDTO) {
         ChatChannel chatChannel = chatChannelRepository.findById(channelId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "ChatChannel with id " + channelId + " not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, String.format(CHANNEL_NOT_FOUND_MSG, channelId)));
         User sender = userRepository.findById(messagePostDTO.getSenderId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User with id " + messagePostDTO.getSenderId() + " not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, String.format(USER_NOT_FOUND_MSG, messagePostDTO.getSenderId())));
 
         boolean isParticipant = chatChannel.getParticipants().stream()
                 .anyMatch(participant -> participant.getUser().getId().equals(sender.getId()));
@@ -158,7 +163,7 @@ public class ChatService {
     // Get chat history of a channel given the channel Id
     public List<Message> getChatHistory(Long channelId) {
         ChatChannel chatChannel = chatChannelRepository.findById(channelId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "ChatChannel with id " + channelId + " not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, String.format(CHANNEL_NOT_FOUND_MSG, channelId)));
         
         Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by("id").ascending());
         return messageRepository.findByChannelId(chatChannel.getId(), pageable).getContent();
@@ -169,7 +174,7 @@ public class ChatService {
     public UserTypingStatusGetDTO updateTypingStatus(UserTypingStatusPushDTO pushDTO) {
         
         User user = userRepository.findById(pushDTO.getUserId())
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User with id " + pushDTO.getUserId() + " not found"));
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, String.format(USER_NOT_FOUND_MSG, pushDTO.getUserId())));
 
         
         UserTypingStatus typingStatus = userTypingStatusRepository.findByUserId(pushDTO.getUserId())
@@ -187,7 +192,7 @@ public class ChatService {
     public UserTypingStatusGetDTO getTypingStatus(Long userId) {
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new ResponseStatusException(
-                HttpStatus.NOT_FOUND, "User with id " + userId + " not found"));
+                HttpStatus.NOT_FOUND, String.format(USER_NOT_FOUND_MSG, userId)));
     
         boolean typing = userTypingStatusRepository.findByUserId(userId)
                            .map(UserTypingStatus::isTyping)
@@ -204,7 +209,7 @@ public class ChatService {
         
         
         for (ChatChannel channel : channels) {
-            if ("individual".equalsIgnoreCase(channel.getType())) {
+            if (TYPE_INDIVIDUAL.equalsIgnoreCase(channel.getType())) {
                 boolean containsBlockedUser = channel.getParticipants().stream()
                     .anyMatch(participant -> participant.getUser().getId().equals(blockedUserId));
                 
@@ -223,10 +228,10 @@ public class ChatService {
         ChatChannel channel = chatChannelRepository.findById(channelId)
             .orElseThrow(() -> new ResponseStatusException(
                 HttpStatus.NOT_FOUND,
-                "ChatChannel with id " + channelId + " not found"));
+                String.format(CHANNEL_NOT_FOUND_MSG, channelId)));
 
         
-        if ("individual".equalsIgnoreCase(channel.getType())) {
+        if (TYPE_INDIVIDUAL.equalsIgnoreCase(channel.getType())) {
             throw new ResponseStatusException(
                 HttpStatus.BAD_REQUEST,
                 "Cannot update an individual channel via this endpoint");
@@ -268,8 +273,8 @@ public class ChatService {
                 User user = userRepository.findById(uid)
                     .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND,
-                        "User with id " + uid + " not found"));
-                ChatParticipant p = new ChatParticipant(user, "member");
+                        String.format(USER_NOT_FOUND_MSG, uid)));
+                ChatParticipant p = new ChatParticipant(user, ROLE_MEMBER);
                 channel.addParticipant(p);
             }
         }

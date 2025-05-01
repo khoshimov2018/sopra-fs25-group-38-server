@@ -4,6 +4,8 @@ import java.io.Serializable;
 
 import javax.persistence.*;
 
+import ch.uzh.ifi.hase.soprafs24.entity.chat.ChatChannel;
+
 @Entity
 @Table(name = "chat_participants")
 public class ChatParticipant implements Serializable {
