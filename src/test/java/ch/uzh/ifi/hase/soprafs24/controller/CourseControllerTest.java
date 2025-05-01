@@ -11,6 +11,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.hamcrest.Matchers.hasSize;
@@ -59,7 +60,7 @@ class CourseControllerTest {
      * Scenario: A course with name "Deep Learning" is sent and saved.
      */
     @Test
-    public void addNewCourse_returns200OK() throws Exception {
+    void addNewCourse_returns200OK() throws Exception {
         String courseJson = "{ \"courseName\": \"Deep Learning\" }";
 
         mockMvc.perform(post("/courses")
