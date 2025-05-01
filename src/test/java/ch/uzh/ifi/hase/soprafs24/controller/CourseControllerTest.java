@@ -1,6 +1,9 @@
 package ch.uzh.ifi.hase.soprafs24.controller;
+import ch.uzh.ifi.hase.soprafs24.constant.ProfileKnowledgeLevel;
 import ch.uzh.ifi.hase.soprafs24.entity.Course;
+import ch.uzh.ifi.hase.soprafs24.entity.UserCourse;
 import ch.uzh.ifi.hase.soprafs24.repository.CourseRepository;
+import ch.uzh.ifi.hase.soprafs24.rest.dto.CoursePostDTO;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,7 +18,12 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.hamcrest.Matchers.hasSize;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.when;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+
+import java.util.List;
+
 
 /**
  * Test: GET /courses
@@ -67,4 +75,19 @@ class CourseControllerTest {
                 .andExpect(status().isCreated());
             }
 
+    /**
+     * Test: CoursePostDTO Setters and Getters
+     * Purpose: Verifies that the getters and setters of the CoursePostDTO work as expected.
+     * Scenario: A CoursePostDTO object is created, and its properties are validated using assertions.
+     */
+    @Test
+    void testCoursePostDTOSettersAndGetters() {
+        CoursePostDTO dto = new CoursePostDTO();
+        List<Long> ids = List.of(1L, 2L);
+        dto.setCourseIds(ids);
+        dto.setCourseName("AI");
+
+        assertEquals(ids, dto.getCourseIds());
+        assertEquals("AI", dto.getCourseName());
+    }         
 }
