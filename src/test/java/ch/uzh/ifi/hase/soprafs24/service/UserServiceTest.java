@@ -3,15 +3,16 @@ package ch.uzh.ifi.hase.soprafs24.service;
 import ch.uzh.ifi.hase.soprafs24.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs24.entity.User;
 import ch.uzh.ifi.hase.soprafs24.repository.UserRepository;
-
-import java.util.Collections;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -29,7 +30,6 @@ class UserServiceTest {
   void setup() {
     MockitoAnnotations.openMocks(this);
 
-    // given
     testUser = new User();
     testUser.setId(1L);
     testUser.setName("testName");
@@ -38,18 +38,13 @@ class UserServiceTest {
     testUser.setStudyLevel("Bachelor");
     testUser.setStudyGoals("Learning");
 
-    // when -> any object is being save in the userRepository -> return the dummy
-    // testUser
     Mockito.when(userRepository.save(Mockito.any())).thenReturn(testUser);
   }
 
   @Test
   void createUser_validInputs_success() {
-    // when -> any object is being save in the userRepository -> return the dummy
-    // testUser
     User createdUser = userService.createUser(testUser, Collections.emptyList());
 
-    // then
     Mockito.verify(userRepository, Mockito.times(1)).save(Mockito.any());
 
     assertEquals(testUser.getId(), createdUser.getId());
@@ -61,44 +56,33 @@ class UserServiceTest {
 
   @Test
   void createUser_duplicateUsername_throwsException() {
-    // given -> a first user has already been created
     userService.createUser(testUser, Collections.emptyList());
 
-    // when -> setup additional mocks for UserRepository
     Mockito.when(userRepository.findByEmail(Mockito.any())).thenReturn(testUser);
     Mockito.when(userRepository.existsByEmail(Mockito.any())).thenReturn(true);
 
-    // Create a new user with the same username but different name
     User secondUser = new User();
     secondUser.setId(2L);
     secondUser.setName("Another Name");
-    secondUser.setEmail("testUsername"); // Same username as testUser
+    secondUser.setEmail("testUsername"); // duplicate email
     secondUser.setPassword("anotherPassword");
     secondUser.setStudyLevel("Master");
     secondUser.setStudyGoals("Data Science");
 
-    // then -> attempt to create second user with same username -> check that an error
-    // is thrown
-    User finalSecondUser = secondUser;
-    assertThrows(ResponseStatusException.class, 
-        () -> userService.createUser(finalSecondUser, Collections.emptyList()));
+    Executable executable = () -> userService.createUser(secondUser, Collections.emptyList());
+    assertThrows(ResponseStatusException.class, executable);
   }
 
   @Test
   void createUser_duplicateInputs_throwsException() {
-    // given -> a first user has already been created
     userService.createUser(testUser, Collections.emptyList());
 
-    // when -> setup additional mocks for UserRepository
     Mockito.when(userRepository.findByName(Mockito.any())).thenReturn(testUser);
     Mockito.when(userRepository.findByEmail(Mockito.any())).thenReturn(testUser);
     Mockito.when(userRepository.existsByEmail(Mockito.any())).thenReturn(true);
 
-    // then -> attempt to create second user with same user -> check that an error
-    // is thrown
-    User finalTestUser = testUser;
-    assertThrows(ResponseStatusException.class, 
-        () -> userService.createUser(finalTestUser, Collections.emptyList()));
+    Executable executable = () -> userService.createUser(testUser, Collections.emptyList());
+    assertThrows(ResponseStatusException.class, executable);
   }
-
 }
+

@@ -46,7 +46,7 @@ public class StudentFilterController {
         return allUsers.stream()
                 .filter(user -> shouldIncludeUser(user, courseMatchedUserIds, availabilityMatchedUserIds, hasCourseFilter, hasAvailabilityFilter))
                 .map(DTOMapper.INSTANCE::convertEntityToUserGetDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     private Set<Long> resolveCourseMatches(List<Long> courseIds, boolean matchAny) {

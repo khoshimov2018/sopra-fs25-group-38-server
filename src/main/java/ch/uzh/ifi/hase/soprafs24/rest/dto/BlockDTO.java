@@ -1,11 +1,18 @@
 package ch.uzh.ifi.hase.soprafs24.rest.dto;
 
 public class BlockDTO {
+
     private Long blockerId;
     private Long blockedUserId;
 
-    // Default constructor required for JSON deserialization and mapping frameworks
-    public BlockDTO() {}
+    /**
+     * Default constructor is required for frameworks like Jackson
+     * that use reflection to instantiate DTOs during deserialization.
+     * This constructor intentionally contains no logic.
+     */
+    public BlockDTO() {
+        // Intentionally left blank
+    }
 
     public Long getBlockerId() {
         return blockerId;

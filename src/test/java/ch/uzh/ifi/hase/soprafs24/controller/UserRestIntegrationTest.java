@@ -109,9 +109,6 @@ class UserRestIntegrationTest {
         assertNotNull(token);
         assertNotNull(userService.getUserById(userId.longValue()));
         }
- 
-
-    
 
         @Test
         void testUserProfileRetrieval() throws Exception {
@@ -171,9 +168,6 @@ class UserRestIntegrationTest {
                 .andExpect(jsonPath("$.userCourses[0].knowledgeLevel", is("BEGINNER")));
         }
 
-
-
-        
 
     /**
      * Helper Method to convert objects into a JSON string
