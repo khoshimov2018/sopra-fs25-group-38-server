@@ -5,8 +5,14 @@ public class ReportDTO {
     private Long reportedId;
     private String reason;
 
-    // Default constructor required for JSON deserialization and mapping frameworks
-    public ReportDTO() {}
+    /**
+     * Default constructor is required for frameworks like Jackson
+     * that use reflection to instantiate DTOs during deserialization.
+     * This constructor intentionally contains no logic.
+     */
+    public ReportDTO() {
+        // Intentionally left blank
+    }
 
     public Long getReporterId() {
         return reporterId;
