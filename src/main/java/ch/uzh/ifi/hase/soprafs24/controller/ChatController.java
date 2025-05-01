@@ -1,7 +1,7 @@
 package ch.uzh.ifi.hase.soprafs24.controller;
 
+import ch.uzh.ifi.hase.soprafs24.entity.ChatChannel;
 import ch.uzh.ifi.hase.soprafs24.entity.Message;
-import ch.uzh.ifi.hase.soprafs24.entity.chat.ChatChannel;
 // dto
 import ch.uzh.ifi.hase.soprafs24.rest.dto.ChatChannelGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.ChatChannelPostDTO;

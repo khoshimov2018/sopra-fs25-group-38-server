@@ -1,11 +1,11 @@
 package ch.uzh.ifi.hase.soprafs24.service;
 
 import ch.uzh.ifi.hase.soprafs24.constant.UserStatus;
+import ch.uzh.ifi.hase.soprafs24.entity.ChatChannel;
 import ch.uzh.ifi.hase.soprafs24.entity.ChatParticipant;
 import ch.uzh.ifi.hase.soprafs24.entity.Message;
 import ch.uzh.ifi.hase.soprafs24.entity.User;
 import ch.uzh.ifi.hase.soprafs24.entity.UserTypingStatus;
-import ch.uzh.ifi.hase.soprafs24.entity.chat.ChatChannel;
 // repository
 import ch.uzh.ifi.hase.soprafs24.repository.ChatChannelRepository;
 import ch.uzh.ifi.hase.soprafs24.repository.MessageRepository;

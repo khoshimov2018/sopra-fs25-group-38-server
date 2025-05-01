@@ -2,8 +2,6 @@ package ch.uzh.ifi.hase.soprafs24.entity;
 
 import javax.persistence.*;
 
-import ch.uzh.ifi.hase.soprafs24.entity.chat.ChatChannel;
-
 import java.io.Serializable;
 import java.time.LocalDateTime;
 

@@ -1,13 +1,11 @@
-package ch.uzh.ifi.hase.soprafs24.entity.chat;
+package ch.uzh.ifi.hase.soprafs24.entity;
 
 import javax.persistence.*;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.List;
-
-import ch.uzh.ifi.hase.soprafs24.entity.ChatParticipant; 
+import java.util.List; 
 
 @Entity
 @Table(name = "channel")
