@@ -80,9 +80,8 @@ class UserServiceTest {
     // then -> attempt to create second user with same username -> check that an error
     // is thrown
     User finalSecondUser = secondUser;
-    assertThrows(ResponseStatusException.class, () ->
-      userService.createUser(finalSecondUser, Collections.emptyList())
-    );
+    assertThrows(ResponseStatusException.class, 
+        () -> userService.createUser(finalSecondUser, Collections.emptyList()));
   }
 
   @Test
@@ -98,9 +97,8 @@ class UserServiceTest {
     // then -> attempt to create second user with same user -> check that an error
     // is thrown
     User finalTestUser = testUser;
-    assertThrows(ResponseStatusException.class, () ->
-      userService.createUser(finalTestUser, Collections.emptyList())
-    );
+    assertThrows(ResponseStatusException.class, 
+        () -> userService.createUser(finalTestUser, Collections.emptyList()));
   }
 
 }

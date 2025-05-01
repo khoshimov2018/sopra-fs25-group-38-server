@@ -7,15 +7,14 @@ import org.junit.jupiter.api.Test;
 import java.time.LocalDate;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class StudyPlanTest {
+class StudyPlanTest {
     @Test
-    public void testSettersAndGetters() {
+    void testSettersAndGetters() {
         StudyPlan plan = new StudyPlan();
 
         // test data
         Long userId = 99L;
         String content = "Study Spring Boot";
-        LocalDate date = LocalDate.of(2025, 5, 1);
 
         // setter
         plan.setUserId(userId);
@@ -29,7 +28,7 @@ public class StudyPlanTest {
     }
 
     @Test
-    public void testConstructor_setsFieldsCorrectly() {
+    void testConstructor_setsFieldsCorrectly() {
         User mockUser = new User();
         mockUser.setId(42L);
 

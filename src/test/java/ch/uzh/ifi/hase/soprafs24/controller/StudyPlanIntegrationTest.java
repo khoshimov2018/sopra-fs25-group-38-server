@@ -16,7 +16,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
-public class StudyPlanIntegrationTest {
+class StudyPlanIntegrationTest {
 
     @Autowired
     private StudyPlanService studyPlanService;
@@ -45,7 +45,7 @@ public class StudyPlanIntegrationTest {
     }
 
     @Test
-    public void addAndRetrieveStudyPlan_worksCorrectly() {
+    void addAndRetrieveStudyPlan_worksCorrectly() {
         // when
         studyPlanService.addStudyPlanForUser(testUser.getId(), "Finish Lecture 4");
 

@@ -43,8 +43,6 @@ class CourseControllerTest {
         courseRepository.deleteAll(); // Ensure a clean state
         courseRepository.save(new Course("Java"));
         courseRepository.save(new Course("Python"));
-        // courseRepository.save(new Course(1L, "Java"));
-        // courseRepository.save(new Course(2L, "Python"));
     
         // when/then
         mockMvc.perform(get("/courses")
