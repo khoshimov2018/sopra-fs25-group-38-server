@@ -3,11 +3,15 @@ package ch.uzh.ifi.hase.soprafs24.controller;
 import ch.uzh.ifi.hase.soprafs24.entity.Course;
 import ch.uzh.ifi.hase.soprafs24.repository.CourseRepository;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.CourseGetDTO;
+import ch.uzh.ifi.hase.soprafs24.rest.dto.CoursePostDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.mapper.DTOMapper;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+
 
 @RestController
 @RequestMapping("/courses")
@@ -27,6 +31,15 @@ public class CourseController {
             dtos.add(DTOMapper.INSTANCE.convertEntityToCourseGetDTO(c));
         }
         return dtos;
+    }
+
+    // POST /courses for admin
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public void addNewCourse(@RequestBody CoursePostDTO dto) {
+        Course newCourse = new Course();
+        newCourse.setCourseName(dto.getCourseName());
+        courseRepository.save(newCourse);
     }
 }
 
