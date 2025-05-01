@@ -11,14 +11,11 @@ public class MatchGetDTO {
 
     public MatchGetDTO() {}
     
-    public MatchGetDTO(Long id, Long userId1, Long userId2, MatchStatus status,
-    boolean likedByUser1, boolean likedByUser2) {
+    public MatchGetDTO(Long id, Long userId1, Long userId2, MatchStatus status) {
     this.id = id;
     this.userId1 = userId1;
     this.userId2 = userId2;
     this.status = status;
-    this.likedByUser1 = likedByUser1;
-    this.likedByUser2 = likedByUser2;
     }
 
 
