@@ -10,7 +10,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @CrossOrigin(origins = {
         "http://localhost:3000",
@@ -46,7 +45,8 @@ public class StudentFilterController {
         return allUsers.stream()
                 .filter(user -> shouldIncludeUser(user, courseMatchedUserIds, availabilityMatchedUserIds, hasCourseFilter, hasAvailabilityFilter))
                 .map(DTOMapper.INSTANCE::convertEntityToUserGetDTO)
-                .collect(Collectors.toList());
+                .toList();
+
     }
 
     private Set<Long> resolveCourseMatches(List<Long> courseIds, boolean matchAny) {

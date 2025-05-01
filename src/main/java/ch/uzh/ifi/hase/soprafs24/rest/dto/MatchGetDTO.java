@@ -16,8 +16,6 @@ public class MatchGetDTO {
         this.userId1 = userId1;
         this.userId2 = userId2;
         this.status = status;
-        this.likedByUser1 = likedByUser1;
-        this.likedByUser2 = likedByUser2;
     }
 
     // Getters and Setters
