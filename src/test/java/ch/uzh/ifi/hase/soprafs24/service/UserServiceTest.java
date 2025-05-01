@@ -3,7 +3,6 @@ package ch.uzh.ifi.hase.soprafs24.service;
 import ch.uzh.ifi.hase.soprafs24.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs24.entity.User;
 import ch.uzh.ifi.hase.soprafs24.repository.UserRepository;
-import ch.uzh.ifi.hase.soprafs24.rest.dto.CourseSelectionDTO;
 
 import java.util.Collections;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,7 +26,7 @@ class UserServiceTest {
   private User testUser;
 
   @BeforeEach
-  public void setup() {
+  void setup() {
     MockitoAnnotations.openMocks(this);
 
     // given
@@ -45,7 +44,7 @@ class UserServiceTest {
   }
 
   @Test
-  public void createUser_validInputs_success() {
+  void createUser_validInputs_success() {
     // when -> any object is being save in the userRepository -> return the dummy
     // testUser
     User createdUser = userService.createUser(testUser, Collections.emptyList());
@@ -61,7 +60,7 @@ class UserServiceTest {
   }
 
   @Test
-  public void createUser_duplicateUsername_throwsException() {
+  void createUser_duplicateUsername_throwsException() {
     // given -> a first user has already been created
     userService.createUser(testUser, Collections.emptyList());
 
@@ -80,11 +79,14 @@ class UserServiceTest {
 
     // then -> attempt to create second user with same username -> check that an error
     // is thrown
-    assertThrows(ResponseStatusException.class, () -> userService.createUser(secondUser, Collections.emptyList()));
+    User finalSecondUser = secondUser;
+    assertThrows(ResponseStatusException.class, () -> {
+      userService.createUser(finalSecondUser, Collections.emptyList());
+    });
   }
 
   @Test
-  public void createUser_duplicateInputs_throwsException() {
+  void createUser_duplicateInputs_throwsException() {
     // given -> a first user has already been created
     userService.createUser(testUser, Collections.emptyList());
 
@@ -95,7 +97,10 @@ class UserServiceTest {
 
     // then -> attempt to create second user with same user -> check that an error
     // is thrown
-    assertThrows(ResponseStatusException.class, () -> userService.createUser(testUser, Collections.emptyList()));
+    User finalTestUser = testUser;
+    assertThrows(ResponseStatusException.class, () -> {
+      userService.createUser(finalTestUser, Collections.emptyList());
+    });
   }
 
 }

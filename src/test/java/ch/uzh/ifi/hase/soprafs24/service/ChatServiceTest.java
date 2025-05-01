@@ -33,7 +33,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-public class ChatServiceTest {
+class ChatServiceTest {
 
     @Mock
     private ChatChannelRepository chatChannelRepository;
@@ -51,12 +51,12 @@ public class ChatServiceTest {
     private ChatService chatService;
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         MockitoAnnotations.openMocks(this);
     }
 
     @Test
-    public void createChatChannel_validInput_success() {
+    void createChatChannel_validInput_success() {
         // Given
         ChatChannelPostDTO postDTO = new ChatChannelPostDTO();
         postDTO.setChannelName("Study Group");
@@ -92,7 +92,7 @@ public class ChatServiceTest {
 
 
     @Test
-    public void sendMessage_validInput_success() {
+    void sendMessage_validInput_success() {
         // Given
         Long channelId = 100L;
         MessagePostDTO postDTO = new MessagePostDTO();
@@ -127,7 +127,7 @@ public class ChatServiceTest {
     }
 
     @Test
-    public void sendMessage_senderNotParticipant_throwsException() {
+    void sendMessage_senderNotParticipant_throwsException() {
         // Given
         Long channelId = 100L;
         MessagePostDTO postDTO = new MessagePostDTO();
@@ -151,7 +151,7 @@ public class ChatServiceTest {
     }
 
     @Test
-    public void getChatHistory_validChannel_returnsMessages() {
+    void getChatHistory_validChannel_returnsMessages() {
         // Given
         Long channelId = 100L;
         ChatChannel channel = new ChatChannel("Study Group", "group", "group.png");
@@ -177,7 +177,7 @@ public class ChatServiceTest {
     
     // UserTypingStatus test suite
     @Test
-    public void updateTypingStatus_validInput_success() {
+    void updateTypingStatus_validInput_success() {
         // Given
         Long userId = 1L;
         User user = new User();
@@ -205,7 +205,7 @@ public class ChatServiceTest {
 
 
     @Test
-    public void getTypingStatus_validInput_success() {
+    void getTypingStatus_validInput_success() {
         // Given
         Long userId = 1L;
         User user = new User();
@@ -229,7 +229,7 @@ public class ChatServiceTest {
     
 
     @Test
-    public void updateTypingStatus_userNotFound_throwsException() {
+    void updateTypingStatus_userNotFound_throwsException() {
         // Given
         Long userId = 999L;
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
@@ -242,7 +242,7 @@ public class ChatServiceTest {
     }
 
     @Test
-    public void deleteIndividualChannelBetweenUsers_channelExists_deletesChannel() {
+    void deleteIndividualChannelBetweenUsers_channelExists_deletesChannel() {
         // Given
         Long blockerId = 1L;
         Long blockedUserId = 2L;
@@ -277,7 +277,7 @@ public class ChatServiceTest {
     }
 
     @Test
-    public void deleteIndividualChannelBetweenUsers_noChannelExists_noDeletion() {
+    void deleteIndividualChannelBetweenUsers_noChannelExists_noDeletion() {
         // Given
         Long blockerId = 1L;
         Long blockedUserId = 2L;
@@ -295,7 +295,7 @@ public class ChatServiceTest {
     }
 
     @Test
-    public void deleteIndividualChannelBetweenUsers_channelExistsButNoMatch_noDeletion() {
+    void deleteIndividualChannelBetweenUsers_channelExistsButNoMatch_noDeletion() {
         // Given
         Long blockerId = 1L;
         Long blockedUserId = 2L;
