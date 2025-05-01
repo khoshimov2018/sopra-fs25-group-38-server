@@ -93,9 +93,9 @@ class MatchServiceTest {
         assertEquals(MatchStatus.PENDING, result.getStatus(), "Status should be PENDING for new match");
         
         // Verify that the match was saved and notification was created
-        // Note: The service calls createLikeNotification twice for new matches (lines 85 and 104)
+        // Note: The service now calls createLikeNotification only once (at line 99)
         verify(matchRepository).save(any(Match.class));
-        verify(notificationService, times(2)).createLikeNotification(targetUserId, actingUserId);
+        verify(notificationService, times(1)).createLikeNotification(targetUserId, actingUserId);
         verify(chatService, never()).createIndividualChatChannelAfterMatch(any(User.class), any(User.class));
     }
 
