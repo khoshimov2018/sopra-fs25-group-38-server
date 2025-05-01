@@ -47,8 +47,10 @@ public class CourseControllerTest {
     public void getAllCourses_returns200OkAndCourses() throws Exception {
         // given
         courseRepository.deleteAll(); // Ensure a clean state
-        courseRepository.save(new Course(1L, "Java"));
-        courseRepository.save(new Course(2L, "Python"));
+        courseRepository.save(new Course("Java"));
+        courseRepository.save(new Course("Python"));
+        // courseRepository.save(new Course(1L, "Java"));
+        // courseRepository.save(new Course(2L, "Python"));
     
         // when/then
         mockMvc.perform(get("/courses")
@@ -58,4 +60,19 @@ public class CourseControllerTest {
                 .andExpect(jsonPath("$[*].courseName", containsInAnyOrder("Java", "Python")));
     }
     
+    /**
+     * Test: POST /courses
+     * Purpose: Verifies that a new course can be added (201 Created).
+     * Scenario: A course with name "Deep Learning" is sent and saved.
+     */
+    @Test
+    public void addNewCourse_returns200OK() throws Exception {
+        String courseJson = "{ \"courseName\": \"Deep Learning\" }";
+
+        mockMvc.perform(post("/courses")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(courseJson))
+                .andExpect(status().isCreated());
+            }
+
 }
