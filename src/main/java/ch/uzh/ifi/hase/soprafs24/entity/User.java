@@ -52,9 +52,6 @@ public class User implements Serializable {
   @Column(nullable = true, unique = true)
   private String token;
 
-  @Column(nullable = true, unique = true)
-  private String chatToken;
-
   @Column(nullable = false)
   private UserStatus status;
 
@@ -144,15 +141,6 @@ public class User implements Serializable {
 
   public void setToken(String token) {
     this.token = token;
-  }
-
-  // chat token
-  public String getChatToken() {
-    return chatToken;
-  }
-
-  public void setChatToken(String token) {
-    this.chatToken = token;
   }
 
   // status

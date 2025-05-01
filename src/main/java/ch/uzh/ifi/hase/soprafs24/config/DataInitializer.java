@@ -46,14 +46,6 @@ public class DataInitializer implements ApplicationRunner {
                 new Course("Web Development")
             );
             
-            // List<Course> courses = List.of(
-            //     new Course(1L, "AI"),
-            //     new Course(2L, "Machine Learning"),
-            //     new Course(3L, "Software Engineering"),
-            //     new Course(4L, "Data Science"),
-            //     new Course(5L, "Databases"),
-            //     new Course(6L, "Web Development")
-            // );
             courseRepository.saveAll(courses);
             log.info("Predefined courses inserted into the database.");
         } else {
