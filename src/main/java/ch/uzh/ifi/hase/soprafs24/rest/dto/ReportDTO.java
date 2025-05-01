@@ -1,19 +1,12 @@
 package ch.uzh.ifi.hase.soprafs24.rest.dto;
 
 public class ReportDTO {
-
     private Long reporterId;
     private Long reportedId;
     private String reason;
 
-    /**
-     * Default constructor is required for frameworks like Jackson
-     * that use reflection to instantiate DTOs during deserialization.
-     * This constructor intentionally contains no logic.
-     */
-    public ReportDTO() {
-        // Intentionally left blank
-    }
+    // Default constructor required for JSON deserialization and mapping frameworks
+    public ReportDTO() {}
 
     public Long getReporterId() {
         return reporterId;

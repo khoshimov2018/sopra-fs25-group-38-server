@@ -281,7 +281,7 @@ public class UserService {
     
     // Clean the token (remove "Bearer " prefix if exists)
     if (token.startsWith(BEARER_PREFIX)) {
-      token = token.substring(BEARER_PREFIX.length());
+      token = token.substring(7);
     }
     
     // Check if token is valid
@@ -305,7 +305,7 @@ public class UserService {
     
     // Clean the token (remove "Bearer " prefix if exists)
     if (token.startsWith(BEARER_PREFIX)) {
-      token = token.substring(BEARER_PREFIX.length());
+      token = token.substring(7);
     }
     
     // Find user by token
@@ -322,7 +322,7 @@ public class UserService {
   public void checkAuthorizationById(String token, Long userId) {
     // Clean the token (remove "Bearer " prefix if exists)
     if (token != null && token.startsWith(BEARER_PREFIX)) {
-      token = token.substring(BEARER_PREFIX.length());
+      token = token.substring(7);
     }
     
     // Find user by token
@@ -368,7 +368,7 @@ public class UserService {
     log.info(">>> Incoming token: {}", token);
   
     if (token != null && token.startsWith(BEARER_PREFIX)) {
-      token = token.substring(BEARER_PREFIX.length());
+      token = token.substring(7);
     }
   
     User user = userRepository.findByToken(token);
@@ -433,7 +433,7 @@ public class UserService {
     */
     public void deleteUserByToken(String token) {
       if (token != null && token.startsWith(BEARER_PREFIX)) {
-          token = token.substring(BEARER_PREFIX.length());
+          token = token.substring(7);
       }
 
       User user = userRepository.findByToken(token);
@@ -491,7 +491,7 @@ public class UserService {
    * @throws ResponseStatusException if the token is invalid or user not found
    */public boolean isAdmin(String token) {
       if (token != null && token.startsWith(BEARER_PREFIX)) {
-          token = token.substring(BEARER_PREFIX.length());
+          token = token.substring(7);
       }
 
       User user = userRepository.findByToken(token);
