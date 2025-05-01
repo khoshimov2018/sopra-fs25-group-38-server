@@ -27,10 +27,17 @@ public class StudyPlan implements Serializable{
     /*
      * getter and setter
      */
+
+    // UserId
     public Long getUserId() {
         return userId;
     }
 
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
+
+    // generatedDate
     public LocalDate generatedDate() {
         return generatedDate;
     }
@@ -39,6 +46,7 @@ public class StudyPlan implements Serializable{
         this.generatedDate = LocalDate.now();
     }
 
+    // PlanContent
     public String getPlanContent() {
         return planContent;
     }
@@ -46,7 +54,6 @@ public class StudyPlan implements Serializable{
     public void setPlanContent(String planContent) {
         this.planContent = planContent;
     }
-
 
     public StudyPlan() {
         this.generatedDate = LocalDate.now();
