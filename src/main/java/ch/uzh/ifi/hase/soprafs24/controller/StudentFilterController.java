@@ -9,10 +9,13 @@ import ch.uzh.ifi.hase.soprafs24.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
-@CrossOrigin(origins = {"http://localhost:3000", "https://sopra-fs25-group-38-client.vercel.app","https://sopra-fs25-group-38-client-notsofuns-projects.vercel.app"})
+@CrossOrigin(origins = {
+        "http://localhost:3000",
+        "https://sopra-fs25-group-38-client.vercel.app",
+        "https://sopra-fs25-group-38-client-notsofuns-projects.vercel.app"})
 @RestController
 @RequestMapping("/students")
 public class StudentFilterController {
@@ -29,60 +32,56 @@ public class StudentFilterController {
     @ResponseStatus(HttpStatus.OK)
     public List<UserGetDTO> getFilteredStudents(
             @RequestParam(required = false) List<Long> courseIds,
-            // firstly, receive the availability as string.
             @RequestParam(required = false) List<String> availability,
-            @RequestParam(defaultValue = "false") boolean matchAny
-            ) {
-        
+            @RequestParam(defaultValue = "false") boolean matchAny) {
+
         List<User> allUsers = userService.getUsers();
-        List<UserGetDTO> userGetDTOs = new ArrayList<>();
 
-        List<Long> courseMatchedUserIds = new ArrayList<>();
-        if (courseIds != null && !courseIds.isEmpty()) {
-            if (matchAny) {
-                courseMatchedUserIds = courseService.findUserIdsByAnyCourseIds(courseIds);
-            } else {
-                courseMatchedUserIds = courseService.findUserIdsEnrolledInAllCourses(courseIds);
-            }        
-        }
-
-        List<UserAvailability> availabilityEnums = new ArrayList<>();
-        List<Long> availabilityMatchedUserIds = new ArrayList<>();
-        if (availability != null && !availability.isEmpty()) {
-            for (String str : availability) {
-
-                // Second, convert the availability values from String to Enum to allow proper binding in the JPQL query.
-                availabilityEnums.add(UserAvailability.valueOf(str));
-            }
-            availabilityMatchedUserIds = courseService.findUserIdsEnrolledInAllAvailability(availabilityEnums);
-        }
+        Set<Long> courseMatchedUserIds = resolveCourseMatches(courseIds, matchAny);
+        Set<Long> availabilityMatchedUserIds = resolveAvailabilityMatches(availability);
 
         boolean hasCourseFilter = courseIds != null && !courseIds.isEmpty();
         boolean hasAvailabilityFilter = availability != null && !availability.isEmpty();
 
-        for (User user : allUsers) {
-            Long userId = user.getId();
-            if (userId == null) continue;
+        return allUsers.stream()
+                .filter(user -> shouldIncludeUser(user, courseMatchedUserIds, availabilityMatchedUserIds, hasCourseFilter, hasAvailabilityFilter))
+                .map(DTOMapper.INSTANCE::convertEntityToUserGetDTO)
+                .collect(Collectors.toList());
+    }
 
-            // Skip admin user
-            if ("admin@example.com".equalsIgnoreCase(user.getEmail())) {
-                continue;
-            }
+    private Set<Long> resolveCourseMatches(List<Long> courseIds, boolean matchAny) {
+        if (courseIds == null || courseIds.isEmpty()) {
+            return Collections.emptySet();
+        }
+        List<Long> matchedIds = matchAny
+                ? courseService.findUserIdsByAnyCourseIds(courseIds)
+                : courseService.findUserIdsEnrolledInAllCourses(courseIds);
+        return new HashSet<>(matchedIds);
+    }
 
-            boolean matchesCourse = courseMatchedUserIds.isEmpty() || courseMatchedUserIds.contains(userId);
-            boolean matchesAvailability = availabilityMatchedUserIds.isEmpty() || availabilityMatchedUserIds.contains(userId);
+    private Set<Long> resolveAvailabilityMatches(List<String> availability) {
+        if (availability == null || availability.isEmpty()) {
+            return Collections.emptySet();
+        }
+        List<UserAvailability> enums = availability.stream()
+                .map(UserAvailability::valueOf)
+                .toList();
+        return new HashSet<>(courseService.findUserIdsEnrolledInAllAvailability(enums));
+    }
 
-            boolean shouldIncludeUser =
-                    (hasCourseFilter && hasAvailabilityFilter && matchesCourse && matchesAvailability)
+    private boolean shouldIncludeUser(User user, Set<Long> courseIds, Set<Long> availabilityIds,
+                                      boolean hasCourseFilter, boolean hasAvailabilityFilter) {
+        Long userId = user.getId();
+        if (userId == null || "admin@example.com".equalsIgnoreCase(user.getEmail())) {
+            return false;
+        }
+
+        boolean matchesCourse = courseIds.isEmpty() || courseIds.contains(userId);
+        boolean matchesAvailability = availabilityIds.isEmpty() || availabilityIds.contains(userId);
+
+        return (hasCourseFilter && hasAvailabilityFilter && matchesCourse && matchesAvailability)
                 || (hasCourseFilter && !hasAvailabilityFilter && matchesCourse)
                 || (!hasCourseFilter && hasAvailabilityFilter && matchesAvailability)
                 || (!hasCourseFilter && !hasAvailabilityFilter);
-
-            if (shouldIncludeUser) {
-                userGetDTOs.add(DTOMapper.INSTANCE.convertEntityToUserGetDTO(user));
-            }
-        }
-
-        return userGetDTOs;
     }
 }

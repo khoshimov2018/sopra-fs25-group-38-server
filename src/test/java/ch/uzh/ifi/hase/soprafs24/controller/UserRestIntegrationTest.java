@@ -112,26 +112,6 @@ class UserRestIntegrationTest {
  
 
     
-    /**
-         * Integration Test 2: User Registration with Duplicate Username
-         *
-         * Tests the REST protocol behavior when registering with a duplicate username:
-         * 1. Register first user successfully
-         * 2. Attempt to register second user with same email
-         * 3. Verify 409 CONFLICT status code is returned with proper error message
-         */
-
-        /**
-         * Integration Test 3: User Profile Retrieval
-         *
-         * This test verifies the full flow for retrieving a user's profile through the REST API.
-         * It ensures that:
-         * 1. A new user can successfully register via POST /users/register.
-         * 2. The registration response contains a valid authorization token and user ID.
-         * 3. The user's profile can be retrieved via GET /users/{userId} using the token.
-         * 4. The response returns HTTP 200 OK with the correct user details (ID, name, email).
-         */
-
 
         @Test
         void testUserProfileRetrieval() throws Exception {

@@ -5,6 +5,7 @@ public class ReportDTO {
     private Long reportedId;
     private String reason;
 
+    // Default constructor required for JSON deserialization and mapping frameworks
     public ReportDTO() {}
 
     public Long getReporterId() {

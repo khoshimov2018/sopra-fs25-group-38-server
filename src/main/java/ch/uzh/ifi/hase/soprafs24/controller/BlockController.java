@@ -11,7 +11,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/blocks")
@@ -44,9 +43,8 @@ public class BlockController {
         if (!userService.isAdmin(token)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only admins can view block data");
         }
-
         return reportBlockService.getAllBlocks().stream()
-            .map(block -> DTOMapper.INSTANCE.convertToBlockDTO(block))
+            .map(DTOMapper.INSTANCE::convertToBlockDTO)
             .toList();
     }
 }

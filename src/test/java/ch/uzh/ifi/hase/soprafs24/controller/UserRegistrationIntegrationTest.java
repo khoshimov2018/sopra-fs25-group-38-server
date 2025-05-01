@@ -10,7 +10,6 @@ import ch.uzh.ifi.hase.soprafs24.repository.CourseRepository;
 import ch.uzh.ifi.hase.soprafs24.repository.UserRepository;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.CourseSelectionDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.UserPostDTO;
-import ch.uzh.ifi.hase.soprafs24.service.UserService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -45,9 +44,6 @@ class UserRegistrationIntegrationTest {
 
     @Autowired
     private MockMvc mockMvc;
-
-    @Autowired
-    private UserService userService;
     
     @Autowired
     private UserRepository userRepository;
