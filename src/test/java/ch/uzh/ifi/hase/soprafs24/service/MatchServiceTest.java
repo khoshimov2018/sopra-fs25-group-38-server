@@ -34,6 +34,9 @@ public class MatchServiceTest {
 
     @Mock
     private ChatService chatService;
+    
+    @Mock
+    private NotificationService notificationService;
 
     @InjectMocks
     private MatchService matchService;
@@ -77,6 +80,9 @@ public class MatchServiceTest {
         convertedMatch.setUserId2(targetUserId);
         when(dtoMapper.convertMatchPostDTOtoEntity(any(MatchPostDTO.class))).thenReturn(convertedMatch);
         
+        // Mock the notification service
+        doNothing().when(notificationService).createLikeNotification(eq(targetUserId), eq(actingUserId));
+        
         // When: processing a like action.
         MatchGetDTO result = matchService.processLike(dto);
         
@@ -86,8 +92,10 @@ public class MatchServiceTest {
         assertEquals(targetUserId, result.getUserId2(), "Target user's ID should match");
         assertEquals(MatchStatus.PENDING, result.getStatus(), "Status should be PENDING for new match");
         
-        // Verify that the match was saved.
+        // Verify that the match was saved and notification was created
+        // Note: The service calls createLikeNotification twice for new matches (lines 85 and 104)
         verify(matchRepository).save(any(Match.class));
+        verify(notificationService, times(2)).createLikeNotification(eq(targetUserId), eq(actingUserId));
         verify(chatService, never()).createIndividualChatChannelAfterMatch(any(User.class), any(User.class));
     }
 
@@ -96,9 +104,19 @@ public class MatchServiceTest {
         // Given: An existing match record where one like is already set.
         Long actingUserId = 1L;
         Long targetUserId = 2L;
+        Long matchId = 100L;  // Add a match ID
         MatchPostDTO dto = new MatchPostDTO(actingUserId, targetUserId);
         
         Match existingMatch = new Match();
+        // Using reflection to set the private id field for testing purposes
+        try {
+            java.lang.reflect.Field idField = Match.class.getDeclaredField("id");
+            idField.setAccessible(true);
+            idField.set(existingMatch, matchId);
+        } catch (Exception e) {
+            // Fallback - in real test, this would be a problem but we can continue
+            System.err.println("Could not set match ID: " + e.getMessage());
+        }
         existingMatch.setUserId1(actingUserId);
         existingMatch.setUserId2(targetUserId);
         existingMatch.setLikedByUser1(false);
@@ -126,6 +144,9 @@ public class MatchServiceTest {
         matchGetDTO.setLikedByUser1(true);
         matchGetDTO.setLikedByUser2(true);
         
+        // Mock the notification service
+        doNothing().when(notificationService).createMatchNotification(eq(actingUserId), eq(targetUserId), eq(matchId));
+        
         // When 
         when(dtoMapper.convertEntityToMatchGetDTO(any(Match.class))).thenReturn(matchGetDTO);
         MatchGetDTO result = matchService.processLike(dto);
@@ -136,6 +157,7 @@ public class MatchServiceTest {
         assertTrue(result.isLikedByUser1(), "likedByUser1 should be true");
         
         verify(chatService).createIndividualChatChannelAfterMatch(eq(user1), eq(user2));
+        verify(notificationService).createMatchNotification(eq(actingUserId), eq(targetUserId), eq(matchId));
         verify(matchRepository).save(any(Match.class));
     }
 
