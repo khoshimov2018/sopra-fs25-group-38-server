@@ -10,18 +10,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 
 /**
  * Test: GET /courses
@@ -30,7 +23,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 @SpringBootTest
 @AutoConfigureMockMvc(addFilters = false)
-public class CourseControllerTest {
+class CourseControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -44,7 +37,7 @@ public class CourseControllerTest {
     }
 
     @Test
-    public void getAllCourses_returns200OkAndCourses() throws Exception {
+    void getAllCourses_returns200OkAndCourses() throws Exception {
         // given
         courseRepository.deleteAll(); // Ensure a clean state
         courseRepository.save(new Course(1L, "Java"));

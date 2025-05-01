@@ -58,7 +58,7 @@ class RestApiSpecificationTest {
     private CourseRepository courseRepository;
 
     @Test
-    public void createUser_checkResponseHeaders() throws Exception {
+    void createUser_checkResponseHeaders() throws Exception {
         // mock return user
         User user = new User();
         user.setId(1L);
@@ -89,7 +89,7 @@ class RestApiSpecificationTest {
     }
 
     @Test
-    public void createUser_invalidData_returnsBadRequest() throws Exception {
+    void createUser_invalidData_returnsBadRequest() throws Exception {
         UserPostDTO userPostDTO = new UserPostDTO();
         userPostDTO.setName("Invalid User");
         userPostDTO.setEmail(""); // Invalid
@@ -102,7 +102,7 @@ class RestApiSpecificationTest {
     }
 
     @Test
-    public void getUserById_withSpecificAcceptHeader() throws Exception {
+    void getUserById_withSpecificAcceptHeader() throws Exception {
         User user = new User();
         user.setId(1L);
         user.setName("Test User");
@@ -121,7 +121,7 @@ class RestApiSpecificationTest {
     }
 
         @Test
-    public void loginUser_successful_returnsTokenAndUser() throws Exception {
+    void loginUser_successful_returnsTokenAndUser() throws Exception {
         UserLoginDTO loginDTO = new UserLoginDTO();
         loginDTO.setEmail("user@example.com");
         loginDTO.setPassword("password");
@@ -142,31 +142,15 @@ class RestApiSpecificationTest {
     }
 
     @Test
-    public void logoutUser_validToken_returnsNoContent() throws Exception {
+    void logoutUser_validToken_returnsNoContent() throws Exception {
         mockMvc.perform(post("/users/logout")
                         .header("Authorization", "Bearer token123"))
                 .andExpect(status().isNoContent());
     }
 
-    /* @Test
-    public void updateUser_validData_returnsNoContent() throws Exception {
-        UserPutDTO putDTO = new UserPutDTO();
-        putDTO.setName("Updated Name");
-
-        User existingUser = new User();
-        existingUser.setId(1L);
-
-        given(userService.getUserById(1L)).willReturn(existingUser);
-
-        mockMvc.perform(put("/users/1")
-                        .header("Authorization", "Bearer token123")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(asJsonString(putDTO)))
-                .andExpect(status().isNoContent());
-    } */
 
     @Test
-    public void getCurrentUser_validToken_returnsUser() throws Exception {
+    void getCurrentUser_validToken_returnsUser() throws Exception {
         User user = new User();
         user.setId(1L);
         user.setEmail("user@example.com");
@@ -181,7 +165,7 @@ class RestApiSpecificationTest {
     }
 
     @Test
-    public void getCurrentUser_invalidToken_returnsUnauthorized() throws Exception {
+    void getCurrentUser_invalidToken_returnsUnauthorized() throws Exception {
         given(userService.getUserByToken("invalidtoken")).willReturn(null);
 
         mockMvc.perform(get("/users/me")
@@ -190,7 +174,7 @@ class RestApiSpecificationTest {
     }
 
     @Test
-    public void deleteMyAccount_validToken_returnsNoContent() throws Exception {
+    void deleteMyAccount_validToken_returnsNoContent() throws Exception {
         mockMvc.perform(delete("/users/me")
                         .header("Authorization", "Bearer token123"))
                 .andExpect(status().isNoContent());
@@ -200,7 +184,7 @@ class RestApiSpecificationTest {
 
   
     @Test
-    public void updateUser_validData_updatesSuccessfully() throws Exception {
+    void updateUser_validData_updatesSuccessfully() throws Exception {
         Long userId = 1L;
     
         // Existing user mock
@@ -244,7 +228,7 @@ class RestApiSpecificationTest {
     }
     
     @Test
-    public void updateUser_validData_updatesSuccessfully2() throws Exception {
+    void updateUser_validData_updatesSuccessfully2() throws Exception {
         Long userId = 1L;
         String token = "validToken";
     

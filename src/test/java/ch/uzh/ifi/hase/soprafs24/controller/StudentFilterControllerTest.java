@@ -29,7 +29,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc(addFilters = false)
-public class StudentFilterControllerTest {
+class StudentFilterControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -79,7 +79,7 @@ public class StudentFilterControllerTest {
      * Scenario: Bob has EVENING availability; only Bob should be returned.
      */
     @Test
-    public void getStudents_byAvailability_eveningUserReturned() throws Exception {
+    void getStudents_byAvailability_eveningUserReturned() throws Exception {
         registerUser("Bob", "bob@example.com", UserAvailability.EVENING, List.of(select(javaCourse.getId())));
         registerUser("Alice", "alice@example.com", UserAvailability.MORNING, List.of(select(pythonCourse.getId())));
 
@@ -95,7 +95,7 @@ public class StudentFilterControllerTest {
     * Scenario: Charlie is enrolled in Java; only Charlie should be returned.
     */
     @Test
-    public void getStudents_byCourseId_javaStudentReturned() throws Exception {
+    void getStudents_byCourseId_javaStudentReturned() throws Exception {
         registerUser("Charlie", "charlie@example.com", UserAvailability.MORNING, List.of(select(javaCourse.getId())));
         registerUser("Diana", "diana@example.com", UserAvailability.EVENING, List.of(select(pythonCourse.getId())));
 
@@ -112,7 +112,7 @@ public class StudentFilterControllerTest {
     * Scenario: Eve matches both Java course and EVENING availability; only Eve should be returned.
     */
     @Test
-    public void getStudents_byCourseAndAvailability_combinedFilterWorks() throws Exception {
+    void getStudents_byCourseAndAvailability_combinedFilterWorks() throws Exception {
         MvcResult result = registerUser("Eve", "eve@example.com", UserAvailability.EVENING, List.of(select(javaCourse.getId())));
         registerUser("Frank", "frank@example.com", UserAvailability.MORNING, List.of(select(javaCourse.getId())));
         registerUser("Grace", "grace@example.com", UserAvailability.EVENING, List.of(select(pythonCourse.getId())));

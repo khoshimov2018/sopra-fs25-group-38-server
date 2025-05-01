@@ -9,7 +9,6 @@ import ch.uzh.ifi.hase.soprafs24.entity.User;
 import ch.uzh.ifi.hase.soprafs24.repository.CourseRepository;
 import ch.uzh.ifi.hase.soprafs24.repository.UserRepository;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.CourseSelectionDTO;
-import ch.uzh.ifi.hase.soprafs24.rest.dto.UserGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.UserPostDTO;
 import ch.uzh.ifi.hase.soprafs24.service.UserService;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -42,7 +41,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @Import(TestSecurityConfig.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-public class UserRegistrationIntegrationTest {
+class UserRegistrationIntegrationTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -59,7 +58,7 @@ public class UserRegistrationIntegrationTest {
     private ObjectMapper objectMapper;
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         objectMapper = new ObjectMapper();
         
         if (courseRepository.findById(1L).isEmpty()) {
@@ -71,7 +70,7 @@ public class UserRegistrationIntegrationTest {
     }
 
     @Test
-    public void testFrontendBackendUserRegistrationIntegration() throws Exception {
+    void testFrontendBackendUserRegistrationIntegration() throws Exception {
         UserPostDTO registrationData = new UserPostDTO();
         registrationData.setName("Test User");
         registrationData.setEmail("test.user@example.com");
@@ -173,7 +172,7 @@ public class UserRegistrationIntegrationTest {
     }
 
     @Test
-    public void testRegistrationValidation_emailAlreadyExists() throws Exception {
+    void testRegistrationValidation_emailAlreadyExists() throws Exception {
         UserPostDTO firstUser = new UserPostDTO();
         firstUser.setName("First User");
         firstUser.setEmail("duplicate@example.com");
@@ -210,7 +209,7 @@ public class UserRegistrationIntegrationTest {
     }
 
     @Test
-    public void testRegistrationValidation_invalidInput() throws Exception {
+    void testRegistrationValidation_invalidInput() throws Exception {
         UserPostDTO invalidUser = new UserPostDTO();
         invalidUser.setName("Invalid User");
         invalidUser.setEmail("invalid@example.com");

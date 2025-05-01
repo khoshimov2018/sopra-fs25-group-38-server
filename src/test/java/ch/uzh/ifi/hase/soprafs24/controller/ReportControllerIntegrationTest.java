@@ -29,7 +29,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @Import(TestSecurityConfig.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-public class ReportControllerIntegrationTest {
+class ReportControllerIntegrationTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -40,7 +40,7 @@ public class ReportControllerIntegrationTest {
     private Long reportedId;
 
     @BeforeEach
-    public void setup() throws Exception {
+    void setup() throws Exception {
         objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
 
@@ -49,7 +49,7 @@ public class ReportControllerIntegrationTest {
     }
 
     @Test
-    public void testReportUserSuccessfully() throws Exception {
+    void testReportUserSuccessfully() throws Exception {
         ReportDTO reportDTO = new ReportDTO();
         reportDTO.setReporterId(reporterId);
         reportDTO.setReportedId(reportedId);
@@ -62,7 +62,7 @@ public class ReportControllerIntegrationTest {
     }
 
     @Test
-    public void testAdminCanViewReports() throws Exception {
+    void testAdminCanViewReports() throws Exception {
         // First report a user
         testReportUserSuccessfully();
 
@@ -98,9 +98,6 @@ public class ReportControllerIntegrationTest {
         return Long.valueOf((Integer) response.get("id"));
     }
 
-    private String loginAs(String email) throws Exception {
-        return loginAs(email, "password123");
-    }
 
     private String loginAs(String email, String password) throws Exception {
         String requestBody = String.format("{\"email\": \"%s\", \"password\": \"%s\"}", email, password);

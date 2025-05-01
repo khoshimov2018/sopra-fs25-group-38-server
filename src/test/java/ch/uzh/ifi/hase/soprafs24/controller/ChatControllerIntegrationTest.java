@@ -26,7 +26,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc(addFilters = false) // Disable security filters (and CSRF) for testing
 @Transactional
-public class ChatControllerIntegrationTest {
+class ChatControllerIntegrationTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -48,7 +48,7 @@ public class ChatControllerIntegrationTest {
     private User userCarol;
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         // Clear repositories to ensure test isolation.
         messageRepository.deleteAll();
         chatChannelRepository.deleteAll();
@@ -85,7 +85,7 @@ public class ChatControllerIntegrationTest {
 
     // Test the channel creation endpoint.
     @Test
-    public void testCreateChatChannel_group() throws Exception {
+    void testCreateChatChannel_group() throws Exception {
         ChatChannelPostDTO postDTO = new ChatChannelPostDTO();
         postDTO.setChannelName("Study Group");
         postDTO.setChannelType("group");
@@ -107,7 +107,7 @@ public class ChatControllerIntegrationTest {
 
     // Test retrieving channels for a specific user.
     @Test
-    public void testGetChannelsForUser() throws Exception {
+    void testGetChannelsForUser() throws Exception {
         // First, create a channel.
         ChatChannelPostDTO postDTO = new ChatChannelPostDTO();
         postDTO.setChannelName("Group Chat");
@@ -132,7 +132,7 @@ public class ChatControllerIntegrationTest {
 
     // Test sending a message and retrieving chat history.
     @Test
-    public void testSendMessage_andGetChatHistory() throws Exception {
+    void testSendMessage_andGetChatHistory() throws Exception {
         // Create a chat channel that includes userAlice and userBob.
         ChatChannelPostDTO postDTO = new ChatChannelPostDTO();
         postDTO.setChannelName("Discussion");
@@ -183,7 +183,7 @@ public class ChatControllerIntegrationTest {
 
     // UserTypingStatus test suite
     @Test
-    public void testUpdateTypingStatus_endpoint() throws Exception {
+    void testUpdateTypingStatus_endpoint() throws Exception {
         Long userId = userAlice.getId();
         // Prepare the push DTO.
         UserTypingStatusPushDTO pushDTO = new UserTypingStatusPushDTO(userId, true);
@@ -199,7 +199,7 @@ public class ChatControllerIntegrationTest {
     }
     
     @Test
-    public void testGetTypingStatus_endpoint() throws Exception {
+    void testGetTypingStatus_endpoint() throws Exception {
         Long userId = userAlice.getId();
 
         // First, update the typing status using the PUT endpoint.
@@ -225,7 +225,7 @@ public class ChatControllerIntegrationTest {
      * - changes name, profileImage, and participants.
      */
     @Test
-    public void testUpdateChatChannel_success() throws Exception {
+    void testUpdateChatChannel_success() throws Exception {
         // 1) create an initial group channel with Alice & Bob
         ChatChannelPostDTO createDTO = new ChatChannelPostDTO();
         createDTO.setChannelName("Old Name");
@@ -268,7 +268,7 @@ public class ChatControllerIntegrationTest {
     }
 
     @Test
-    public void testUpdateChatChannel_notFound() throws Exception {
+    void testUpdateChatChannel_notFound() throws Exception {
         ChatChannelPostDTO dto = new ChatChannelPostDTO();
         dto.setChannelName("X");
         dto.setChannelProfileImage("x.png");
@@ -281,7 +281,7 @@ public class ChatControllerIntegrationTest {
     }
 
     @Test
-    public void testUpdateChatChannel_individualForbidden() throws Exception {
+    void testUpdateChatChannel_individualForbidden() throws Exception {
         // create an individual channel first
         ChatChannelPostDTO createDTO = new ChatChannelPostDTO();
         createDTO.setChannelType("individual");

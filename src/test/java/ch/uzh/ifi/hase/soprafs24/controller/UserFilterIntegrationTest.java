@@ -45,7 +45,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 @SpringBootTest
 @AutoConfigureMockMvc(addFilters = false) // Skip auth for testing
-public class UserFilterIntegrationTest {
+class UserFilterIntegrationTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -66,7 +66,7 @@ public class UserFilterIntegrationTest {
     private String claudeEmail;
 
     @BeforeEach
-    public void setup() throws Exception {
+    void setup() throws Exception {
         userRepository.deleteAll();
         courseRepository.deleteAll();
 
@@ -94,7 +94,7 @@ public class UserFilterIntegrationTest {
      * S6. Test that all courses are successfully retrieved.
      */
     @Test
-    public void getCourses_returnsAllCourses() throws Exception {
+    void getCourses_returnsAllCourses() throws Exception {
         mockMvc.perform(get("/courses")
                 .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
@@ -106,7 +106,7 @@ public class UserFilterIntegrationTest {
      * S9. Test that student is successfully filtered by courseId.
      */
     @Test
-    public void getStudents_filteredByCourseId_returnsBob() throws Exception {
+    void getStudents_filteredByCourseId_returnsBob() throws Exception {
         mockMvc.perform(get("/students")
                 .param("courseIds", savedCourse1.getId().toString())
                 .accept(MediaType.APPLICATION_JSON))
@@ -118,7 +118,7 @@ public class UserFilterIntegrationTest {
      * S8. Test that student is successfully filtered by availability.
      */
     @Test
-    public void getStudents_filteredByAvailability_returnsClaude() throws Exception {
+    void getStudents_filteredByAvailability_returnsClaude() throws Exception {
         mockMvc.perform(get("/students")
                 .param("availability", "EVENING")
                 .accept(MediaType.APPLICATION_JSON))

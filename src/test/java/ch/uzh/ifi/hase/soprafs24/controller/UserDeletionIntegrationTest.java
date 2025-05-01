@@ -4,9 +4,6 @@ import ch.uzh.ifi.hase.soprafs24.config.DataInitializer;
 import ch.uzh.ifi.hase.soprafs24.config.TestSecurityConfig;
 import ch.uzh.ifi.hase.soprafs24.constant.ProfileKnowledgeLevel;
 import ch.uzh.ifi.hase.soprafs24.constant.UserAvailability;
-import ch.uzh.ifi.hase.soprafs24.constant.UserStatus;
-import ch.uzh.ifi.hase.soprafs24.entity.ChatChannel;
-import ch.uzh.ifi.hase.soprafs24.entity.User;
 import ch.uzh.ifi.hase.soprafs24.entity.UserCourse;
 import ch.uzh.ifi.hase.soprafs24.entity.Match;
 import ch.uzh.ifi.hase.soprafs24.entity.Block;
@@ -67,7 +64,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Transactional
 @Import({TestSecurityConfig.class, DataInitializer.class})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-public class UserDeletionIntegrationTest {
+class UserDeletionIntegrationTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -93,7 +90,7 @@ public class UserDeletionIntegrationTest {
     private ObjectMapper objectMapper;
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
     }
@@ -124,7 +121,7 @@ public class UserDeletionIntegrationTest {
      */
 
         @Test
-        public void testUserDeletionFlow() throws Exception {
+        void testUserDeletionFlow() throws Exception {
 
         CourseSelectionDTO selection1 = new CourseSelectionDTO();
         selection1.setCourseId(1L); // AI
@@ -183,7 +180,6 @@ public class UserDeletionIntegrationTest {
         mockMvc.perform(post("/matches/like")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(asJsonString(like1)))
-                // .andExpect(status().isOk());
                 .andExpect(status().isCreated());
 
         // 3-2. targetId likes sample1Id(matched)
@@ -196,16 +192,16 @@ public class UserDeletionIntegrationTest {
 
         // 4. Create chat channels involving the target user
         // 4-1. Create an individual chat between target and sample user
-        ChatChannelPostDTO individual_chat = new ChatChannelPostDTO();
-        individual_chat.setChannelType("individual");
-        individual_chat.setChannelProfileImage("group.png");
-        individual_chat.setParticipantIds(Arrays.asList(targetId, sample1Id));
+        ChatChannelPostDTO individualChat = new ChatChannelPostDTO();
+        individualChat.setChannelType("individual");
+        individualChat.setChannelProfileImage("group.png");
+        individualChat.setParticipantIds(Arrays.asList(targetId, sample1Id));
 
-        String individual_postContent = objectMapper.writeValueAsString(individual_chat);
+        String individualPostContent = objectMapper.writeValueAsString(individualChat);
 
         mockMvc.perform(post("/chat/channels")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(individual_postContent))
+                .content(individualPostContent))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.channelId").exists())
                 .andExpect(jsonPath("$.channelType", is("individual")))
@@ -213,17 +209,17 @@ public class UserDeletionIntegrationTest {
                 .andExpect(jsonPath("$.participants", hasSize(2)));
 
         // 4-2. Create a group chat including all three users
-        ChatChannelPostDTO group_chat = new ChatChannelPostDTO();
-        group_chat.setChannelName("Study Group");
-        group_chat.setChannelType("group");
-        group_chat.setChannelProfileImage("group.png");
-        group_chat.setParticipantIds(Arrays.asList(targetId, sample1Id, sample2Id));
+        ChatChannelPostDTO groupChat = new ChatChannelPostDTO();
+        groupChat.setChannelName("Study Group");
+        groupChat.setChannelType("group");
+        groupChat.setChannelProfileImage("group.png");
+        groupChat.setParticipantIds(Arrays.asList(targetId, sample1Id, sample2Id));
 
-        String group_postContent = objectMapper.writeValueAsString(group_chat);
+        String groupPostContent = objectMapper.writeValueAsString(groupChat);
 
         mockMvc.perform(post("/chat/channels")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(group_postContent))
+                .content(groupPostContent))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.channelId").exists())
                 .andExpect(jsonPath("$.channelName", is("Study Group")))
