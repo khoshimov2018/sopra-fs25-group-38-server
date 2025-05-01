@@ -31,6 +31,8 @@ import org.springframework.web.server.ResponseStatusException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 // junit & Mockito
@@ -355,6 +357,51 @@ class ChatServiceTest {
         assertEquals(HttpStatus.NOT_FOUND, ex.getStatus());
     }
 
+    // test for createIndividualChatChannelAfterMatch
+    @Test
+    void createIndividualChannel_channelAlreadyExists_returnsSameInstance() {
+        // users
+        User user1 = new User(); user1.setId(1L); user1.setName("A");
+        User user2 = new User(); user2.setId(2L); user2.setName("B");
+
+        // existing channel with both users
+        ChatChannel existing = new ChatChannel();
+        existing.setType("individual");
+        existing.addParticipant(new ChatParticipant(user1, "member"));
+        existing.addParticipant(new ChatParticipant(user2, "member"));
+
+        when(chatChannelRepository.findByParticipantsUserId(1L))
+                .thenReturn(List.of(existing));
+
+        ChatChannel result = chatService.createIndividualChatChannelAfterMatch(user1, user2);
+
+        assertSame(existing, result);
+        verify(chatChannelRepository, never()).save(any(ChatChannel.class));
+    }
+
+    @Test
+    void createIndividualChannel_noneExists_savesAndReturnsNewChannel() {
+        User user1 = new User(); user1.setId(1L); user1.setName("A");
+        User user2 = new User(); user2.setId(2L); user2.setName("B");
+
+        when(chatChannelRepository.findByParticipantsUserId(1L))
+                .thenReturn(List.of());                    // no existing channel
+
+        when(chatChannelRepository.save(any(ChatChannel.class)))
+                .thenAnswer(inv -> inv.getArgument(0, ChatChannel.class));
+
+        ChatChannel result = chatService.createIndividualChatChannelAfterMatch(user1, user2);
+
+        assertEquals("individual", result.getType());
+        assertEquals(
+            Set.of(1L, 2L),
+            result.getParticipants().stream()
+                .map(cp -> cp.getUser().getId())
+                .collect(Collectors.toSet())
+        );
+
+        verify(chatChannelRepository).save(result);
+    }
 }
 
 

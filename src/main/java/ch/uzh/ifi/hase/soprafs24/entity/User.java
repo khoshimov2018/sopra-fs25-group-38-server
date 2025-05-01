@@ -152,7 +152,7 @@ public class User implements Serializable {
   }
 
   public void setChatToken(String token) {
-    this.chatToken = chatToken;
+    this.chatToken = token;
   }
 
   // status
