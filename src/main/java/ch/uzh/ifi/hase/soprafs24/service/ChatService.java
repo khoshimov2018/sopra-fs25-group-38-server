@@ -213,10 +213,11 @@ public class ChatService {
                 boolean containsBlockedUser = channel.getParticipants().stream()
                     .anyMatch(participant -> participant.getUser().getId().equals(blockedUserId));
                 
-                if (containsBlockedUser) {
-                    
-                    chatChannelRepository.delete(channel);
-                }
+                    if (containsBlockedUser) {
+                        messageRepository.deleteByChannelId(channel.getId());
+                        
+                        chatChannelRepository.delete(channel);
+                    }
             }
         }
         chatChannelRepository.flush();
