@@ -162,6 +162,6 @@ public class UserController {
     List<User> discoverable = userService.getDiscoverableUsers(userId);
     return discoverable.stream()
         .map(DTOMapper.INSTANCE::convertEntityToUserGetDTO)
-        .collect(Collectors.toList());
+        .toList();
   }
 }

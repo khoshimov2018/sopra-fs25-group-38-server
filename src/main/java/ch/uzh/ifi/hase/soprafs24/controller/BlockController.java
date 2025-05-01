@@ -47,6 +47,6 @@ public class BlockController {
 
         return reportBlockService.getAllBlocks().stream()
             .map(block -> DTOMapper.INSTANCE.convertToBlockDTO(block))
-            .collect(Collectors.toList());
+            .toList();
     }
 }

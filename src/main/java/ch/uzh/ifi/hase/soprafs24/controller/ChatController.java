@@ -47,7 +47,7 @@ public class ChatController {
         List<ChatChannel> channels = chatService.getChannelsForUser(userId);
         List<ChatChannelGetDTO> channelDTOs = channels.stream()
                 .map(DTOMapper.INSTANCE::convertEntityToChatChannelGetDTO)
-                .collect(Collectors.toList());
+                .toList();
 
         if (channelDTOs.isEmpty()) {
             // Returns 204
@@ -72,7 +72,7 @@ public class ChatController {
         List<Message> messages = chatService.getChatHistory(channelId);
         List<MessageGetDTO> messageDTOs = messages.stream()
                 .map(DTOMapper.INSTANCE::convertEntityToMessageGetDTO)
-                .collect(Collectors.toList());
+                .toList();
 
         if (messageDTOs.isEmpty()) {
             // 204
