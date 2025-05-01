@@ -10,11 +10,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Collections;
 
 import static org.assertj.core.api.Assertions.*;
 
 @SpringBootTest
-public class UserServiceIntegrationTest {
+class UserServiceIntegrationTest {
 
     @Autowired
     private UserService userService;
@@ -23,7 +24,7 @@ public class UserServiceIntegrationTest {
     private UserRepository userRepository;
 
     @Test
-    public void createUser_validInput_userCreatedSuccessfully() {
+    void createUser_validInput_userCreatedSuccessfully() {
         User user = new User();
         user.setEmail("testuser@example.com");
         user.setPassword("securePass123");
@@ -39,7 +40,7 @@ public class UserServiceIntegrationTest {
     }
 
     @Test
-    public void createUser_duplicateEmail_throwsException() {
+    void createUser_duplicateEmail_throwsException() {
         // Create initial user
         User user1 = new User();
         user1.setEmail("duplicate@example.com");
@@ -57,13 +58,15 @@ public class UserServiceIntegrationTest {
         user2.setStudyLevel("Master");
         user2.setStudyGoals("Goals B");
 
-        assertThatThrownBy(() -> userService.createUser(user2, List.of()))
+        // Create a local variable with the correct type
+        List<CourseSelectionDTO> emptyCourseList = Collections.emptyList();
+        assertThatThrownBy(() -> userService.createUser(user2, emptyCourseList))
                 .isInstanceOf(ResponseStatusException.class)
                 .hasMessageContaining("Email already exists");
     }
 
     @Test
-    public void loginUser_validCredentials_successfulLogin() {
+    void loginUser_validCredentials_successfulLogin() {
         User user = new User();
         user.setEmail("login@example.com");
         user.setPassword("securePass123");
@@ -79,7 +82,7 @@ public class UserServiceIntegrationTest {
     }
 
     @Test
-    public void loginUser_invalidPassword_throwsException() {
+    void loginUser_invalidPassword_throwsException() {
         User user = new User();
         user.setEmail("wrongpass@example.com");
         user.setPassword("correctPass123");
@@ -94,7 +97,7 @@ public class UserServiceIntegrationTest {
     }
 
     @Test
-    public void getUserById_validId_returnsUser() {
+    void getUserById_validId_returnsUser() {
         User user = new User();
         user.setEmail("fetch@example.com");
         user.setPassword("fetchPass123");

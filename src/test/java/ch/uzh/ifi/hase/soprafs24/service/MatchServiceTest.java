@@ -14,7 +14,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
@@ -24,7 +23,7 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(org.mockito.junit.jupiter.MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
-public class MatchServiceTest {
+class MatchServiceTest {
 
     @Mock
     private MatchRepository matchRepository;
@@ -45,18 +44,19 @@ public class MatchServiceTest {
     private DTOMapper dtoMapper = DTOMapper.INSTANCE;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
+        // No setup needed as mocks are initialized by MockitoExtension
     }
 
     @Test
-    public void testProcessLike_NewMatch() {
+    void testProcessLike_NewMatch() {
         // Given: No existing match between the users.
         Long actingUserId = 1L;
         Long targetUserId = 2L;
         MatchPostDTO dto = new MatchPostDTO(actingUserId, targetUserId);
         
         // Use the repository method instead of the service method
-        when(matchRepository.findMatchByUsers(eq(actingUserId), eq(targetUserId)))
+        when(matchRepository.findMatchByUsers(actingUserId, targetUserId))
             .thenReturn(Optional.empty());
         
         Match savedMatch = new Match();
@@ -81,7 +81,7 @@ public class MatchServiceTest {
         when(dtoMapper.convertMatchPostDTOtoEntity(any(MatchPostDTO.class))).thenReturn(convertedMatch);
         
         // Mock the notification service
-        doNothing().when(notificationService).createLikeNotification(eq(targetUserId), eq(actingUserId));
+        doNothing().when(notificationService).createLikeNotification(targetUserId, actingUserId);
         
         // When: processing a like action.
         MatchGetDTO result = matchService.processLike(dto);
@@ -95,12 +95,12 @@ public class MatchServiceTest {
         // Verify that the match was saved and notification was created
         // Note: The service calls createLikeNotification twice for new matches (lines 85 and 104)
         verify(matchRepository).save(any(Match.class));
-        verify(notificationService, times(2)).createLikeNotification(eq(targetUserId), eq(actingUserId));
+        verify(notificationService, times(2)).createLikeNotification(targetUserId, actingUserId);
         verify(chatService, never()).createIndividualChatChannelAfterMatch(any(User.class), any(User.class));
     }
 
     @Test
-    public void testProcessLike_ExistingMatch_MutualLike_CreatesChat() {
+    void testProcessLike_ExistingMatch_MutualLike_CreatesChat() {
         // Given: An existing match record where one like is already set.
         Long actingUserId = 1L;
         Long targetUserId = 2L;
@@ -123,7 +123,7 @@ public class MatchServiceTest {
         existingMatch.setLikedByUser2(true); // Target already liked
         existingMatch.setStatus(MatchStatus.PENDING);
         
-        when(matchRepository.findMatchByUsers(eq(actingUserId), eq(targetUserId)))
+        when(matchRepository.findMatchByUsers(actingUserId, targetUserId))
             .thenReturn(Optional.of(existingMatch));
         
         when(matchRepository.save(any(Match.class))).thenReturn(existingMatch);
@@ -134,8 +134,8 @@ public class MatchServiceTest {
         User user2 = new User();
         user2.setId(targetUserId);
         user2.setName("Bob");
-        when(userRepository.findById(eq(actingUserId))).thenReturn(Optional.of(user1));
-        when(userRepository.findById(eq(targetUserId))).thenReturn(Optional.of(user2));
+        when(userRepository.findById(actingUserId)).thenReturn(Optional.of(user1));
+        when(userRepository.findById(targetUserId)).thenReturn(Optional.of(user2));
         
         MatchGetDTO matchGetDTO = new MatchGetDTO();
         matchGetDTO.setUserId1(actingUserId);
@@ -145,7 +145,7 @@ public class MatchServiceTest {
         matchGetDTO.setLikedByUser2(true);
         
         // Mock the notification service
-        doNothing().when(notificationService).createMatchNotification(eq(actingUserId), eq(targetUserId), eq(matchId));
+        doNothing().when(notificationService).createMatchNotification(actingUserId, targetUserId, matchId);
         
         // When 
         when(dtoMapper.convertEntityToMatchGetDTO(any(Match.class))).thenReturn(matchGetDTO);
@@ -156,13 +156,13 @@ public class MatchServiceTest {
         assertEquals(MatchStatus.ACCEPTED, result.getStatus(), "Status should be ACCEPTED when both users like each other");
         assertTrue(result.isLikedByUser1(), "likedByUser1 should be true");
         
-        verify(chatService).createIndividualChatChannelAfterMatch(eq(user1), eq(user2));
-        verify(notificationService).createMatchNotification(eq(actingUserId), eq(targetUserId), eq(matchId));
+        verify(chatService).createIndividualChatChannelAfterMatch(user1, user2);
+        verify(notificationService).createMatchNotification(actingUserId, targetUserId, matchId);
         verify(matchRepository).save(any(Match.class));
     }
 
     @Test
-    public void testProcessLike_RejectedMatch() {
+    void testProcessLike_RejectedMatch() {
         // Given: existing match is REJECTED.
         Long actingUserId = 1L;
         Long targetUserId = 2L;
@@ -173,7 +173,7 @@ public class MatchServiceTest {
         rejectedMatch.setUserId2(targetUserId);
         rejectedMatch.setStatus(MatchStatus.REJECTED);
         
-        when(matchRepository.findMatchByUsers(eq(actingUserId), eq(targetUserId)))
+        when(matchRepository.findMatchByUsers(actingUserId, targetUserId))
             .thenReturn(Optional.of(rejectedMatch));
         
         // When & Then:
@@ -184,7 +184,7 @@ public class MatchServiceTest {
     }
 
     @Test
-    public void testProcessDislike_MatchExists() {
+    void testProcessDislike_MatchExists() {
         // Given: existing match is found
         Long actingUserId = 1L;
         Long targetUserId = 2L;
@@ -195,7 +195,7 @@ public class MatchServiceTest {
         existingMatch.setUserId2(targetUserId);
         existingMatch.setStatus(MatchStatus.PENDING);
         
-        when(matchRepository.findMatchByUsers(eq(actingUserId), eq(targetUserId)))
+        when(matchRepository.findMatchByUsers(actingUserId, targetUserId))
             .thenReturn(Optional.of(existingMatch));
         
         when(matchRepository.save(any(Match.class))).thenReturn(existingMatch);
@@ -208,7 +208,7 @@ public class MatchServiceTest {
     }
 
     @Test
-    public void testProcessDislike_SetsStatusToRejected() {
+    void testProcessDislike_SetsStatusToRejected() {
         // GIVEN: create existing match between user1 and user2
         Match match = new Match();
         match.setUserId1(1L);
@@ -217,7 +217,7 @@ public class MatchServiceTest {
         match.setLikedByUser1(true);
         match.setLikedByUser2(true);
         
-        when(matchRepository.findMatchByUsers(eq(1L), eq(2L)))
+        when(matchRepository.findMatchByUsers(1L, 2L))
             .thenReturn(Optional.of(match));
         when(matchRepository.save(any(Match.class))).thenReturn(match);
         

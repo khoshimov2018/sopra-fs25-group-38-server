@@ -17,7 +17,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-public class ReportBlockServiceTest {
+class ReportBlockServiceTest {
 
     @Mock
     private ReportRepository reportRepository;
@@ -37,7 +37,7 @@ public class ReportBlockServiceTest {
     private ReportBlockService reportBlockService;
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         MockitoAnnotations.openMocks(this);
         reportBlockService = new ReportBlockService(
                 reportRepository,
@@ -49,7 +49,7 @@ public class ReportBlockServiceTest {
     }
 
     @Test
-    public void testReportUser_savesReport() {
+    void testReportUser_savesReport() {
         User reporter = new User();
         reporter.setId(1L);
         User reported = new User();
@@ -67,7 +67,7 @@ public class ReportBlockServiceTest {
     }
 
     @Test
-    public void testBlockUser_savesBlock() {
+    void testBlockUser_savesBlock() {
         User blocker = new User();
         blocker.setId(1L);
         User blocked = new User();
@@ -85,14 +85,14 @@ public class ReportBlockServiceTest {
     }
 
     @Test
-    public void testBlockUser_duplicateThrowsConflict() {
+    void testBlockUser_duplicateThrowsConflict() {
         when(blockRepository.existsByBlockerIdAndBlockedUserId(1L, 2L)).thenReturn(true);
 
         assertThrows(ResponseStatusException.class, () -> reportBlockService.blockUser(1L, 2L));
     }
 
     @Test
-    public void testReportUser_selfReportingThrowsError() {
+    void testReportUser_selfReportingThrowsError() {
         assertThrows(ResponseStatusException.class, () -> reportBlockService.reportUser(1L, 1L, "invalid"));
     }
 }

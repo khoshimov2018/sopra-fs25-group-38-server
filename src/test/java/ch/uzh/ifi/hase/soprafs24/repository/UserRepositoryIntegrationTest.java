@@ -1,4 +1,4 @@
-/* package ch.uzh.ifi.hase.soprafs24.repository;
+package ch.uzh.ifi.hase.soprafs24.repository;
 
 import ch.uzh.ifi.hase.soprafs24.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs24.entity.User;
@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
-public class UserRepositoryIntegrationTest {
+class UserRepositoryIntegrationTest {
 
   @Autowired
   private TestEntityManager entityManager;
@@ -24,7 +24,7 @@ public class UserRepositoryIntegrationTest {
   private UserRepository userRepository;
 
   @Test
-  public void findByName_success() {
+  void findByName_success() {
     // given
     User user = new User();
     user.setName("Firstname Lastname");
@@ -33,6 +33,8 @@ public class UserRepositoryIntegrationTest {
     user.setToken("1");
     user.setPassword("password123");
     user.setCreationDate(LocalDateTime.now());
+    user.setStudyLevel("Bachelor");
+    user.setStudyGoals("Learning");
 
     entityManager.persist(user);
     entityManager.flush();
@@ -48,4 +50,3 @@ public class UserRepositoryIntegrationTest {
     assertEquals(found.getStatus(), user.getStatus());
   }
 }
- */
