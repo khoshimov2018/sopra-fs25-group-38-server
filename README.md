@@ -45,22 +45,54 @@ This backend service provides the RESTful API and database integration supportin
 - Docker (Containerization)
 - SonarCloud (Code quality)
 
----
-
 ## High-Level Components
+
+1.⁠ ⁠*Authentication*
+   - Secure login and registration using token-based authentication.
+
+2.⁠ ⁠*User Profile Management*
+   - Bio, courses, study goals, availability, and knowledge levels.
+   - Course selections managed through ⁠ UserCourse ⁠ and ⁠ CourseSelectionDTO ⁠.
+
+3.⁠ ⁠*Matchmaking System*
+   - Logic to match users based on shared interests and mutual likes.
+
+4.⁠ ⁠*Chat & Interaction*
+   - Basic real-time messaging infrastructure.
+
+5.⁠ ⁠*User Moderation*
+   - Blocking and reporting system for user safety.
 
 ---
 
 ## Launch & Deployment
 
----
+⁠bash
+cd server
+./gradlew bootRun
+ ⁠
 
-## Illustrations
+Backend will start on ⁠ http://localhost:8080 ⁠.
+
+### Environment
+
+•⁠  ⁠Ensure PostgreSQL is running.
+•⁠  ⁠Set your database credentials in ⁠ application.properties ⁠.
+•⁠  ⁠Use included SQL to seed the database (if required).
+
+### Testing
+
+⁠bash
+./gradlew test
+ ⁠
 
 ---
 
 ## Roadmap
 
+•⁠  Enable message deletion in chat system
+•⁠  ⁠Refine matching algorithm with better recommendation system
+•⁠  ⁠Enable calendar integration for availability sync
 
 ---
 
