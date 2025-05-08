@@ -91,8 +91,8 @@ Backend will start on ⁠ http://localhost:8080 ⁠.
 ## Roadmap
 
 - Enable message deletion in chat system.
-    - ⁠Refine matching algorithm with better recommendation system.
-    - ⁠Enable calendar integration for availability sync.
+- ⁠Refine matching algorithm with better recommendation system.
+- ⁠Enable calendar integration for availability sync.
 
 
 ---
