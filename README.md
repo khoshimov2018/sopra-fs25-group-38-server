@@ -76,9 +76,9 @@ Backend will start on ⁠ http://localhost:8080 ⁠.
 
 ### Environment
 
--  ⁠Ensure PostgreSQL is running.
--  ⁠Set your database credentials in ⁠ application.properties ⁠.
--  ⁠Use included SQL to seed the database (if required).
+- ⁠Ensure PostgreSQL is running.
+- ⁠Set your database credentials in ⁠ application.properties ⁠.
+- ⁠Use included SQL to seed the database (if required).
 
 ### Testing
 
@@ -90,9 +90,9 @@ Backend will start on ⁠ http://localhost:8080 ⁠.
 
 ## Roadmap
 
--⁠  Enable message deletion in chat system
--⁠  ⁠Refine matching algorithm with better recommendation system
--  ⁠Enable calendar integration for availability sync
+-⁠ Enable message deletion in chat system
+-⁠ ⁠Refine matching algorithm with better recommendation system
+- ⁠Enable calendar integration for availability sync
 
 ---
 
