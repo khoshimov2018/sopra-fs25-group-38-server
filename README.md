@@ -1,4 +1,4 @@
-# StudyBuddy
+# StudyBuddy – Backend
 
 **Find your ideal study partner — based on courses, goals, and learning style.**
 
@@ -16,7 +16,7 @@
 
 - [Introduction](#introduction)
 - [Technologies Used](#technologies-used)
-- [High-Level Components](#high-level-components)
+- [Core Features](#core-features)
 - [Launch & Deployment](#launch--deployment)
 - [Roadmap](#roadmap)
 - [Authors and Acknowledgment](#authors-and-acknowledgment)
@@ -26,8 +26,9 @@
 
 ## Introduction
 
-**StudyBuddy** is a web application designed to connect university students with compatible study partners based on shared courses, availability, and study goals. The platform features a swipe-based matching system, real-time chat, profile management, and AI-based study assistance.  
-This backend service provides the RESTful API and database integration supporting all core functionalities.
+**StudyBuddy** is a web application designed to connect university students with compatible study partners based on shared courses, availability, and study goals.
+
+This backend provides the RESTful API for [StudyBuddy frontend](https://github.com/khoshimov2018/sopra-fs25-group-38-client), including user authentication, matching logic, chat handling, moderation and AI-based study assistance. 
 
 ---
 
@@ -44,7 +45,7 @@ This backend service provides the RESTful API and database integration supportin
 - Docker (Containerization)
 - SonarCloud (Code quality)
 
-## High-Level Components
+## Core Features
 
 1.⁠ ⁠*Authentication*
    - Secure login and registration using token-based authentication.
@@ -66,31 +67,37 @@ This backend service provides the RESTful API and database integration supportin
 
 ## Launch & Deployment
 
-⁠bash
+### Local Setup
+
+```bash
 cd server
 ./gradlew bootRun
- ⁠
+```
 
-Backend will start on ⁠ http://localhost:8080 ⁠.
+Visit: [http://localhost:8080](http://localhost:8080)
 
-### Environment
+---
 
-- ⁠Ensure PostgreSQL is running.
-- ⁠Set your database credentials in ⁠ application.properties ⁠.
-- ⁠Use included SQL to seed the database (if required).
+### Environment Configuration
+
+- Ensure PostgreSQL is running
+- Set credentials in `application.properties`
+- Use provided SQL for test data if needed
+
+---
 
 ### Testing
 
-⁠bash
+```bash
 ./gradlew test
- ⁠
+```
 
 ---
 
 ## Roadmap
 
 - Enable message deletion in chat system.
-- ⁠Refine matching algorithm with better recommendation system.
+- ⁠Refine matchmaking logic with improved recommendation techniques.
 - ⁠Enable calendar integration for availability sync.
 
 
