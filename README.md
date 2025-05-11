@@ -18,7 +18,6 @@
 - [Technologies Used](#technologies-used)
 - [High-Level Components](#high-level-components)
 - [Launch & Deployment](#launch--deployment)
-- [Illustrations](#illustrations)
 - [Roadmap](#roadmap)
 - [Authors and Acknowledgment](#authors-and-acknowledgment)
 - [License](#license)
