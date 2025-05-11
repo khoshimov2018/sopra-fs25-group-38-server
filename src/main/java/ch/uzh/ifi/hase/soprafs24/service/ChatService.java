@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.Set;
 import java.util.Iterator;
+import java.util.Optional; 
 
 @Service
 public class ChatService {
@@ -284,6 +285,47 @@ public class ChatService {
         ChatChannel saved = chatChannelRepository.save(channel);
         chatChannelRepository.flush();
         return saved;
+    }
+
+    // used after deletion of an account
+    @Transactional
+    public void removeAllUserChats(Long userId) {
+        messageRepository.deleteAllBySenderId(userId);
+        List<ChatChannel> channels =
+            chatChannelRepository.findByParticipantsUserId(userId);  
+
+        for (ChatChannel channel : channels) {
+            if (TYPE_INDIVIDUAL.equalsIgnoreCase(channel.getType())) {
+                messageRepository.deleteByChannelId(channel.getId());
+                chatChannelRepository.delete(channel);
+            } else {
+                Optional<ChatParticipant> opt = channel.getParticipants().stream()
+                    .filter(cp -> cp.getUser().getId().equals(userId))
+                    .findFirst();
+
+                boolean wasAdmin = false;
+                if (opt.isPresent()) {
+                    ChatParticipant removed = opt.get();
+                    wasAdmin = ROLE_ADMIN.equalsIgnoreCase(removed.getRole());
+                    channel.removeParticipant(removed);
+                }
+
+                if (channel.getParticipants().isEmpty()) {
+                    messageRepository.deleteByChannelId(channel.getId());
+                    chatChannelRepository.delete(channel);
+
+                } else {
+                    if (wasAdmin) {
+                        ChatParticipant newAdmin = channel.getParticipants().get(0);
+                        newAdmin.setRole(ROLE_ADMIN);
+                    }
+                    chatChannelRepository.save(channel);
+                }
+            }
+        }
+
+        chatChannelRepository.flush();
+        messageRepository.flush();
     }
     
 

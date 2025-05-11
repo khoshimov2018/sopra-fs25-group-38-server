@@ -68,6 +68,7 @@ public class UserService {
   private final StudyPlanRepository studyPlanRepository;
   private final ProfileRepository profileRepository;
   private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+  private final ChatService chatService;
 
   @Autowired
   public UserService(UserRepository userRepository,
@@ -79,7 +80,8 @@ public class UserService {
                      ReportRepository reportRepository,
                      ChatChannelRepository chatChannelRepository,
                      StudyPlanRepository studyPlanRepository,
-                     ProfileRepository profileRepository) {
+                     ProfileRepository profileRepository,
+                     ChatService chatService) {
     this.userRepository = userRepository;
     this.matchRepository = matchRepository;
     this.courseRepository = courseRepository;
@@ -90,6 +92,7 @@ public class UserService {
     this.chatChannelRepository = chatChannelRepository;
     this.studyPlanRepository = studyPlanRepository;
     this.profileRepository = profileRepository;
+    this.chatService = chatService;
   }
 
   public List<Long> getBlockedOrBlockingUserIds(Long userId) {
@@ -455,22 +458,9 @@ public class UserService {
   private void deleteUser(User user){
       Long userId = user.getId();
 
-      messageRepository.deleteAllBySenderId(userId);
+      chatService.removeAllUserChats(userId);
+      // messageRepository.deleteAllBySenderId(userId);
       matchRepository.deleteAllByUserId1OrUserId2(userId, userId);
-
-      // Delete chat channels where the user is the only participant
-      List<ChatChannel> channels = chatChannelRepository.findByParticipantsUserId(userId);
-      for (ChatChannel channel : channels) {
-          // Deleting user from channel: participants must be removed first to avoid FK constraint errors
-          // (CascadeType.ALL and orphanRemoval handle ChatParticipant deletion)
-          channel.getParticipants().removeIf(p -> p.getUser().getId().equals(userId));
-          chatChannelRepository.save(channel);
-
-        // (Optional) Delete chat channel if the user was the only participant left after removal.
-        if (channel.getParticipants().size() <= 1) {
-            chatChannelRepository.delete(channel);
-        }
-      }
 
       blockRepository.deleteAllByBlockerIdOrBlockedUserId(userId, userId);
       reportRepository.deleteAllByReporterIdOrReportedUserId(userId, userId);
