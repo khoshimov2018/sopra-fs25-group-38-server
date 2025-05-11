@@ -290,6 +290,7 @@ public class ChatService {
     // used after deletion of an account
     @Transactional
     public void removeAllUserChats(Long userId) {
+        userTypingStatusRepository.deleteByUserId(userId);
         messageRepository.deleteAllBySenderId(userId);
         List<ChatChannel> channels =
             chatChannelRepository.findByParticipantsUserId(userId);  
